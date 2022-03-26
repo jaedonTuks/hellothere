@@ -1,0 +1,14 @@
+server:
+    port: 9000
+    error:
+        include-stacktrace: never
+
+spring:
+    liquibase:
+        change-log: /db/changelog/db.changelog-master.yaml
+    datasource:
+        url: jdbc:postgresql://localhost:5432/hellothere?stringtype=unspecified
+        username: HelloThereAdmin
+        password: "EzJ3DkQ6iyd5kH0"
+        driver-class-name: org.postgresql.Driver
+

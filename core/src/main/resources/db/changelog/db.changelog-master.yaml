@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0__initialize_test_db_items
+      author: Jaedon Heger
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/0__initialize_test_db_items.sql
