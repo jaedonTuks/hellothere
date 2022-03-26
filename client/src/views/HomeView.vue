@@ -1,22 +1,20 @@
 <template>
-  <div class="home">
-    <v-container style="width:100%">
-      <v-row align="center" justify="center">
-        <v-col>
-          <h1>{{test}}</h1>
-        </v-col>
-      </v-row>
-    </v-container>
+  <div>
+    <div>
+      <h1>{{ test }}</h1>
+    </div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
 import { mapActions, mapState } from 'vuex';
+import HelloWorld from '../components/HelloWorld.vue';
 
 export default {
   name: 'Home',
+
   components: {
+    HelloWorld,
   },
 
   computed: {
@@ -32,6 +30,5 @@ export default {
   created() {
     this.fetchTest();
   },
-
 };
 </script>

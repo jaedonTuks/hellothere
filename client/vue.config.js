@@ -1,4 +1,8 @@
 module.exports = {
+  configureWebpack: {
+    devtool: 'source-map',
+  },
+
   devServer: {
     proxy: {
       '/api': {
@@ -8,4 +12,8 @@ module.exports = {
       },
     },
   },
+
+  transpileDependencies: [
+    'vuetify',
+  ],
 };
