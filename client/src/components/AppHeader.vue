@@ -5,47 +5,55 @@
     dark
   >
     <div class="d-flex align-center">
-      <h1 class="logo">Hello There!</h1>
+      <h1
+        class="logo"
+        @click="$router.push({name: 'Home'})"
+      >
+        Hello There!
+      </h1>
     </div>
 
     <v-spacer></v-spacer>
     <v-btn
       text
       plain
+      :ripple="false"
       :class="{
         button: true,
         active: $route.name === 'Home'
       }"
-      @click="$router.push({name: 'Home'})"
+      :to="{name: 'Home'}"
     >
       <v-img class="icon mr-2" src="../assets/icons/home.png"/>
-      <span class="mr-2">Home</span>
+      <span class="mr-2 underlineEffect">Home</span>
     </v-btn>
-
-    <v-btn
-    text
-    plain
-    :class="{
-        button: true,
-        active: $route.name === 'Leaderboards'
-      }"
-    @click="$router.push({name: 'Leaderboards'})"
-  >
-    <v-img class="icon mr-2" src="../assets/icons/first-place.png"/>
-    <span class="mr-2">Leaderboards</span>
-  </v-btn>
 
     <v-btn
       text
       plain
+      :ripple="false"
+      :to="{name: 'Leaderboards'}"
+      :class="{
+        button: true,
+        active: $route.name === 'Leaderboards'
+      }"
+    >
+      <v-img class="icon mr-2" src="../assets/icons/first-place.png"/>
+      <span class="mr-2 underlineEffect">Leaderboards</span>
+    </v-btn>
+
+    <v-btn
+      text
+      plain
+      :ripple="false"
       :class="{
         button: true,
         active: $route.name === 'Profile'
       }"
-      @click="$router.push({name: 'Profile'})"
+      :to="{name: 'Profile'}"
     >
       <v-img class="icon mr-2" src="../assets/icons/user.png"/>
-      <span class="mr-2">Profile</span>
+      <span class="mr-2 underlineEffect">Profile</span>
     </v-btn>
   </v-app-bar>
 </template>
@@ -56,8 +64,18 @@ export default {
 </script>
 
 <style scoped>
+.logo:hover {
+  cursor: pointer;
+}
+
 .logo {
-  color: var(--v-secondary-base);
+  background: -webkit-linear-gradient(
+    0.5turn,
+    rgba(135, 240, 252, 1),
+    rgba(191, 120, 251, 1),
+    rgba(250, 115, 198, 1));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 span {
@@ -74,12 +92,45 @@ span {
   filter: grayscale(0);
 }
 
-.button.active{
-  opacity: 1!important;
+.button.active {
+  opacity: 1 !important;
 }
 
 .button:hover .icon {
   filter: grayscale(0);
 }
 
+.underlineEffect {
+  display: inline-block;
+}
+
+.button:hover .underlineEffect::before {
+  transform: scaleX(1);
+}
+
+.button.active .underlineEffect::before {
+  transform: scaleX(1) !important;
+}
+
+.underlineEffect::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  bottom: -10px;
+  left: 0;
+  background: -webkit-linear-gradient(
+    1turn,
+    rgba(135, 240, 252, 1),
+    rgba(191, 120, 251, 1),
+    rgba(250, 115, 198, 1));
+  transform-origin: bottom left;
+  transition: transform 0.4s ease-out;
+  transform: scaleX(0);
+}
+
+.v-btn {
+  opacity: 0.85 !important;
+}
 </style>

@@ -6,11 +6,11 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    test: null,
+    loading: false,
   },
   mutations: {
-    testCommit: (state, data) => {
-      state.test = data;
+    updateLoading: (state, isLoading) => {
+      state.loading = isLoading;
     },
   },
   actions,
