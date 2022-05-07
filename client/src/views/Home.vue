@@ -1,13 +1,9 @@
 <template>
-  <div class="home">
-    <v-container style="width:100%">
-      <v-row align="center" justify="center">
-        <v-col>
-          <h1>{{test}}</h1>
-        </v-col>
-      </v-row>
-    </v-container>
-  </div>
+  <v-row align="center" justify="center">
+    <v-col>
+      <h1>{{ test }}</h1>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
@@ -16,8 +12,7 @@ import { mapActions, mapState } from 'vuex';
 
 export default {
   name: 'Home',
-  components: {
-  },
+  components: {},
 
   computed: {
     ...mapState({

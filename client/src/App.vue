@@ -1,16 +1,20 @@
 <template>
-  <v-app>
+  <v-app class="app">
     <AppHeader/>
 
     <v-main>
-      <router-view/>
+      <div class="home">
+        <v-container style="width:100%">
+          <router-view/>
+        </v-container>
+      </div>
     </v-main>
   </v-app>
 </template>
 
 <script>
 
-import AppHeader from '@/AppHeader.vue';
+import AppHeader from '@/components/AppHeader.vue';
 
 export default {
   name: 'App',
@@ -22,6 +26,10 @@ export default {
 </script>
 <style>
 div {
-  color: var(--v-accent-darken1)!important;
+  color: #FFF !important;
+}
+
+.app{
+ background-color: #343E59!important;
 }
 </style>
