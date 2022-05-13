@@ -4,7 +4,7 @@
       Feature not currently available
     </div>
     <div class="topThree">
-      <h1>Leaderboards page</h1>
+      <h1>Top Three</h1>
       <v-row class="mt-5">
         <v-col class="secondPlace" cols="4">
           <v-card color="accent" height="300">
