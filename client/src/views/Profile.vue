@@ -1,6 +1,6 @@
 <template>
   <div class="about">
-    <h1>{{ name }} {{ surname }}</h1>
+    <h1>{{ username }}</h1>
     <h3>Rank: {{ rank }}</h3>
     <h2 class="mt-5">Badges</h2>
 
@@ -30,8 +30,7 @@ export default {
   components: { StatsCard },
   data() {
     return {
-      name: 'Name',
-      surname: 'Surname',
+      username: 'username',
       rank: 'Newbie',
       radialBarOptions: {
         chart: {
