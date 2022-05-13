@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify/lib/framework';
 import userIcon from '@/assets/icons/user.png';
+import '@mdi/font/css/materialdesignicons.css';
 
 Vue.use(Vuetify);
 
