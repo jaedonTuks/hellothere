@@ -4,5 +4,6 @@ import hellothere.model.user.Rank
 
 data class UserDto(
     val username: String,
-    val rank: Rank
+    val rank: Rank,
+    val currentWeekStats: WeekStatsDto?
 )
