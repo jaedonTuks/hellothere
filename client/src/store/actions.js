@@ -1,11 +1,7 @@
 import axios from 'axios';
 
 const actions = {
-  fetchTest: ({ commit }) => axios.get('/api/test').then(
-    (response) => {
-      commit('testCommit', response.data);
-    },
-  ),
+  fetchLeaderboardTopThree: () => axios.get('/api/leaderboard/top-three'),
 };
 
 export default actions;

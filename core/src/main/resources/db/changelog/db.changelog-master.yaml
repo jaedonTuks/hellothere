@@ -5,9 +5,17 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: db/changelog/migrations/0__initialize_test_db_items.sql
+
   - changeSet:
       id: 0__setup_ff4j
       author: Jaedon Heger
       changes:
         - sqlFile:
             path: db/changelog/migrations/0__setup_ff4j.sql
+
+  - changeSet:
+      id: 1__leaderboard_setup.sql
+      author: Jaedon Heger
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/1__leaderboard_setup.sql
