@@ -2,6 +2,9 @@ server:
     port: 9000
     error:
         include-stacktrace: never
+logging:
+    level:
+        hellothere: DEBUG
 
 spring:
     liquibase:
