@@ -1,7 +1,7 @@
 <template>
-  <div class="about">
-    <h1>{{ username }}</h1>
-    <h3>Rank: {{ rank }}</h3>
+  <div v-if="profileInfo" class="about">
+    <h1>{{ profileInfo.username }}</h1>
+    <h3>Rank: {{ profileInfo.rank }}</h3>
     <h2 class="mt-5">Badges</h2>
 
     <h2 class="mt-5">Weekly stats</h2>
@@ -24,14 +24,14 @@
 
 <script>
 import StatsCard from '@/components/StatsCard.vue';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'Profile',
   components: { StatsCard },
   data() {
     return {
-      username: 'username',
-      rank: 'Newbie',
+      profileInfo: null,
       radialBarOptions: {
         chart: {
           type: 'radialBar',
@@ -84,6 +84,18 @@ export default {
         }],
       },
     };
+  },
+
+  methods: {
+    ...mapActions(['fetchUserInfo']),
+    ...mapGetters(['getProfile']),
+  },
+
+  created() {
+    this.fetchUserInfo().then(() => {
+      this.profileInfo = this.getProfile();
+      console.log(this.profileInfo);
+    });
   },
 };
 </script>
