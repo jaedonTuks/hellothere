@@ -14,6 +14,13 @@ databaseChangeLog:
             path: db/changelog/migrations/0__setup_ff4j.sql
 
   - changeSet:
+      id: 6__user_info_setup
+      author: Jaedon Heger
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/6__user_info_setup.sql
+
+  - changeSet:
       id: 1__leaderboard_setup.sql
       author: Jaedon Heger
       changes:
