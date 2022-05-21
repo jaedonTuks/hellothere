@@ -1,7 +1,7 @@
 <template>
   <v-row align="center" justify="center">
     <v-col>
-      <h1>test</h1>
+      <h1>Home page</h1>
     </v-col>
   </v-row>
 </template>

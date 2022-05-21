@@ -9,6 +9,8 @@ const actions = {
   ).catch((e) => {
     console.log(e);
   }),
+
+  fetchLeaderboardTopThree: () => axios.get('/api/leaderboard/top-three'),
 };
 
 export default actions;
