@@ -82,7 +82,12 @@
             <version>1.8.12</version>
             <scope>compile</scope>
         </dependency>
-
+        <!--Gmail-->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-gmail</artifactId>
+            <version>v1-rev20220404-1.32.1</version>
+        </dependency>
     </dependencies>
 
     <build>

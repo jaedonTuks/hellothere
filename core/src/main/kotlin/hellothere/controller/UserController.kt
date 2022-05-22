@@ -4,7 +4,6 @@ import hellothere.annotation.RequiresFeatureAspect
 import hellothere.config.RestUrl.USER
 import hellothere.dto.user.UserDto
 import hellothere.service.user.UserService
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
