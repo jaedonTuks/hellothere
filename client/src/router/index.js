@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import Login from '@/views/Login.vue';
 import Home from '../views/Home.vue';
 import Profile from '../views/Profile.vue';
 import Leaderboards from '../views/Leaderboards.vue';
@@ -21,6 +22,11 @@ const routes = [
     path: '/leaderboards',
     name: 'Leaderboards',
     component: Leaderboards,
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
   },
 ];
 

@@ -108,7 +108,7 @@ span {
   transform: scaleX(1);
 }
 
-.button.active .underlineEffect::before {
+.active .underlineEffect::before {
   transform: scaleX(1) !important;
 }
 

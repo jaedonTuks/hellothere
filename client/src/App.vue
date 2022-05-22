@@ -1,6 +1,6 @@
 <template>
   <v-app class="app">
-    <AppHeader/>
+    <AppHeader v-if="shouldDisplayHeader"/>
 
     <v-main>
         <Loader/>
@@ -23,6 +23,11 @@ export default {
   name: 'App',
   components: { AppHeader, Loader },
 
+  computed: {
+    shouldDisplayHeader() {
+      return this.$route.name !== 'Login';
+    },
+  },
 };
 </script>
 <style>

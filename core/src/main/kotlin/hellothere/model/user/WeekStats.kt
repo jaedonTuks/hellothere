@@ -9,7 +9,7 @@ class WeekStats(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    val id: String,
+    val id: Long? = null,
 
     @Column(name = "experience")
     val experience: Int = 0,

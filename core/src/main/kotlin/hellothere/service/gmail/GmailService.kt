@@ -8,7 +8,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.GmailScopes
-import hellothere.controller.GmailController
+import com.google.api.services.gmail.model.Profile
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -66,12 +66,29 @@ class GmailService(
         return getGmailClientFromCredentials(credentials)
     }
 
-    fun getEmailIdList(client: Gmail) {
+    fun getEmailIdList(client: Gmail): List<String> {
         LOGGER.info("Fetching emails")
-        client.users().messages().list("me").execute()
+        val messageList = client
+            .users()
+            .messages()
+            .list(USER_SELF_ACCESS)
+            .setMaxResults(5)
+            .execute()
+        // todo explore client.batch()
+        return messageList.messages.map { it.id }
+    }
+
+    fun getGmailUserInfo(client: Gmail): Profile {
+        LOGGER.info("Fetching user info for client $client")
+
+        return client
+            .users()
+            .getProfile(USER_SELF_ACCESS)
+            .execute()
     }
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(GmailService::class.java)
+        const val USER_SELF_ACCESS = "me"
     }
 }
