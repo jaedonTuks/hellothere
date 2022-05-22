@@ -15,6 +15,11 @@ spring:
         password: "EzJ3DkQ6iyd5kH0"
         driver-class-name: org.postgresql.Driver
 
+security:
+    jwt:
+        token:
+            secret-key: ${HELLO_THERE_JWT_SK}
+
 gmail:
     client:
         projectId: ${HELLOTHERE_PROJECT_ID}

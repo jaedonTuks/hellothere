@@ -1,8 +1,8 @@
 package hellothere.controller
 
 import hellothere.config.RestUrl.GMAIL
+import hellothere.service.security.SecurityService
 import hellothere.service.gmail.GmailService
-import hellothere.service.user.UserService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.*
@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse
 @RequestMapping(GMAIL)
 class GmailController(
     private val gmailService: GmailService,
-    private val userService: UserService
+    private val securityService: SecurityService
 ) {
 
     @GetMapping("/login")
@@ -30,10 +30,8 @@ class GmailController(
     ) {
         try {
             val client = gmailService.getGmailClientFromCode(code)
-            userService.loginOrSignup(client)
+            securityService.loginOrSignup(client, httpServletResponse)
 
-            // todo add the jwt token for access below
-            httpServletResponse.setHeader("Set-Cookie", "testCookie=testValue; Path=/; Max-Age=60;")
             httpServletResponse.setHeader("Location", "http://localhost:8080/profile")
             httpServletResponse.status = HttpServletResponse.SC_FOUND
         } catch (e: Exception) {
