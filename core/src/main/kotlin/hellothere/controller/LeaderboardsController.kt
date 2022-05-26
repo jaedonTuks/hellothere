@@ -1,7 +1,7 @@
 package hellothere.controller
 
 import hellothere.config.RestUrl.LEADERBOARDS
-import hellothere.dto.TopThreeDto
+import hellothere.dto.leaderboards.TopThreeDto
 import hellothere.service.LeaderboardsService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

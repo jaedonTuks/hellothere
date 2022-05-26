@@ -1,7 +1,7 @@
 package hellothere.service
 
-import hellothere.dto.TopThreeDto
-import hellothere.dto.UserLeaderBoardDTO
+import hellothere.dto.leaderboards.TopThreeDto
+import hellothere.dto.leaderboards.UserLeaderBoardDTO
 import hellothere.model.feature.FF4jFeature
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

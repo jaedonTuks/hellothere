@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
@@ -31,7 +30,7 @@ class UserController(
 
         LOGGER.debug("Fetching user info for {$username}")
 
-        return userService.getUser(username)?.let {
+        return userService.getUserDto(username)?.let {
             ResponseEntity.ok(it)
         } ?: ResponseEntity.notFound().build()
     }

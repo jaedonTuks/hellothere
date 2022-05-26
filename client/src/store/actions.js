@@ -11,6 +11,8 @@ const actions = {
   }),
 
   fetchLeaderboardTopThree: () => axios.get('/api/leaderboard/top-three'),
+
+  fetchEmails: () => axios.get('/api/gmail/emails'),
 };
 
 export default actions;
