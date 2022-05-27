@@ -1,16 +1,17 @@
 package hellothere.service.user
 
 import com.google.api.services.gmail.Gmail
+import com.google.api.services.gmail.model.Profile
 import hellothere.dto.user.UserDto
 import hellothere.dto.user.WeekStatsDto
 import hellothere.model.user.Rank
 import hellothere.model.user.User
 import hellothere.model.user.UserAccessToken
 import hellothere.model.user.WeekStats
-import hellothere.repository.UserAccessTokenRepository
-import hellothere.repository.UserRepository
-import hellothere.repository.WeekStatsRepository
-import hellothere.service.gmail.GmailService
+import hellothere.repository.user.UserAccessTokenRepository
+import hellothere.repository.user.UserRepository
+import hellothere.repository.user.WeekStatsRepository
+import hellothere.service.google.GmailService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -24,7 +25,6 @@ class UserService(
     private val userRepository: UserRepository,
     private val weekStatsRepository: WeekStatsRepository,
     private val userAccessTokenRepository: UserAccessTokenRepository,
-    private val gmailService: GmailService,
 ) {
     fun getUserById(username: String): User? {
         return userRepository.findByIdOrNull(username)
@@ -56,7 +56,7 @@ class UserService(
     }
 
     fun loginOrSignup(client: Gmail): User? {
-        val gmailProfile = gmailService.getGmailUserInfo(client)
+        val gmailProfile = getGmailUserInfo(client)
 
         return getUserById(gmailProfile.emailAddress)
             ?: signupNewUser(gmailProfile.emailAddress)
@@ -96,6 +96,15 @@ class UserService(
 
         userAccessToken.user = user
         userAccessTokenRepository.save(userAccessToken)
+    }
+
+    fun getGmailUserInfo(client: Gmail): Profile {
+        LOGGER.info("Fetching user info for client $client")
+
+        return client
+            .users()
+            .getProfile(GmailService.USER_SELF_ACCESS)
+            .execute()
     }
 
     companion object {

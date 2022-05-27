@@ -1,4 +1,4 @@
-package hellothere.repository
+package hellothere.repository.user
 
 import hellothere.model.user.UserAccessToken
 import org.springframework.data.jpa.repository.JpaRepository

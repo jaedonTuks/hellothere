@@ -15,7 +15,7 @@ class LeaderboardsController(
     private val leaderboardsService: LeaderboardsService
 ) {
 
-    @GetMapping("top-three")
+    @GetMapping("/top-three")
     fun getTop3(): ResponseEntity<TopThreeDto> {
         val topThree = leaderboardsService.getTopThreeUsers()
 

@@ -1,9 +1,9 @@
 package hellothere.controller
 
-import com.google.api.services.gmail.model.Message
 import hellothere.config.RestUrl.GMAIL
 import hellothere.dto.email.EmailDto
-import hellothere.service.gmail.GmailService
+import hellothere.service.google.GmailService
+import hellothere.service.google.GoogleAuthenticationService
 import hellothere.service.security.SecurityService
 import hellothere.service.user.UserService
 import org.slf4j.Logger
@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse
 @RestController
 @RequestMapping(GMAIL)
 class GmailController(
+    private val googleAuthenticationService: GoogleAuthenticationService,
     private val gmailService: GmailService,
     private val userService: UserService,
     private val securityService: SecurityService
@@ -25,7 +26,7 @@ class GmailController(
 
     @GetMapping("/login")
     fun googleConnectionStatus(request: HttpServletRequest?): RedirectView? {
-        return gmailService.authorize()?.let { RedirectView(it) }
+        return googleAuthenticationService.authorize()?.let { RedirectView(it) }
     }
 
     @GetMapping("/callback")
@@ -59,7 +60,20 @@ class GmailController(
         val client = gmailService.getGmailClientFromUsername(username)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-        val emails = gmailService.getEmailsBaseData(client)
+        val emails = gmailService.getEmailsBaseData(client, username)
+
+        return ResponseEntity.ok(emails)
+    }
+
+    @GetMapping("/search")
+    fun searchEmails(request: HttpServletRequest, @RequestParam searchString: String): ResponseEntity<List<EmailDto>> {
+        val username = securityService.getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val client = gmailService.getGmailClientFromUsername(username)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        //todo add some passing like date etc
+        val emails = gmailService.getEmailsBaseData(client, username, searchString)
 
         return ResponseEntity.ok(emails)
     }

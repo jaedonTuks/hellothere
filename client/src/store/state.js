@@ -6,6 +6,8 @@ function getDefaultState() {
       rank: '',
       currentWeekStats: null,
     },
+    emailsById: {},
+    currentEmailIds: [],
   };
 }
 

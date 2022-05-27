@@ -28,6 +28,10 @@ export default {
       return this.$route.name !== 'Login';
     },
   },
+
+  created() {
+    document.title = 'Hello There!';
+  },
 };
 </script>
 <style>
