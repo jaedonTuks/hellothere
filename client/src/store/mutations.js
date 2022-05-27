@@ -17,6 +17,10 @@ const mutations = {
     state.emailsById = emailsObj;
   },
 
+  updateEmailById: (state, email) => {
+    state.emailsById[email.id] = email;
+  },
+
   resetAndSetCurrentEmailIds: (state, emails) => {
     state.currentEmailIds = [];
     const emailIds = emails.map((email) => email.id);

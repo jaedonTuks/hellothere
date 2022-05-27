@@ -16,13 +16,15 @@ export default new Vuetify({
     options: {
       customProperties: true,
     },
-    dark: false,
+    dark: true,
     themes: {
-      light: {
+      dark: {
         primary: '#80DED9',
         secondary: '#C4676A',
         info: '#FFFBFE',
         accent: '#465362',
+        purpleAccent: '#bf78fb',
+        pinkAccent: '#fa73c6',
         error: '#ef5350',
       },
     },

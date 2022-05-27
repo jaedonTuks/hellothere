@@ -20,10 +20,18 @@ const actions = {
       console.error(e);
     }),
 
-  searchEmails: ({ commit }, searchString) => axios.get(`/api/gmail/search?searchString=${searchString}`)
+  searchEmails: ({ commit }, payload) => axios.get(`/api/gmail/search?searchString=${payload.searchString}&labels=${payload.labels}`)
     .then((response) => {
       commit('setEmailsById', response.data);
       commit('resetAndSetCurrentEmailIds', response.data);
+    })
+    .catch((e) => {
+      console.error(e);
+    }),
+
+  fetchFullEmail: ({ commit }, id) => axios.get(`/api/gmail/email/${id}`)
+    .then((response) => {
+      commit('updateEmailById', response.data);
     })
     .catch((e) => {
       console.error(e);

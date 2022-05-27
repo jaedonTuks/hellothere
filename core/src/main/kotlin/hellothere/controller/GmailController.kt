@@ -6,6 +6,7 @@ import hellothere.service.google.GmailService
 import hellothere.service.google.GoogleAuthenticationService
 import hellothere.service.security.SecurityService
 import hellothere.service.user.UserService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -52,6 +53,19 @@ class GmailController(
         }
     }
 
+    @GetMapping("/email/{id}")
+    fun getFullEmailFromId(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<EmailDto> {
+        val username = securityService.getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val client = gmailService.getGmailClientFromUsername(username)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val emails = gmailService.getFullEmailData(client, username, id)
+
+        return ResponseEntity.ok(emails)
+    }
+
     @GetMapping("/emails")
     fun getEmails(request: HttpServletRequest): ResponseEntity<List<EmailDto>> {
         val username = securityService.getUsernameFromRequest(request)
@@ -60,20 +74,25 @@ class GmailController(
         val client = gmailService.getGmailClientFromUsername(username)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-        val emails = gmailService.getEmailsBaseData(client, username)
+        val emails = gmailService.getEmailsBaseData(client, username).sortedByDescending { it.date }
 
         return ResponseEntity.ok(emails)
     }
 
     @GetMapping("/search")
-    fun searchEmails(request: HttpServletRequest, @RequestParam searchString: String): ResponseEntity<List<EmailDto>> {
+    fun searchEmails(
+        request: HttpServletRequest,
+        @RequestParam searchString: String,
+        @RequestParam labels: List<String> = listOf()
+    ): ResponseEntity<List<EmailDto>> {
         val username = securityService.getUsernameFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val client = gmailService.getGmailClientFromUsername(username)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        //todo add some passing like date etc
-        val emails = gmailService.getEmailsBaseData(client, username, searchString)
+        // todo add some enrichment to search such as email etc
+
+        val emails = gmailService.getEmailsBaseData(client, username, searchString, labels).sortedByDescending { it.date }
 
         return ResponseEntity.ok(emails)
     }

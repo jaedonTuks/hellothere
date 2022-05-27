@@ -10,6 +10,7 @@ import hellothere.model.email.UserEmail
 import hellothere.model.user.UserAccessToken
 import hellothere.repository.email.UserEmailRepository
 import hellothere.service.user.UserService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -48,8 +49,12 @@ class GmailService(
         return Pair(getGmailClientFromCredentials(credentials), userAccessToken)
     }
 
-    fun getEmailIdList(client: Gmail, query: String? = null): List<String> {
-        LOGGER.info("Fetching email ids with search query: {$query}")
+    fun getEmailIdList(
+        client: Gmail,
+        query: String? = null,
+        labelIds: List<String> = listOf()
+    ): List<String> {
+        LOGGER.info("Fetching email ids with search query: {$query} and ids {$labelIds}")
 
         val messageList = client
             .users()
@@ -61,40 +66,65 @@ class GmailService(
             messageList.q = query
         }
 
+        if (labelIds.isNotEmpty()) {
+            messageList.labelIds = labelIds
+        }
+
         return messageList
             .execute()
             .messages.map { it.id }
     }
 
-    fun getEmailsBaseData(client: Gmail, username: String, search: String? = null): List<EmailDto> {
-        val ids = getEmailIdList(client, search)
+    fun getEmailsBaseData(
+        client: Gmail,
+        username: String,
+        search: String? = null,
+        labels: List<String> = listOf()
+    ): List<EmailDto> {
+        val ids = getEmailIdList(client, search, labels)
         val emails = getEmailsBaseData(client, ids, username)
         return emails.map { buildEmailDto(it) }
     }
 
+    fun getFullEmailData(client: Gmail, username: String, id: String): EmailDto? {
+        val emails = getFullEmailData(client, listOf(id), username)
+        return emails.firstOrNull()
+    }
+
+    fun getFullEmailData(client: Gmail, gmailIds: List<String>, username: String): List<EmailDto> {
+        LOGGER.info("Fetching full emails for user: $username with ids $gmailIds")
+        // todo update to full once get to that section
+        val messages = getMutableMessagesList(gmailIds, EmailFormat.METADATA, client)
+        return messages.map { buildEmailDto(it) }
+    }
+
     fun getEmailsBaseData(client: Gmail, gmailIds: List<String>, username: String): List<UserEmail> {
-        LOGGER.info("Fetching full emails for user: $username")
+        LOGGER.info("Fetching Metadata emails for user: $username with ids $gmailIds")
 
         val cachedEmails = userEmailRepository.findAllByUserIdAndGmailIdIn(username, gmailIds)
 
         val emailIdsToFetch = mutableListOf<String>()
         emailIdsToFetch.addAll(gmailIds)
         cachedEmails.forEach { emailIdsToFetch.remove(it.gmailId) }
-        // todo explore client.batch() in beta version
-        // will require you to build your own http request
 
-        val newMessages = emailIdsToFetch.map {
-            client
-                .users()
-                .messages()
-                .get(USER_SELF_ACCESS, it)
-                .setFormat(EmailFormat.METADATA.value)
-                .execute()
-        }.toMutableList()
+        val newMessages = getMutableMessagesList(emailIdsToFetch, EmailFormat.METADATA, client)
 
         val newEmails = saveNewEmailsFromGmail(newMessages, username)
 
         return newEmails + cachedEmails
+    }
+
+    private fun getMutableMessagesList(ids: List<String>, format: EmailFormat, client: Gmail): MutableList<Message> {
+        // todo explore client.batch() in beta version
+        // will require you to build your own http request
+        return ids.map {
+            client
+                .users()
+                .messages()
+                .get(USER_SELF_ACCESS, it)
+                .setFormat(format.value)
+                .execute()
+        }.toMutableList()
     }
 
     fun saveNewEmailsFromGmail(messages: List<Message>, username: String): List<UserEmail> {
@@ -139,8 +169,18 @@ class GmailService(
             LocalDateTime.ofEpochSecond(message.internalDate, 0, ZoneOffset.UTC),
             message.labelIds,
             getEmailHeader(message, EmailHeaderName.SUBJECT),
-            message.snippet
+            getFullBodyFromMessage(message)
         )
+    }
+
+    private fun getFullBodyFromMessage(message: Message): String? {
+        // todo improve to actually user message.payload.parts and iterate through there
+        // additionally take into account html!
+        return if (message.payload.body.getSize() == 0) {
+            message.snippet
+        } else {
+            message.payload.body.data
+        }
     }
 
     fun buildEmailDto(userEmail: UserEmail): EmailDto {
