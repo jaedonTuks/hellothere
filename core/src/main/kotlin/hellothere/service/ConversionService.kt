@@ -2,6 +2,7 @@ package hellothere.service
 
 import com.google.api.services.gmail.model.MessagePart
 import hellothere.model.email.MessagePartMimeType
+import org.apache.commons.lang3.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -31,10 +32,20 @@ class ConversionService {
             val decoder = Base64.getDecoder()
             val decodedByteArray = decoder.decode(base64String)
             String(decodedByteArray, Charset.defaultCharset())
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             LOGGER.error("Unable ro build string")
             LOGGER.error(e.stackTraceToString())
             return null
+        }
+    }
+
+    fun getHtmlBody(fullBody: String): String {
+        val bodyOfHtmlDoc = StringUtils.substringBetween(fullBody, "<body", "</body>")
+
+        return if (bodyOfHtmlDoc == null) {
+            fullBody
+        } else {
+            "<div $bodyOfHtmlDoc </div>"
         }
     }
 

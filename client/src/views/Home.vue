@@ -69,8 +69,14 @@ export default {
       reply: '',
       filterItems: [
         {
-          text: 'Unread',
-          value: 'UNREAD',
+          text: 'Important',
+          value: 'IMPORTANT',
+          disabled: false,
+          divider: false,
+        },
+        {
+          text: 'Sent',
+          value: 'SENT',
           disabled: false,
           divider: false,
         },
@@ -81,8 +87,8 @@ export default {
           divider: false,
         },
         {
-          text: 'Important',
-          value: 'IMPORTANT',
+          text: 'Unread',
+          value: 'UNREAD',
           disabled: false,
           divider: false,
         },

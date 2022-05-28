@@ -12,6 +12,7 @@ import hellothere.repository.email.UserEmailRepository
 import hellothere.service.ConversionService
 import hellothere.service.user.UserService
 import liquibase.pro.packaged.it
+import org.apache.commons.lang3.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -186,10 +187,10 @@ class GmailService(
             fullBody += conversionService.convertMessagePartToString(it)
         }
 
-        return if (fullBody.isNullOrBlank()) {
+        return if (fullBody.isBlank()) {
             message.snippet
         } else {
-            fullBody
+            conversionService.getHtmlBody(fullBody)
         }
     }
 

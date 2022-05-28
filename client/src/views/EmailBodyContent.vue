@@ -2,7 +2,6 @@
   <v-expansion-panel-content>
     <template class="emailBody">
       <div  v-html="email.body" />
-      <style></style>
     </template>
     <v-textarea
         outlined
