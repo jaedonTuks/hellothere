@@ -37,31 +37,12 @@
           :key="email.id"
           @change="getFullEmail(email)"
         >
-          <v-expansion-panel-header class="text-h6">
-            <span style="width:90%">
-              <span class="ma-0 dateAndFrom">
-                {{ email.formattedDate }}  - {{ fromName(email.from) }}
-              </span>
-              <span class="ml-2 subject">{{ email.subject }}</span>
-            </span>
-            <span class="float-end label">{{ filterLabels(email.labelIds) }}</span>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            {{
-              email.body
-            }}
-
-            <v-textarea
-              outlined
-              v-model="reply"
-              class="mt-5"
-              name="input-7-4"
-              label="Reply"
-              append-icon="mdi-send"
-              @click:append="sendReply(email)"
-              @keyup.ctrl.enter="sendReply(email)"
-            ></v-textarea>
-          </v-expansion-panel-content>
+          <emailHeader
+            :email="email"
+          />
+          <employeeBodyContent
+            :email="email"
+          />
         </v-expansion-panel>
       </v-expansion-panels>
     </v-col>
@@ -71,10 +52,12 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import loadingMixin from '@/loadingMixin';
+import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
+import EmailHeader from '@/views/EmailHeader.vue';
 
 export default {
   name: 'Home',
-
+  components: { EmailHeader, EmployeeBodyContent },
   mixins: [loadingMixin],
 
   data() {
@@ -114,20 +97,16 @@ export default {
 
   methods: {
     ...mapActions(['fetchFullEmail', 'fetchEmails', 'searchEmails']),
-
-    fromName(emailFrom) {
-      const startEmail = emailFrom.indexOf('<');
-      const charsToRemove = emailFrom.length - startEmail;
-
-      return emailFrom.slice(0, -charsToRemove);
-    },
-
     sendReply(email) {
       console.log('replying to email');
       console.log(email);
     },
 
     getFullEmail(email) {
+      if (email.body) {
+        return;
+      }
+
       this.fetchFullEmail(email.id)
         .then(() => {
           const fullEmail = this.getOneEmail(email.id);
@@ -136,14 +115,6 @@ export default {
 
           outdatedEmail.body = fullEmail.body;
         });
-    },
-
-    filterLabels(labelIds) {
-      const removedCategory = labelIds.filter((label) => !label.includes('CATEGORY'));
-      const removedInbox = removedCategory.filter((label) => label !== 'INBOX');
-      return removedInbox
-        .map((label) => label.toLowerCase())
-        .join(',');
     },
 
     search(isSearchLoading) {
@@ -176,21 +147,9 @@ export default {
 </script>
 
 <style scoped>
-.subject {
-  display: inline-block;
-  border-left: 2px solid var(--v-secondary-base) !important;
-  padding-left: 10px
-}
 
 .expansionPanel {
   background-color: var(--v-accent-base) !important;
 }
 
-.subject {
-  color: var(--v-info-darken2) !important;
-}
-
-.label {
-  color: var(--v-info-darken4) !important;
-}
 </style>

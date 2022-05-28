@@ -9,6 +9,7 @@ import hellothere.model.email.EmailHeaderName
 import hellothere.model.email.UserEmail
 import hellothere.model.user.UserAccessToken
 import hellothere.repository.email.UserEmailRepository
+import hellothere.service.ConversionService
 import hellothere.service.user.UserService
 import liquibase.pro.packaged.it
 import org.slf4j.Logger
@@ -26,6 +27,7 @@ class GmailService(
     private val userEmailRepository: UserEmailRepository,
     private val googleAuthenticationService: GoogleAuthenticationService,
     private val userService: UserService,
+    private val conversionService: ConversionService,
 ) {
     fun getGmailClientFromCredentials(credentials: Credential): Gmail {
         return Gmail.Builder(
@@ -93,8 +95,8 @@ class GmailService(
 
     fun getFullEmailData(client: Gmail, gmailIds: List<String>, username: String): List<EmailDto> {
         LOGGER.info("Fetching full emails for user: $username with ids $gmailIds")
-        // todo update to full once get to that section
-        val messages = getMutableMessagesList(gmailIds, EmailFormat.METADATA, client)
+        // todo update to fetch thread not just email
+        val messages = getMutableMessagesList(gmailIds, EmailFormat.FULL, client)
         return messages.map { buildEmailDto(it) }
     }
 
@@ -174,12 +176,20 @@ class GmailService(
     }
 
     private fun getFullBodyFromMessage(message: Message): String? {
-        // todo improve to actually user message.payload.parts and iterate through there
-        // additionally take into account html!
-        return if (message.payload.body.getSize() == 0) {
+        // todo ensure it works with html
+        if (message.payload.parts.isEmpty()) {
+            message.snippet
+        }
+        var fullBody = ""
+
+        message.payload.parts.forEach {
+            fullBody += conversionService.convertMessagePartToString(it)
+        }
+
+        return if (fullBody.isNullOrBlank()) {
             message.snippet
         } else {
-            message.payload.body.data
+            fullBody
         }
     }
 
