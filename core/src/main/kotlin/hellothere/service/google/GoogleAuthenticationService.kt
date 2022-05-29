@@ -38,7 +38,7 @@ class GoogleAuthenticationService(
             httpTransport,
             jsonFactory,
             clientSecret,
-            listOf(GmailScopes.GMAIL_READONLY)
+            listOf(GmailScopes.GMAIL_READONLY, GmailScopes.GMAIL_SEND)
         ).build()
     }
 

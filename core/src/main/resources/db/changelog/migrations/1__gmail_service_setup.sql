@@ -14,17 +14,20 @@ CREATE TABLE user_access_token
 
 CREATE TABLE user_email_summary
 (
-    id            bigserial,
+    id               bigserial,
     gmail_id         VARCHAR(255),
-    subject VARCHAR(255),
-    from_email         VARCHAR(2047),
-    label_ids_string         VARCHAR(2047),
-    date_sent       timestamp,
-    app_user      VARCHAR(127),
+    thread_id        VARCHAR(255),
+    mime_message_id    VARCHAR(511),
+    subject          VARCHAR(255),
+    from_email       VARCHAR(2047),
+    label_ids_string VARCHAR(2047),
+    date_sent        timestamp,
+    app_user         VARCHAR(127),
     PRIMARY KEY (id),
     CONSTRAINT user_email_summary_user_fk
         FOREIGN KEY (app_user)
             REFERENCES app_user (username)
 );
 
-delete from user_week_stats;
+delete
+from user_week_stats;

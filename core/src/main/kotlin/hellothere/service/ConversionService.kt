@@ -6,8 +6,10 @@ import org.apache.commons.lang3.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
 import java.util.*
+import javax.mail.internet.MimeMessage
 
 @Service
 class ConversionService {
@@ -25,6 +27,20 @@ class ConversionService {
         }
 
         return returnString
+    }
+
+    fun convertMimeMessageToBase64String(mimeMessage: MimeMessage): String? {
+        return try {
+            val buffer = ByteArrayOutputStream()
+            mimeMessage.writeTo(buffer)
+            val messageBytes = buffer.toByteArray()
+            val encoder = Base64.getUrlEncoder()
+            encoder.encodeToString(messageBytes)
+        } catch (e: Exception) {
+            LOGGER.error("Cant convert mime message to base 64 string. Encountered exception with message: ${e.message}")
+            LOGGER.debug(e.stackTraceToString())
+            null
+        }
     }
 
     fun convertBase64ToReadableText(base64String: String): String? {

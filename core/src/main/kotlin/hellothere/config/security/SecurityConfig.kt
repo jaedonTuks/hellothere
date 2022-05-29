@@ -23,5 +23,9 @@ class SecurityConfig(
             .antMatchers("/api/**").permitAll()
             .antMatchers("$USER/**")
             .authenticated()
+
+        http
+            .csrf()
+            .disable()
     }
 }

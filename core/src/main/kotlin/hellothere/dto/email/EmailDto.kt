@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 
 data class EmailDto(
     val id: String,
+    val threadId: String,
     val from: String,
     val date: LocalDateTime,
     val labelIds: List<String>,

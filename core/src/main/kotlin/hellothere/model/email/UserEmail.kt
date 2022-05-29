@@ -15,6 +15,12 @@ class UserEmail(
     @Column(name = "gmail_id")
     val gmailId: String,
 
+    @Column(name = "thread_id")
+    val threadId: String,
+
+    @Column(name = "mime_message_id")
+    val mimeMessageId: String,
+
     @Column(name = "subject")
     val subject: String,
 

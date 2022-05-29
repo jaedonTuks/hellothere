@@ -36,6 +36,22 @@ const actions = {
     .catch((e) => {
       console.error(e);
     }),
+
+  sendEmail: ({ commit }, payload) => axios.post('/api/gmail/send', payload)
+    .then((response) => {
+      commit('updateEmailById', response.data);
+    })
+    .catch((e) => {
+      console.error(e);
+    }),
+
+  replyToEmail: ({ commit }, payload) => axios.post('/api/gmail/reply', payload)
+    .then((response) => {
+      commit('updateEmailById', response.data);
+    })
+    .catch((e) => {
+      console.error(e);
+    }),
 };
 
 export default actions;

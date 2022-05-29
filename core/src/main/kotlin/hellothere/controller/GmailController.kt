@@ -2,11 +2,12 @@ package hellothere.controller
 
 import hellothere.config.RestUrl.GMAIL
 import hellothere.dto.email.EmailDto
+import hellothere.requests.email.ReplyRequest
+import hellothere.requests.email.SendRequest
 import hellothere.service.google.GmailService
 import hellothere.service.google.GoogleAuthenticationService
 import hellothere.service.security.SecurityService
 import hellothere.service.user.UserService
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -90,12 +91,51 @@ class GmailController(
 
         val client = gmailService.getGmailClientFromUsername(username)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        // todo add some enrichment to search such as email etc
 
         val emails = gmailService.getEmailsBaseData(client, username, searchString, labels).sortedByDescending { it.date }
 
         return ResponseEntity.ok(emails)
     }
+
+    @PostMapping("/send")
+    fun sendEmail(
+        request: HttpServletRequest,
+        @RequestBody sendRequest: SendRequest
+    ): ResponseEntity<EmailDto> {
+        val username = securityService.getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val client = gmailService.getGmailClientFromUsername(username)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val email = gmailService.send(username, client, sendRequest)
+            ?: return ResponseEntity.badRequest().build()
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/reply")
+    fun replyToEmail(
+        request: HttpServletRequest,
+        @RequestBody replyRequest: ReplyRequest
+    ): ResponseEntity<EmailDto> {
+        val username = securityService.getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val client = gmailService.getGmailClientFromUsername(username)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        val email = gmailService.sendReply(username, client, replyRequest)
+            ?: return ResponseEntity.badRequest().build()
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/test")
+    fun test(
+        request: HttpServletRequest,
+        @RequestBody replyRequest: ReplyRequest
+    ): ResponseEntity<EmailDto> {
+
+        return ResponseEntity.noContent().build()
+    }
+
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(GmailController::class.java)

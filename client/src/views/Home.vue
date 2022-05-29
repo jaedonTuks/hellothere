@@ -87,6 +87,12 @@ export default {
           divider: false,
         },
         {
+          text: 'Starred',
+          value: 'STARRED',
+          disabled: false,
+          divider: false,
+        },
+        {
           text: 'Unread',
           value: 'UNREAD',
           disabled: false,

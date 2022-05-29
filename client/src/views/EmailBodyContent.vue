@@ -10,22 +10,45 @@
         name="input-7-4"
         label="Reply"
         append-icon="mdi-send"
+        :disabled = "sendingReply"
         @click:append="sendReply"
         @keyup.ctrl.enter="sendReply"
-    ></v-textarea>
+    />
   </v-expansion-panel-content>
 </template>
 <script>
+import { mapActions } from 'vuex';
+
 export default {
   name: 'employeeBodyContent',
   props: {
     email: {},
-    reply: {},
+  },
+
+  data() {
+    return {
+      sendingReply: false,
+      reply: '',
+    };
   },
 
   methods: {
-    sendReply(email) {
-      console.log(`replying to email ${email.id}`);
+    ...mapActions(['replyToEmail']),
+
+    sendReply() {
+      this.sendingReply = true;
+      const payload = {
+        threadId: this.email.threadId,
+        messageId: this.email.id,
+        reply: this.reply,
+      };
+
+      console.log(payload);
+
+      this.replyToEmail(payload)
+        .finally(() => {
+          this.sendingReply = false;
+        });
     },
   },
 };

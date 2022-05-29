@@ -1,6 +1,7 @@
 package hellothere.service.google
 
 import com.google.api.client.auth.oauth2.Credential
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Message
 import hellothere.dto.email.EmailDto
@@ -9,18 +10,24 @@ import hellothere.model.email.EmailHeaderName
 import hellothere.model.email.UserEmail
 import hellothere.model.user.UserAccessToken
 import hellothere.repository.email.UserEmailRepository
+import hellothere.requests.email.ReplyRequest
+import hellothere.requests.email.SendRequest
 import hellothere.service.ConversionService
 import hellothere.service.user.UserService
-import liquibase.pro.packaged.it
-import org.apache.commons.lang3.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.util.*
+import javax.mail.Session
+import javax.mail.internet.AddressException
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
 
 @Service
 class GmailService(
@@ -117,6 +124,10 @@ class GmailService(
         return newEmails + cachedEmails
     }
 
+    fun getEmailBaseData(client: Gmail, gmailId: String, username: String): UserEmail? {
+        return getEmailsBaseData(client, listOf(gmailId), username).firstOrNull()
+    }
+
     private fun getMutableMessagesList(ids: List<String>, format: EmailFormat, client: Gmail): MutableList<Message> {
         // todo explore client.batch() in beta version
         // will require you to build your own http request
@@ -147,6 +158,8 @@ class GmailService(
             UserEmail(
                 null,
                 it.id,
+                it.threadId,
+                getEmailHeader(it, EmailHeaderName.MESSAGE_ID),
                 getEmailHeader(it, EmailHeaderName.SUBJECT),
                 getEmailHeader(it, EmailHeaderName.FROM),
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(it.internalDate), ZoneId.systemDefault()),
@@ -165,9 +178,125 @@ class GmailService(
             ?.value ?: ""
     }
 
+    fun send(username: String, client: Gmail, sendRequest: SendRequest): Message? {
+        return try {
+            val message = buildMessageFromSendRequest(sendRequest, username)
+                ?: return null
+            val sentMessage = client.users().messages().send(USER_SELF_ACCESS, message).execute()
+            sentMessage
+        } catch (e: GoogleJsonResponseException) {
+            LOGGER.error("Unable to send message: " + e.details)
+            null
+        }
+    }
+
+    fun sendReply(username: String, client: Gmail, replyRequest: ReplyRequest): Message? {
+        val message = buildMessageFromReplyRequest(username, client, replyRequest)
+            ?: return null
+        message.threadId = replyRequest.threadId
+
+        val sentMessage = client.users()
+            .messages()
+            .send(USER_SELF_ACCESS, message)
+            .execute()
+
+        return sentMessage
+    }
+
+    private fun buildMessageFromSendRequest(sendRequest: SendRequest, username: String): Message? {
+        return buildMessage(
+            username,
+            sendRequest.to,
+            sendRequest.subject,
+            sendRequest.body
+        )
+    }
+
+    private fun buildMessageFromReplyRequest(
+        username: String,
+        client: Gmail,
+        replyRequest: ReplyRequest
+    ): Message? {
+        val emailToReplyTo = getEmailBaseData(client, replyRequest.messageId, username)
+            ?: return null
+
+        val to = emailToReplyTo.fromEmail
+        val subject = emailToReplyTo.subject
+        val replyHeaders = mutableMapOf<String, String>()
+        // todo investigate the thread id here
+
+        replyHeaders[EmailHeaderName.REFERENCE.value] = emailToReplyTo.mimeMessageId
+        replyHeaders[EmailHeaderName.IN_REPLY_TO.value] = emailToReplyTo.mimeMessageId
+
+        return buildMessage(
+            username,
+            to,
+            subject,
+            replyRequest.reply,
+            replyHeaders
+        )
+    }
+
+    fun buildMimeMessage(
+        from: String,
+        to: String,
+        subject: String,
+        body: String,
+        additionalHeaders: Map<String, String> = mapOf()
+    ): MimeMessage? {
+        if (!isValidEmailAddress(from) || !isValidEmailAddress(to)) {
+            LOGGER.info("Stopping mime message build. invalid email addresses")
+            return null
+        }
+        val props = Properties()
+        val session = Session.getDefaultInstance(props, null)
+
+        val mimeMessage = MimeMessage(session)
+        val mimeMessageHelper = MimeMessageHelper(mimeMessage)
+
+        mimeMessageHelper.setFrom(from)
+        mimeMessageHelper.setTo(to)
+        mimeMessageHelper.setSubject(subject)
+        mimeMessageHelper.setText(body)
+
+        additionalHeaders.entries.forEach {
+            mimeMessage.addHeader(it.key, it.value)
+        }
+
+        return mimeMessage
+    }
+
+    fun buildMessage(
+        from: String,
+        to: String,
+        subject: String,
+        body: String,
+        additionalHeaders: Map<String, String> = mapOf()
+    ): Message? {
+        val mimeMessage = buildMimeMessage(from, to, subject, body, additionalHeaders)
+            ?: return null
+        val base64String = conversionService.convertMimeMessageToBase64String(mimeMessage)
+            ?: return null
+
+        val message = Message()
+        message.raw = base64String
+        return message
+    }
+
+    fun isValidEmailAddress(emailAddress: String): Boolean {
+        return try {
+            InternetAddress(emailAddress).validate()
+            return true
+        } catch (exception: AddressException) {
+            LOGGER.info("invalid email address $emailAddress")
+            return false
+        }
+    }
+
     fun buildEmailDto(message: Message): EmailDto {
         return EmailDto(
             message.id,
+            message.threadId,
             getEmailHeader(message, EmailHeaderName.FROM),
             LocalDateTime.ofEpochSecond(message.internalDate, 0, ZoneOffset.UTC),
             message.labelIds,
@@ -176,10 +305,21 @@ class GmailService(
         )
     }
 
+    fun buildEmailDto(userEmail: UserEmail): EmailDto {
+        return EmailDto(
+            userEmail.gmailId,
+            userEmail.threadId,
+            userEmail.fromEmail,
+            userEmail.dateSent,
+            userEmail.getLabelList(),
+            userEmail.subject,
+            null
+        )
+    }
+
     private fun getFullBodyFromMessage(message: Message): String? {
-        // todo ensure it works with html
-        if (message.payload.parts.isEmpty()) {
-            message.snippet
+        if (message.payload?.parts == null || message.payload.parts.isEmpty()) {
+            return message.snippet
         }
         var fullBody = ""
 
@@ -192,17 +332,6 @@ class GmailService(
         } else {
             conversionService.getHtmlBody(fullBody)
         }
-    }
-
-    fun buildEmailDto(userEmail: UserEmail): EmailDto {
-        return EmailDto(
-            userEmail.gmailId,
-            userEmail.fromEmail,
-            userEmail.dateSent,
-            userEmail.getLabelList(),
-            userEmail.subject,
-            null
-        )
     }
 
     companion object {
