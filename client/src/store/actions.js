@@ -13,8 +13,8 @@ const actions = {
 
   fetchEmails: ({ commit }) => axios.get('/api/gmail/emails')
     .then((response) => {
-      commit('setEmailsById', response.data);
-      commit('resetAndSetCurrentEmailIds', response.data);
+      commit('setThreadsById', response.data);
+      commit('resetAndSetCurrentThreadIds', response.data);
     })
     .catch((e) => {
       console.error(e);
@@ -22,8 +22,8 @@ const actions = {
 
   searchEmails: ({ commit }, payload) => axios.get(`/api/gmail/search?searchString=${payload.searchString}&labels=${payload.labels}`)
     .then((response) => {
-      commit('setEmailsById', response.data);
-      commit('resetAndSetCurrentEmailIds', response.data);
+      commit('setThreadsById', response.data);
+      commit('resetAndSetCurrentThreadIds', response.data);
     })
     .catch((e) => {
       console.error(e);
@@ -31,7 +31,7 @@ const actions = {
 
   fetchFullEmail: ({ commit }, id) => axios.get(`/api/gmail/email/${id}`)
     .then((response) => {
-      commit('updateEmailById', response.data);
+      commit('updateEmailThreadsById', response.data);
     })
     .catch((e) => {
       console.error(e);
@@ -39,7 +39,7 @@ const actions = {
 
   sendEmail: ({ commit }, payload) => axios.post('/api/gmail/send', payload)
     .then((response) => {
-      commit('updateEmailById', response.data);
+      commit('updateEmailThreadsById', response.data);
     })
     .catch((e) => {
       console.error(e);
@@ -47,7 +47,7 @@ const actions = {
 
   replyToEmail: ({ commit }, payload) => axios.post('/api/gmail/reply', payload)
     .then((response) => {
-      commit('updateEmailById', response.data);
+      commit('updateEmailThreadsById', response.data);
     })
     .catch((e) => {
       console.error(e);

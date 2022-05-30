@@ -7,7 +7,8 @@ function getDefaultState() {
       currentWeekStats: null,
     },
     emailsById: {},
-    currentEmailIds: [],
+    threadsById: {},
+    currentThreadIds: [],
   };
 }
 

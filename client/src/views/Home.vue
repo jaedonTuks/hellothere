@@ -31,17 +31,17 @@
       </v-row>
       <v-expansion-panels dark>
         <v-expansion-panel
-          v-for="email in Object.values(emails)"
+          v-for="emailThread in Object.values(emailThreads)"
           class="mb-5 expansionPanel"
           color="accent"
-          :key="email.id"
-          @change="getFullEmail(email)"
+          :key="emailThread.id"
+          @change="getFullEmailThread(emailThread)"
         >
           <emailHeader
-            :email="email"
+            :emailThread="emailThread"
           />
           <employeeBodyContent
-            :email="email"
+            :emailThread="emailThread"
           />
         </v-expansion-panel>
       </v-expansion-panels>
@@ -62,7 +62,7 @@ export default {
 
   data() {
     return {
-      emails: [],
+      emailThreads: [],
       searchString: '',
       searchingEmails: false,
       filteringEmails: false,
@@ -104,28 +104,24 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getOneEmail', 'getEmails']),
+    ...mapGetters(['getEmailThread', 'getEmailThreads']),
   },
 
   methods: {
-    ...mapActions(['fetchFullEmail', 'fetchEmails', 'searchEmails']),
-    sendReply(email) {
-      console.log('replying to email');
-      console.log(email);
-    },
+    ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'searchEmails']),
 
-    getFullEmail(email) {
-      if (email.body) {
+    getFullEmailThread(emailThread) {
+      if (emailThread.emails.every((email) => email.body != null)) {
         return;
       }
 
-      this.fetchFullEmail(email.id)
+      this.fetchFullEmail(emailThread.id)
         .then(() => {
-          const fullEmail = this.getOneEmail(email.id);
-          const outdatedEmail = this.emails
-            .find((searchingEmail) => searchingEmail.id === email.id);
+          const fullEmailThread = this.getEmailThread(emailThread.id);
+          const outdatedEmailThread = this.emailThreads
+            .find((searchingEmailThread) => searchingEmailThread.id === emailThread.id);
 
-          outdatedEmail.body = fullEmail.body;
+          outdatedEmailThread.emails = fullEmailThread.emails;
         });
     },
 
@@ -138,7 +134,7 @@ export default {
       };
       this.searchEmails(payload)
         .then(() => {
-          this.emails = this.getEmails();
+          this.emailThreads = this.getEmailThreads();
         })
         .finally(() => {
           this.searchingEmails = false;
@@ -151,9 +147,11 @@ export default {
     this.setLoading(true);
     this.fetchEmails()
       .finally(() => {
-        this.emails = this.getEmails();
+        this.emailThreads = this.getEmailThreads();
         this.setLoading(false);
       });
+
+    this.fetchUserInfo();
   },
 };
 </script>

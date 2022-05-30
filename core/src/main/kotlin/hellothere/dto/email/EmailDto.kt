@@ -10,8 +10,6 @@ data class EmailDto(
     val threadId: String,
     val from: String,
     val date: LocalDateTime,
-    val labelIds: List<String>,
-    val subject: String,
     val body: String?
 ) {
     @JsonProperty("formattedDate")

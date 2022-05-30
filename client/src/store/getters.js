@@ -1,6 +1,14 @@
 /* eslint-disable */
 const getters = {
-  getProfile: (state) => state.userProfile,
+  getProfile: (state) => () => state.userProfile,
+
+  getEmailThreads: (state) => () => Object.entries(state.threadsById).filter((threadById) => {
+    const [key] = threadById;
+    return state.currentThreadIds.includes(key);
+  }).map((threadEntry) => {
+    const [key, value] = threadEntry;
+    return value;
+  }),
 
   getEmails: (state) => () => Object.entries(state.emailsById).filter((emailById) => {
     const [key] = emailById;
@@ -10,8 +18,8 @@ const getters = {
     return value;
   }),
 
-  getOneEmail: (state) => (id) => {
-    return state.emailsById[id]
+  getEmailThread: (state) => (id) => {
+    return state.threadsById[id]
   }
 };
 

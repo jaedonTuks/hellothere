@@ -1,6 +1,5 @@
 package hellothere.model.email
 
-import hellothere.model.user.User
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -15,16 +14,10 @@ class UserEmail(
     @Column(name = "gmail_id")
     val gmailId: String,
 
-    @Column(name = "thread_id")
-    val threadId: String,
-
     @Column(name = "mime_message_id")
     val mimeMessageId: String,
 
-    @Column(name = "subject")
-    val subject: String,
-
-    @Column(name = "fromEmail")
+    @Column(name = "from_email")
     val fromEmail: String,
 
     @Column(name = "date_sent")
@@ -34,8 +27,8 @@ class UserEmail(
     val labelIdsString: String,
 
     @ManyToOne
-    @JoinColumn(name = "app_user")
-    var user: User? = null
+    @JoinColumn(name = "thread_id")
+    var thread: EmailThread? = null
 ) {
     fun getLabelList(): List<String> {
         return labelIdsString.split(",")

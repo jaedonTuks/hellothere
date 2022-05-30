@@ -2,6 +2,7 @@ package hellothere.controller
 
 import hellothere.config.RestUrl.GMAIL
 import hellothere.dto.email.EmailDto
+import hellothere.dto.email.EmailThreadDto
 import hellothere.requests.email.ReplyRequest
 import hellothere.requests.email.SendRequest
 import hellothere.service.google.GmailService
@@ -55,27 +56,27 @@ class GmailController(
     }
 
     @GetMapping("/email/{id}")
-    fun getFullEmailFromId(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<EmailDto> {
+    fun getFullEmailFromId(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<EmailThreadDto> {
         val username = securityService.getUsernameFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val client = gmailService.getGmailClientFromUsername(username)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-        val emails = gmailService.getFullEmailData(client, username, id)
+        val emailThread = gmailService.getFullEmailThreadData(client, username, id)
 
-        return ResponseEntity.ok(emails)
+        return ResponseEntity.ok(emailThread)
     }
 
     @GetMapping("/emails")
-    fun getEmails(request: HttpServletRequest): ResponseEntity<List<EmailDto>> {
+    fun getEmails(request: HttpServletRequest): ResponseEntity<List<EmailThreadDto>> {
         val username = securityService.getUsernameFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val client = gmailService.getGmailClientFromUsername(username)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-        val emails = gmailService.getEmailsBaseData(client, username).sortedByDescending { it.date }
+        val emails = gmailService.getThreadsBaseData(client, username).sortedByDescending { it.latestDate }
 
         return ResponseEntity.ok(emails)
     }
@@ -85,14 +86,14 @@ class GmailController(
         request: HttpServletRequest,
         @RequestParam searchString: String,
         @RequestParam labels: List<String> = listOf()
-    ): ResponseEntity<List<EmailDto>> {
+    ): ResponseEntity<List<EmailThreadDto>> {
         val username = securityService.getUsernameFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val client = gmailService.getGmailClientFromUsername(username)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-        val emails = gmailService.getEmailsBaseData(client, username, searchString, labels).sortedByDescending { it.date }
+        val emails = gmailService.getThreadsBaseData(client, username, searchString, labels).sortedByDescending { it.latestDate }
 
         return ResponseEntity.ok(emails)
     }

@@ -5,15 +5,19 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Message
 import hellothere.dto.email.EmailDto
+import hellothere.dto.email.EmailThreadDto
 import hellothere.model.email.EmailFormat
 import hellothere.model.email.EmailHeaderName
+import hellothere.model.email.EmailThread
 import hellothere.model.email.UserEmail
 import hellothere.model.user.UserAccessToken
+import hellothere.repository.email.EmailThreadRepository
 import hellothere.repository.email.UserEmailRepository
 import hellothere.requests.email.ReplyRequest
 import hellothere.requests.email.SendRequest
 import hellothere.service.ConversionService
 import hellothere.service.user.UserService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -33,6 +37,7 @@ import javax.mail.internet.MimeMessage
 class GmailService(
     @Value("\${gmail.client.projectId}") private val projectId: String,
     private val userEmailRepository: UserEmailRepository,
+    private val emailThreadRepository: EmailThreadRepository,
     private val googleAuthenticationService: GoogleAuthenticationService,
     private val userService: UserService,
     private val conversionService: ConversionService,
@@ -59,7 +64,7 @@ class GmailService(
         return Pair(getGmailClientFromCredentials(credentials), userAccessToken)
     }
 
-    fun getEmailIdList(
+    fun getEmailThreadIdList(
         client: Gmail,
         query: String? = null,
         labelIds: List<String> = listOf()
@@ -68,7 +73,7 @@ class GmailService(
 
         val messageList = client
             .users()
-            .messages()
+            .threads()
             .list(USER_SELF_ACCESS)
             .setMaxResults(5)
 
@@ -82,53 +87,60 @@ class GmailService(
 
         return messageList
             .execute()
-            .messages.map { it.id }
+            .threads.map { it.id }
     }
 
-    fun getEmailsBaseData(
+    fun getThreadsBaseData(
         client: Gmail,
         username: String,
         search: String? = null,
         labels: List<String> = listOf()
-    ): List<EmailDto> {
-        val ids = getEmailIdList(client, search, labels)
-        val emails = getEmailsBaseData(client, ids, username)
-        return emails.map { buildEmailDto(it) }
+    ): List<EmailThreadDto> {
+        val ids = getEmailThreadIdList(client, search, labels)
+        val emailThreads = getThreadsBaseData(client, ids, username)
+        return emailThreads.map { buildEmailThreadDto(it) }
     }
 
-    fun getFullEmailData(client: Gmail, username: String, id: String): EmailDto? {
-        val emails = getFullEmailData(client, listOf(id), username)
+    fun getFullEmailThreadData(client: Gmail, username: String, id: String): EmailThreadDto? {
+        val emails = getFullEmailThreadData(client, listOf(id), username)
         return emails.firstOrNull()
     }
 
-    fun getFullEmailData(client: Gmail, gmailIds: List<String>, username: String): List<EmailDto> {
+    fun getFullEmailThreadData(client: Gmail, gmailIds: List<String>, username: String): List<EmailThreadDto> {
         LOGGER.info("Fetching full emails for user: $username with ids $gmailIds")
-        // todo update to fetch thread not just email
-        val messages = getMutableMessagesList(gmailIds, EmailFormat.FULL, client)
-        return messages.map { buildEmailDto(it) }
+        val threads = getMutableThreadsList(gmailIds, EmailFormat.FULL, client)
+        return threads.mapNotNull { buildEmailThreadDto(it) }
     }
 
-    fun getEmailsBaseData(client: Gmail, gmailIds: List<String>, username: String): List<UserEmail> {
+    fun getThreadsBaseData(client: Gmail, gmailIds: List<String>, username: String): List<EmailThread> {
         LOGGER.info("Fetching Metadata emails for user: $username with ids $gmailIds")
 
-        val cachedEmails = userEmailRepository.findAllByUserIdAndGmailIdIn(username, gmailIds)
+        val cachedEmailThreads = emailThreadRepository.findAllByUserIdAndEmailsGmailIdIn(username, gmailIds)
 
         val emailIdsToFetch = mutableListOf<String>()
         emailIdsToFetch.addAll(gmailIds)
-        cachedEmails.forEach { emailIdsToFetch.remove(it.gmailId) }
 
-        val newMessages = getMutableMessagesList(emailIdsToFetch, EmailFormat.METADATA, client)
+        val alreadyCachedEmails = cachedEmailThreads.flatMap { thread ->
+            thread.emails.map { email -> email.gmailId }
+        }
+        alreadyCachedEmails.forEach { emailIdsToFetch.remove(it) }
 
-        val newEmails = saveNewEmailsFromGmail(newMessages, username)
+        val newThreads = getMutableThreadsList(emailIdsToFetch, EmailFormat.METADATA, client)
 
-        return newEmails + cachedEmails
+        val newEmailThreads = saveNewThreadsFromGmail(newThreads, username)
+
+        return cachedEmailThreads + newEmailThreads
     }
 
-    fun getEmailBaseData(client: Gmail, gmailId: String, username: String): UserEmail? {
-        return getEmailsBaseData(client, listOf(gmailId), username).firstOrNull()
+    fun getEmailBaseData(client: Gmail, gmailId: String, username: String): EmailThread? {
+        return getThreadsBaseData(client, listOf(gmailId), username).firstOrNull()
     }
 
-    private fun getMutableMessagesList(ids: List<String>, format: EmailFormat, client: Gmail): MutableList<Message> {
+    private fun getMutableEmailsList(
+        ids: List<String>,
+        format: EmailFormat,
+        client: Gmail
+    ): MutableList<Message> {
         // todo explore client.batch() in beta version
         // will require you to build your own http request
         return ids.map {
@@ -141,8 +153,28 @@ class GmailService(
         }.toMutableList()
     }
 
-    fun saveNewEmailsFromGmail(messages: List<Message>, username: String): List<UserEmail> {
-        if (messages.isEmpty()) {
+    private fun getMutableThreadsList(
+        ids: List<String>,
+        format: EmailFormat,
+        client: Gmail
+    ): MutableList<com.google.api.services.gmail.model.Thread> {
+        // todo explore client.batch() in beta version
+        // will require you to build your own http request
+        return ids.map {
+            client
+                .users()
+                .threads()
+                .get(USER_SELF_ACCESS, it)
+                .setFormat(format.value)
+                .execute()
+        }.toMutableList()
+    }
+
+    fun saveNewThreadsFromGmail(
+        threads: List<com.google.api.services.gmail.model.Thread>,
+        username: String
+    ): List<EmailThread> {
+        if (threads.isEmpty()) {
             LOGGER.info("No messages to save for user $username. Email cache up to date :)")
             return listOf()
         }
@@ -154,21 +186,35 @@ class GmailService(
             return listOf()
         }
 
-        val emailsToSave = messages.map {
-            UserEmail(
-                null,
+        val threadsToSave = threads.map {
+            EmailThread(
                 it.id,
-                it.threadId,
-                getEmailHeader(it, EmailHeaderName.MESSAGE_ID),
-                getEmailHeader(it, EmailHeaderName.SUBJECT),
-                getEmailHeader(it, EmailHeaderName.FROM),
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(it.internalDate), ZoneId.systemDefault()),
-                it.labelIds.joinToString(","),
+                getEmailHeader(it.messages.first(), EmailHeaderName.SUBJECT),
                 user
             )
         }
 
-        return userEmailRepository.saveAll(emailsToSave)
+        val savedThreads = emailThreadRepository.saveAll(threadsToSave)
+
+        threads.forEach { thread ->
+            val savedThread = savedThreads.firstOrNull { it.threadId == thread.id }
+
+            val emailsToSave = thread.messages.map { message ->
+                UserEmail(
+                    null,
+                    message.id,
+                    getEmailHeader(message, EmailHeaderName.MESSAGE_ID),
+                    getEmailHeader(message, EmailHeaderName.FROM),
+                    LocalDateTime.ofInstant(Instant.ofEpochMilli(message.internalDate), ZoneId.systemDefault()),
+                    message.labelIds.joinToString(","),
+                    savedThread
+                )
+            }
+            savedThread?.addAllEmails(emailsToSave)
+            userEmailRepository.saveAll(emailsToSave)
+        }
+
+        return savedThreads
     }
 
     fun getEmailHeader(message: Message, headerName: EmailHeaderName): String {
@@ -217,16 +263,15 @@ class GmailService(
         client: Gmail,
         replyRequest: ReplyRequest
     ): Message? {
-        val emailToReplyTo = getEmailBaseData(client, replyRequest.messageId, username)
+        val replyThread = getEmailBaseData(client, replyRequest.messageId, username)
             ?: return null
 
-        val to = emailToReplyTo.fromEmail
-        val subject = emailToReplyTo.subject
+        val to = replyThread.getLastFromEmail()
+        val subject = replyThread.subject
         val replyHeaders = mutableMapOf<String, String>()
-        // todo investigate the thread id here
 
-        replyHeaders[EmailHeaderName.REFERENCE.value] = emailToReplyTo.mimeMessageId
-        replyHeaders[EmailHeaderName.IN_REPLY_TO.value] = emailToReplyTo.mimeMessageId
+        replyHeaders[EmailHeaderName.REFERENCE.value] = replyThread.getAllEmailMimeIds()
+        replyHeaders[EmailHeaderName.IN_REPLY_TO.value] = replyThread.getLastSentEmailMimeId()
 
         return buildMessage(
             username,
@@ -293,14 +338,39 @@ class GmailService(
         }
     }
 
+    fun buildEmailThreadDto(emailThread: EmailThread): EmailThreadDto {
+        return EmailThreadDto(
+            emailThread.threadId,
+            emailThread.subject,
+            emailThread.getLastFromEmail(),
+            emailThread.emails.maxOfOrNull { it.dateSent },
+            emailThread.getFullLabelList(),
+            emailThread.emails.map { buildEmailDto(it) }
+        )
+    }
+
+    fun buildEmailThreadDto(
+        emailThread: com.google.api.services.gmail.model.Thread
+    ): EmailThreadDto? {
+        val cachedEmailThread = emailThreadRepository.findFirstByThreadId(emailThread.id)
+            ?: return null
+
+        return EmailThreadDto(
+            emailThread.id,
+            cachedEmailThread.subject,
+            cachedEmailThread.getLastFromEmail(),
+            cachedEmailThread.emails.maxOfOrNull { it.dateSent },
+            cachedEmailThread.getFullLabelList(),
+            emailThread.messages.map { buildEmailDto(it) }
+        )
+    }
+
     fun buildEmailDto(message: Message): EmailDto {
         return EmailDto(
             message.id,
             message.threadId,
             getEmailHeader(message, EmailHeaderName.FROM),
             LocalDateTime.ofEpochSecond(message.internalDate, 0, ZoneOffset.UTC),
-            message.labelIds,
-            getEmailHeader(message, EmailHeaderName.SUBJECT),
             getFullBodyFromMessage(message)
         )
     }
@@ -308,11 +378,9 @@ class GmailService(
     fun buildEmailDto(userEmail: UserEmail): EmailDto {
         return EmailDto(
             userEmail.gmailId,
-            userEmail.threadId,
+            userEmail.thread?.threadId ?: "",
             userEmail.fromEmail,
             userEmail.dateSent,
-            userEmail.getLabelList(),
-            userEmail.subject,
             null
         )
     }

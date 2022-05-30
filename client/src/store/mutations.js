@@ -7,6 +7,16 @@ const mutations = {
     state.userProfile = info;
   },
 
+  setThreadsById: (state, emailThreads) => {
+    const threadsObj = state.threadsById;
+
+    emailThreads.forEach((emailThread) => {
+      threadsObj[emailThread.id] = emailThread;
+    });
+
+    state.threadsById = threadsObj;
+  },
+
   setEmailsById: (state, emails) => {
     const emailsObj = state.emailsById;
 
@@ -21,10 +31,13 @@ const mutations = {
     state.emailsById[email.id] = email;
   },
 
-  resetAndSetCurrentEmailIds: (state, emails) => {
-    state.currentEmailIds = [];
-    const emailIds = emails.map((email) => email.id);
-    state.currentEmailIds = emailIds;
+  updateEmailThreadsById: (state, emailThread) => {
+    state.threadsById[emailThread.id] = emailThread;
+  },
+
+  resetAndSetCurrentThreadIds: (state, emailThreads) => {
+    state.currentThreadIds = [];
+    state.currentThreadIds = emailThreads.map((email) => email.id);
   },
 
 };

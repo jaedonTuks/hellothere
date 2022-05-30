@@ -2,18 +2,18 @@
   <v-expansion-panel-header class="text-h6">
             <span style="width:90%">
               <span class="ma-0 dateAndFrom">
-                {{ email.formattedDate }}  - {{ fromName(email.from) }}
+                {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
               </span>
-              <span class="ml-2 subject">{{ email.subject }}</span>
+              <span class="ml-2 subject">{{ emailThread.subject }}</span>
             </span>
-    <span class="float-end label">{{ filterLabels(email.labelIds) }}</span>
+    <span class="float-end label">{{ filterLabels(emailThread.labelIds) }}</span>
   </v-expansion-panel-header>
 </template>
 <script>
 export default {
   name: 'emailHeader',
   props: {
-    email: Object,
+    emailThread: Object,
   },
 
   methods: {
