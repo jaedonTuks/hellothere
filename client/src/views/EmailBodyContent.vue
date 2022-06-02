@@ -32,18 +32,18 @@ export default {
   name: 'employeeBodyContent',
   props: {
     emailThread: {},
+    ownUserName: String,
   },
 
   data() {
     return {
       sendingReply: false,
       reply: '',
-      ownUserName: null,
     };
   },
 
   computed: {
-    ...mapGetters(['getProfile']),
+    ...mapGetters(['getProfile', 'getEmailThread']),
   },
 
   methods: {
@@ -52,8 +52,7 @@ export default {
     sendReply() {
       this.sendingReply = true;
       const payload = {
-        threadId: this.emailThread.threadId,
-        messageId: this.emailThread.id,
+        threadId: this.emailThread.id,
         reply: this.reply,
       };
 
@@ -64,12 +63,9 @@ export default {
     },
 
     isOwnEmail(email) {
-      if (this.ownUserName) {
+      if (this.ownUserName && this.ownUserName !== '') {
         const emailFrom = email.from;
-        const startEmail = emailFrom.indexOf('<');
-        const endEmail = emailFrom.indexOf('>') - startEmail;
-        const emailAddress = emailFrom.substr(startEmail + 1, endEmail - 1);
-        return this.ownUserName.localeCompare(emailAddress) === 0;
+        return emailFrom.includes(this.ownUserName);
       }
       return false;
     },
@@ -86,8 +82,5 @@ export default {
     },
   },
 
-  created() {
-    this.ownUserName = this.getProfile().username;
-  },
 };
 </script>

@@ -31,6 +31,6 @@ class SecurityService(
     companion object {
         val LOGGER: Logger = org.slf4j.LoggerFactory.getLogger(SecurityService::class.java)
         const val JWT_TOKEN_COOKIE_NAME = "jwt-token"
-        const val JWT_TOKEN_EXPIRY_AGE = 86400000
+        const val JWT_TOKEN_EXPIRY_AGE = 3600000
     }
 }

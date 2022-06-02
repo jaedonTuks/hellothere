@@ -125,7 +125,7 @@ class GmailController(
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         val email = gmailService.sendReply(username, client, replyRequest)
             ?: return ResponseEntity.badRequest().build()
-        return ResponseEntity.noContent().build()
+        return ResponseEntity.ok(email)
     }
 
     @PostMapping("/test")

@@ -6,6 +6,7 @@ import hellothere.service.security.SecurityService.Companion.JWT_TOKEN_COOKIE_NA
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -67,7 +68,7 @@ class JwtTokenService(
 
     fun getTokenFromRequest(request: HttpServletRequest): String {
         return request.cookies
-            .firstOrNull { it.name == JWT_TOKEN_COOKIE_NAME }
+            ?.firstOrNull { it.name == JWT_TOKEN_COOKIE_NAME }
             ?.value ?: ""
     }
 

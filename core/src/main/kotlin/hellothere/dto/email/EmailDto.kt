@@ -10,7 +10,7 @@ data class EmailDto(
     val threadId: String,
     val from: String,
     val date: LocalDateTime,
-    val body: String?
+    var body: String?
 ) {
     @JsonProperty("formattedDate")
     fun getFormattedDate(): String {

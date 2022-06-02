@@ -1,4 +1,8 @@
 const mutations = {
+  setIsLoggedIn: (state, isLoggedIn) => {
+    state.isLoggedIn = isLoggedIn;
+  },
+
   setLoading: (state, isLoading) => {
     state.loading = isLoading;
   },
@@ -33,6 +37,11 @@ const mutations = {
 
   updateEmailThreadsById: (state, emailThread) => {
     state.threadsById[emailThread.id] = emailThread;
+  },
+
+  updateEmailThreadsByIdAddEmail: (state, payload) => {
+    const emailThread = state.threadsById[payload.threadId];
+    emailThread.emails.push(payload.newEmail);
   },
 
   resetAndSetCurrentThreadIds: (state, emailThreads) => {

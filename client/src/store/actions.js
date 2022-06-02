@@ -1,11 +1,24 @@
 import axios from 'axios';
+import ErrorResponseUtil from '@/utils/ErrorResponseUtil';
 
 const actions = {
+  isLoggedIn: ({ commit }) => axios.get('/api/user/isLoggedIn').then(
+    (response) => {
+      commit('setIsLoggedIn', response.data);
+    },
+  ).catch((e) => {
+    const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+    commit('setIsLoggedIn', newLoggedIn);
+    console.error(e);
+  }),
+
   fetchUserInfo: ({ commit }) => axios.get('/api/user').then(
     (response) => {
       commit('setProfile', response.data);
     },
   ).catch((e) => {
+    const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+    commit('setIsLoggedIn', newLoggedIn);
     console.error(e);
   }),
 
@@ -17,6 +30,8 @@ const actions = {
       commit('resetAndSetCurrentThreadIds', response.data);
     })
     .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
       console.error(e);
     }),
 
@@ -26,6 +41,8 @@ const actions = {
       commit('resetAndSetCurrentThreadIds', response.data);
     })
     .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
       console.error(e);
     }),
 
@@ -34,6 +51,8 @@ const actions = {
       commit('updateEmailThreadsById', response.data);
     })
     .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
       console.error(e);
     }),
 
@@ -42,14 +61,18 @@ const actions = {
       commit('updateEmailThreadsById', response.data);
     })
     .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
       console.error(e);
     }),
 
   replyToEmail: ({ commit }, payload) => axios.post('/api/gmail/reply', payload)
     .then((response) => {
-      commit('updateEmailThreadsById', response.data);
+      commit('updateEmailThreadsByIdAddEmail', { threadId: payload.threadId, newEmail: response.data });
     })
     .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
       console.error(e);
     }),
 };

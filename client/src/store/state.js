@@ -1,5 +1,6 @@
 function getDefaultState() {
   return {
+    isLoggedIn: true,
     loading: false,
     userProfile: {
       username: '',

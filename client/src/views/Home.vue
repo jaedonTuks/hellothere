@@ -42,6 +42,7 @@
           />
           <employeeBodyContent
             :emailThread="emailThread"
+            :own-user-name="ownUsername"
           />
         </v-expansion-panel>
       </v-expansion-panels>
@@ -51,7 +52,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import loadingMixin from '@/loadingMixin';
+import loadingMixin from '@/mixins/loadingMixin';
 import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
 import EmailHeader from '@/views/EmailHeader.vue';
 
@@ -62,6 +63,7 @@ export default {
 
   data() {
     return {
+      ownUsername: null,
       emailThreads: [],
       searchString: '',
       searchingEmails: false,
@@ -104,7 +106,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getEmailThread', 'getEmailThreads']),
+    ...mapGetters(['getProfile', 'getEmailThread', 'getEmailThreads']),
   },
 
   methods: {
@@ -151,7 +153,12 @@ export default {
         this.setLoading(false);
       });
 
-    this.fetchUserInfo();
+    this.ownUsername = this.getProfile().username;
+    if (this.ownUsername === '') {
+      this.fetchUserInfo().then(() => {
+        this.ownUsername = this.getProfile().username;
+      });
+    }
   },
 };
 </script>

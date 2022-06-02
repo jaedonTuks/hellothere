@@ -35,6 +35,15 @@ class UserController(
         } ?: ResponseEntity.notFound().build()
     }
 
+    @GetMapping("/isLoggedIn")
+    fun isLoggedIn(
+        request: HttpServletRequest
+    ): ResponseEntity<Boolean> {
+        val username = securityService.getUsernameFromRequest(request)
+
+        return ResponseEntity.ok(username != null)
+    }
+
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(RequiresFeatureAspect::class.java)
     }

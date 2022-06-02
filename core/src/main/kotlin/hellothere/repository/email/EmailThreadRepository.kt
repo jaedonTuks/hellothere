@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface EmailThreadRepository : JpaRepository<EmailThread, String> {
-    fun findAllByUserId(userId: String): List<EmailThread>
+    fun findAllByUserIdAndThreadIdIn(userId: String, threadId: List<String>): List<EmailThread>
 
     fun findAllByUserIdAndEmailsGmailIdIn(userId: String, emailsGmailId: List<String>): List<EmailThread>
 

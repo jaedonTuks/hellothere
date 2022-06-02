@@ -17,15 +17,26 @@
 
 import AppHeader from '@/components/AppHeader.vue';
 
-import Loader from '@/Loader.vue';
+import Loader from '@/components/Loader.vue';
+import { mapState } from 'vuex';
 
 export default {
   name: 'App',
   components: { AppHeader, Loader },
 
   computed: {
+    ...mapState(['isLoggedIn']),
+
     shouldDisplayHeader() {
       return this.$route.name !== 'Login';
+    },
+  },
+
+  watch: {
+    isLoggedIn() {
+      if (!this.isLoggedIn) {
+        this.$router.push({ name: 'Login' });
+      }
     },
   },
 

@@ -7,7 +7,7 @@
   </v-container>
 </template>
 <script>
-import loadingMixin from '@/loadingMixin';
+import loadingMixin from '@/mixins/loadingMixin';
 
 export default {
   name: 'Loader',
@@ -15,7 +15,7 @@ export default {
 };
 </script>
 <style>
-@import './assets/styles/loader.css';
+@import '../assets/styles/loader.css';
 
 div {
   color: #FFF !important;

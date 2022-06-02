@@ -47,7 +47,7 @@
 <script>
 import { mapActions } from 'vuex';
 import LeaderBoardCardInfo from '@/components/LeaderBoardCardInfo.vue';
-import loadingMixin from '@/loadingMixin';
+import loadingMixin from '@/mixins/loadingMixin';
 
 export default {
   name: 'Leaderboards',
