@@ -43,6 +43,7 @@
           <employeeBodyContent
             :emailThread="emailThread"
             :own-user-name="ownUsername"
+            :loading="loadingEmailThread"
           />
         </v-expansion-panel>
       </v-expansion-panels>
@@ -69,6 +70,7 @@ export default {
       searchingEmails: false,
       filteringEmails: false,
       reply: '',
+      loadingEmailThread: false,
       filterItems: [
         {
           text: 'Important',
@@ -100,6 +102,12 @@ export default {
           disabled: false,
           divider: false,
         },
+        {
+          text: 'No reply',
+          value: 'NO_REPLY',
+          disabled: false,
+          divider: false,
+        },
       ],
       labels: [],
     };
@@ -116,7 +124,7 @@ export default {
       if (emailThread.emails.every((email) => email.body != null)) {
         return;
       }
-
+      this.loadingEmailThread = true;
       this.fetchFullEmail(emailThread.id)
         .then(() => {
           const fullEmailThread = this.getEmailThread(emailThread.id);
@@ -124,6 +132,9 @@ export default {
             .find((searchingEmailThread) => searchingEmailThread.id === emailThread.id);
 
           outdatedEmailThread.emails = fullEmailThread.emails;
+        })
+        .finally(() => {
+          this.loadingEmailThread = false;
         });
     },
 

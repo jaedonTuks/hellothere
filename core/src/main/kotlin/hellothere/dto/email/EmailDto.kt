@@ -20,4 +20,9 @@ data class EmailDto(
 
         return date.format(DateTimeFormatter.ofPattern("d MMMM"))
     }
+
+    @JsonProperty("fullDateTime")
+    fun getFullDateTimeFormatted(): String {
+        return date.format(DateTimeFormatter.ofPattern("d MMMM HH:mm"))
+    }
 }

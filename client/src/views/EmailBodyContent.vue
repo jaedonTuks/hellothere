@@ -1,6 +1,11 @@
 <template>
   <v-expansion-panel-content>
-    <v-container class="emailBody">
+    <v-progress-linear
+      v-show="loading"
+      indeterminate
+      color="purpleAccent"
+    ></v-progress-linear>
+    <v-container v-show="!loading" class="emailBody">
       <v-row
         v-for="email in emailThread.emails"
         :class="{
@@ -9,10 +14,24 @@
         :justify="getJustify(email)"
         :key="`${emailThread.id} - ${email.id}`"
       >
-        <v-col cols="5" v-html="email.body"/>
+        <v-col
+          cols="5"
+          :class="{
+            'pa-6': true,
+            'emailMessage': true,
+            'ownMessage': isOwnEmail(email),
+            'noReply': isNoReplyEmail(email)
+          }"
+        >
+          <v-row style="margin-bottom: 1px;">
+            <h4>{{email.from}}</h4>
+          </v-row>
+          <v-row v-html="email.body"></v-row>
+        </v-col>
       </v-row>
     </v-container>
     <v-textarea
+        v-if="!isNoReplyEmail(emailThread.emails[0])"
         outlined
         v-model="reply"
         class="mt-5"
@@ -33,6 +52,7 @@ export default {
   props: {
     emailThread: {},
     ownUserName: String,
+    loading: Boolean,
   },
 
   data() {
@@ -84,3 +104,20 @@ export default {
 
 };
 </script>
+
+<style scoped>
+
+.emailMessage {
+  background-color: var(--v-accent-darken1);
+  border-radius: 10px 10px 10px 0;
+}
+
+.ownMessage {
+  border-radius: 10px 10px 0 10px!important;
+}
+
+.noReply {
+  background-color: var(--v-accent-base);
+}
+
+</style>
