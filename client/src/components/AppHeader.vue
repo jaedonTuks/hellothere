@@ -24,8 +24,14 @@
       }"
       :to="{name: 'Home'}"
     >
-      <v-img class="icon mr-2" src="../assets/icons/home.png"/>
-      <span class="mr-2 underlineEffect">Home</span>
+      <v-badge
+        color="deep-purple accent-4"
+        overlap
+        :value="notificationCount"
+      >
+        <v-img class="icon mr-2" src="../assets/icons/home.png"/>
+      </v-badge>
+      <span class="mr-2 underlineEffect">Inbox</span>
     </v-btn>
 
     <v-btn
@@ -60,6 +66,13 @@
 <script>
 export default {
   name: 'AppHeader',
+
+  data() {
+    return {
+      notificationCount: 10,
+    };
+  },
+
 };
 </script>
 

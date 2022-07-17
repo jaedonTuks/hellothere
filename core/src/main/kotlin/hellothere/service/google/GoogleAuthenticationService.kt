@@ -10,10 +10,10 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.gmail.GmailScopes
 import hellothere.model.user.UserAccessToken
 import hellothere.repository.user.UserAccessTokenRepository
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 @Service
 class GoogleAuthenticationService(
@@ -33,13 +33,14 @@ class GoogleAuthenticationService(
 
         val clientSecret = GoogleClientSecrets().setWeb(web)
 
-        // todo handle refresh tokens and credential store
+        // todo use a credential store?
         googleAuthCodeFlow = GoogleAuthorizationCodeFlow.Builder(
             httpTransport,
             jsonFactory,
             clientSecret,
             listOf(GmailScopes.GMAIL_READONLY, GmailScopes.GMAIL_SEND)
-        ).build()
+        ).setAccessType("offline")
+            .build()
     }
 
     fun authorize(): String? {
@@ -65,21 +66,52 @@ class GoogleAuthenticationService(
     }
 
     fun getUserCredentialFromUsername(username: String): Credential? {
-        return getTokenResponseFromAccessToken(username)?.let {
-            googleAuthCodeFlow.createAndStoreCredential(it, username)
+        val tokenResponse = getTokenResponseFromAccessToken(username) ?: return null
+        val credential = googleAuthCodeFlow.createAndStoreCredential(tokenResponse, username)
+
+        if (
+            credential.accessToken == null ||
+            credential.expiresInSeconds != null &&
+            credential.expiresInSeconds < 60L
+
+        ) {
+            if (!refreshCredential(credential, username)) {
+                return null
+            }
+        } else {
+            LOGGER.info("No need to refresh credential for user: $username.")
         }
+
+        return credential
     }
 
     fun getTokenResponseFromAccessToken(username: String): TokenResponse? {
-        return userAccessTokenRepository.findFirstByUserIdAndExpiryDateTimeAfter(username, LocalDateTime.now())
-            ?.let { accessToken ->
-                TokenResponse()
-                    .setAccessToken(accessToken.token)
-                    .setRefreshToken(accessToken.refreshToken)
-                    .setScope(accessToken.scope)
-                    .setExpiresInSeconds(ChronoUnit.SECONDS.between(LocalDateTime.now(), accessToken.expiryDateTime))
-            }
+        val userStoredToken = userAccessTokenRepository.findFirstByUserIdAndRefreshTokenNotNull(username)
+        return userStoredToken?.getTokenResponse()
     }
 
+    fun refreshCredential(credential: Credential, username: String): Boolean {
+        try {
+            val refreshSuccess = credential.refreshToken()
+            val storedCredentials = userAccessTokenRepository.findFirstByUserIdAndRefreshTokenNotNull(username)
+            return if (refreshSuccess && storedCredentials != null) {
+                storedCredentials.token = credential.accessToken
+                storedCredentials.expiryDateTime = LocalDateTime.now().plusSeconds(credential.expiresInSeconds)
+                userAccessTokenRepository.save(storedCredentials)
 
+                LOGGER.info("Refreshed $username credentials")
+                true
+            } else {
+                LOGGER.info("Error refreshing $username credentials.")
+                false
+            }
+        } catch (e: Exception) {
+            LOGGER.info("Error refreshing $username credentials.")
+            return false
+        }
+    }
+
+    companion object {
+        val LOGGER: Logger = org.slf4j.LoggerFactory.getLogger(GoogleAuthenticationService::class.java)
+    }
 }

@@ -1,6 +1,7 @@
 const mutations = {
   setIsLoggedIn: (state, isLoggedIn) => {
     state.isLoggedIn = isLoggedIn;
+    localStorage.setItem('loggedIn', `${isLoggedIn}`);
   },
 
   setLoading: (state, isLoading) => {

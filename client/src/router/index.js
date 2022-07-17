@@ -25,7 +25,7 @@ const routes = [
     component: Leaderboards,
   },
   {
-    path: '/home',
+    path: '/inbox',
     name: 'Home',
     component: Home,
   },
@@ -38,7 +38,9 @@ const router = new VueRouter({
 });
 
 function handleRouting(to, from, next) {
-  if (to.name !== 'Login' && !store.state.isLoggedIn) {
+  if (to.name === 'Login' && store.state.isLoggedIn) {
+    next({ name: 'Home' });
+  } else if (to.name !== 'Login' && !store.state.isLoggedIn) {
     next({ name: 'Login' });
   } else {
     next();

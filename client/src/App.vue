@@ -18,7 +18,7 @@
 import AppHeader from '@/components/AppHeader.vue';
 
 import Loader from '@/components/Loader.vue';
-import { mapState } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 
 export default {
   name: 'App',
@@ -34,8 +34,20 @@ export default {
 
   watch: {
     isLoggedIn() {
-      if (!this.isLoggedIn) {
+      if (!this.isLoggedIn && !this.isLoggedInFromPreviousSession()) {
         this.$router.push({ name: 'Login' });
+      }
+    },
+  },
+
+  methods: {
+    ...mapMutations(['setIsLoggedIn']),
+
+    isLoggedInFromPreviousSession() {
+      if (localStorage.getItem('loggedIn') === 'true') {
+        this.setIsLoggedIn(true);
+      } else {
+        this.setIsLoggedIn(false);
       }
     },
   },

@@ -8,4 +8,6 @@ import java.time.LocalDateTime
 @Repository
 interface UserAccessTokenRepository : JpaRepository<UserAccessToken, String> {
     fun findFirstByUserIdAndExpiryDateTimeAfter(userId: String, expiryDateTime: LocalDateTime): UserAccessToken?
+
+    fun findFirstByUserIdAndRefreshTokenNotNull(userId: String): UserAccessToken?
 }
