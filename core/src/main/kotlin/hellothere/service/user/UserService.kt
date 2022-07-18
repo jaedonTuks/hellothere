@@ -89,12 +89,12 @@ class UserService(
     }
 
     fun saveUserAccessToken(userAccessToken: UserAccessToken, user: User?) {
-        if (user == null) {
-            LOGGER.info("Null user. Skipping saving of token")
+        if (user?.id == null) {
+            LOGGER.info("Null user or id. Skipping saving of token")
             return
         }
 
-        userAccessToken.user = user
+        userAccessToken.id = user.id
         userAccessTokenRepository.save(userAccessToken)
     }
 

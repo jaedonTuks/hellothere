@@ -54,12 +54,11 @@ class GoogleAuthenticationService(
         val credential = googleAuthCodeFlow.createAndStoreCredential(token, "test")
 
         val newAccessToken = UserAccessToken(
-            code,
+            null,
             token.accessToken,
             token.refreshToken,
             token.scope,
-            LocalDateTime.now().plusSeconds(token.expiresInSeconds),
-            null
+            LocalDateTime.now().plusSeconds(token.expiresInSeconds)
         )
 
         return Pair(credential, newAccessToken)
@@ -86,14 +85,14 @@ class GoogleAuthenticationService(
     }
 
     fun getTokenResponseFromAccessToken(username: String): TokenResponse? {
-        val userStoredToken = userAccessTokenRepository.findFirstByUserIdAndRefreshTokenNotNull(username)
+        val userStoredToken = userAccessTokenRepository.findFirstByIdAndRefreshTokenNotNull(username)
         return userStoredToken?.getTokenResponse()
     }
 
     fun refreshCredential(credential: Credential, username: String): Boolean {
         try {
             val refreshSuccess = credential.refreshToken()
-            val storedCredentials = userAccessTokenRepository.findFirstByUserIdAndRefreshTokenNotNull(username)
+            val storedCredentials = userAccessTokenRepository.findFirstByIdAndRefreshTokenNotNull(username)
             return if (refreshSuccess && storedCredentials != null) {
                 storedCredentials.token = credential.accessToken
                 storedCredentials.expiryDateTime = LocalDateTime.now().plusSeconds(credential.expiresInSeconds)

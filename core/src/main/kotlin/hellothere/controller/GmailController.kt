@@ -41,7 +41,7 @@ class GmailController(
             val (client, userAccessToken) = gmailService.getGmailClientFromCode(code)
             val user = securityService.loginOrSignup(client, httpServletResponse)
 
-            if (userAccessToken.user == null) {
+            if (userAccessToken.id == null) {
                 userService.saveUserAccessToken(userAccessToken, user)
             }
 

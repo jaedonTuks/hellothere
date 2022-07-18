@@ -9,8 +9,8 @@ import javax.persistence.*
 @Table(name = "user_access_token")
 class UserAccessToken(
     @Id
-    @Column(name = "id")
-    val id: String,
+    @Column(name = "app_user")
+    var id: String? = null,
 
     @Column(name = "token")
     var token: String,
@@ -22,11 +22,7 @@ class UserAccessToken(
     val scope: String,
 
     @Column(name = "expires")
-    var expiryDateTime: LocalDateTime,
-
-    @ManyToOne
-    @JoinColumn(name = "app_user")
-    var user: User? = null
+    var expiryDateTime: LocalDateTime
 ) {
     fun hasExpired(): Boolean {
         return expiryDateTime >= LocalDateTime.now()
