@@ -15,3 +15,18 @@ spring:
         password: "EzJ3DkQ6iyd5kH0"
         driver-class-name: org.postgresql.Driver
 
+security:
+    jwt:
+        token:
+            secret-key: ${HELLO_THERE_JWT_SK}
+
+gmail:
+    client:
+        projectId: ${HELLOTHERE_PROJECT_ID}
+        clientId: ${HELLOTHERE_CLIENT_ID}
+        clientSecret: ${HELLOTHERE_SECRET}
+        redirectUrl: "http://localhost:9000/api/gmail/callback"
+        userAuthorizationUri: "https://accounts.google.com/o/oauth2/auth"
+        accessTokenUri: "https://oauth2.googleapis.com/token"
+        clientAuthenticationScheme: "query"
+        preferTokenInfo: true

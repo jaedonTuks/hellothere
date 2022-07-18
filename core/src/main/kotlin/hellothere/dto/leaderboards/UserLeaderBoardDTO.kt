@@ -1,4 +1,4 @@
-package hellothere.dto
+package hellothere.dto.leaderboards
 
 data class UserLeaderBoardDTO(
     val username: String,

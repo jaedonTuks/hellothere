@@ -1,6 +1,6 @@
 <template>
   <v-app class="app">
-    <AppHeader/>
+    <AppHeader v-if="shouldDisplayHeader"/>
 
     <v-main>
         <Loader/>
@@ -17,12 +17,44 @@
 
 import AppHeader from '@/components/AppHeader.vue';
 
-import Loader from '@/Loader.vue';
+import Loader from '@/components/Loader.vue';
+import { mapMutations, mapState } from 'vuex';
 
 export default {
   name: 'App',
   components: { AppHeader, Loader },
 
+  computed: {
+    ...mapState(['isLoggedIn']),
+
+    shouldDisplayHeader() {
+      return this.$route.name !== 'Login';
+    },
+  },
+
+  watch: {
+    isLoggedIn() {
+      if (!this.isLoggedIn && !this.isLoggedInFromPreviousSession()) {
+        this.$router.push({ name: 'Login' });
+      }
+    },
+  },
+
+  methods: {
+    ...mapMutations(['setIsLoggedIn']),
+
+    isLoggedInFromPreviousSession() {
+      if (localStorage.getItem('loggedIn') === 'true') {
+        this.setIsLoggedIn(true);
+      } else {
+        this.setIsLoggedIn(false);
+      }
+    },
+  },
+
+  created() {
+    document.title = 'Hello There!';
+  },
 };
 </script>
 <style>

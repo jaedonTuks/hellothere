@@ -65,6 +65,12 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--Auth-->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.1</version>
+        </dependency>
         <!--Feature flagging-->
         <dependency>
             <groupId>org.ff4j</groupId>
@@ -82,7 +88,23 @@
             <version>1.8.12</version>
             <scope>compile</scope>
         </dependency>
-
+        <!--Gmail-->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-gmail</artifactId>
+            <version>v1-rev20220404-1.32.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+            <version>1.33.3</version>
+        </dependency>
+        <!--Generic email-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>2.5.6</version>
+        </dependency>
     </dependencies>
 
     <build>

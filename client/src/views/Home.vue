@@ -1,14 +1,183 @@
 <template>
   <v-row align="center" justify="center">
-    <v-col>
-      <h1>Home page</h1>
+    <v-col class="mt-5">
+      <v-row>
+        <v-col cols="6">
+          <v-text-field
+            v-model="searchString"
+            label="Search"
+            append-icon="mdi-magnify"
+            dark
+            :loading="searchingEmails"
+            :disabled="filteringEmails || searchingEmails"
+            @keyup.enter="search(true)"
+          />
+        </v-col>
+        <v-col cols="6">
+          <v-autocomplete
+            v-model="labels"
+            dark
+            chips
+            deletable-chips
+            dense
+            multiple
+            :items="filterItems"
+            append-icon="mdi-filter"
+            :loading="filteringEmails"
+            :disabled="filteringEmails || searchingEmails"
+            @change="search(false)"
+          />
+        </v-col>
+      </v-row>
+      <v-expansion-panels dark>
+        <v-expansion-panel
+          v-for="emailThread in Object.values(emailThreads)"
+          class="mb-5 expansionPanel"
+          color="accent"
+          :key="emailThread.id"
+          @change="getFullEmailThread(emailThread)"
+        >
+          <emailHeader
+            :emailThread="emailThread"
+          />
+          <employeeBodyContent
+            :emailThread="emailThread"
+            :own-user-name="ownUsername"
+            :loading="loadingEmailThread"
+          />
+        </v-expansion-panel>
+      </v-expansion-panels>
     </v-col>
   </v-row>
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex';
+import loadingMixin from '@/mixins/loadingMixin';
+import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
+import EmailHeader from '@/views/EmailHeader.vue';
+
 export default {
   name: 'Home',
-  components: {},
+  components: { EmailHeader, EmployeeBodyContent },
+  mixins: [loadingMixin],
+
+  data() {
+    return {
+      ownUsername: null,
+      emailThreads: [],
+      searchString: '',
+      searchingEmails: false,
+      filteringEmails: false,
+      reply: '',
+      loadingEmailThread: false,
+      filterItems: [
+        {
+          text: 'Important',
+          value: 'IMPORTANT',
+          disabled: false,
+          divider: false,
+        },
+        {
+          text: 'Sent',
+          value: 'SENT',
+          disabled: false,
+          divider: false,
+        },
+        {
+          text: 'Spam',
+          value: 'SPAM',
+          disabled: false,
+          divider: false,
+        },
+        {
+          text: 'Starred',
+          value: 'STARRED',
+          disabled: false,
+          divider: false,
+        },
+        {
+          text: 'Unread',
+          value: 'UNREAD',
+          disabled: false,
+          divider: false,
+        },
+        {
+          text: 'No reply',
+          value: 'NO_REPLY',
+          disabled: false,
+          divider: false,
+        },
+      ],
+      labels: [],
+    };
+  },
+
+  computed: {
+    ...mapGetters(['getProfile', 'getEmailThread', 'getEmailThreads']),
+  },
+
+  methods: {
+    ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'searchEmails']),
+
+    getFullEmailThread(emailThread) {
+      if (emailThread.emails.every((email) => email.body != null)) {
+        return;
+      }
+      this.loadingEmailThread = true;
+      this.fetchFullEmail(emailThread.id)
+        .then(() => {
+          const fullEmailThread = this.getEmailThread(emailThread.id);
+          const outdatedEmailThread = this.emailThreads
+            .find((searchingEmailThread) => searchingEmailThread.id === emailThread.id);
+
+          outdatedEmailThread.emails = fullEmailThread.emails;
+        })
+        .finally(() => {
+          this.loadingEmailThread = false;
+        });
+    },
+
+    search(isSearchLoading) {
+      this.searchingEmails = isSearchLoading;
+      this.filteringEmails = !isSearchLoading;
+      const payload = {
+        searchString: this.searchString,
+        labels: this.labels.join(','),
+      };
+      this.searchEmails(payload)
+        .then(() => {
+          this.emailThreads = this.getEmailThreads();
+        })
+        .finally(() => {
+          this.searchingEmails = false;
+          this.filteringEmails = false;
+        });
+    },
+  },
+
+  created() {
+    this.setLoading(true);
+    this.fetchEmails()
+      .finally(() => {
+        this.emailThreads = this.getEmailThreads();
+        this.setLoading(false);
+      });
+
+    this.ownUsername = this.getProfile().username;
+    if (this.ownUsername === '') {
+      this.fetchUserInfo().then(() => {
+        this.ownUsername = this.getProfile().username;
+      });
+    }
+  },
 };
 </script>
+
+<style scoped>
+
+.expansionPanel {
+  background-color: var(--v-accent-base) !important;
+}
+
+</style>

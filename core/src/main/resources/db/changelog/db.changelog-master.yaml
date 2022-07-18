@@ -21,8 +21,15 @@ databaseChangeLog:
             path: db/changelog/migrations/6__user_info_setup.sql
 
   - changeSet:
-      id: 1__leaderboard_setup.sql
+      id: 5__leaderboard_setup.sql
       author: Jaedon Heger
       changes:
         - sqlFile:
-            path: db/changelog/migrations/1__leaderboard_setup.sql
+            path: db/changelog/migrations/5__leaderboard_setup.sql
+
+  - changeSet:
+      id: 1__gmail_service_setup.sql
+      author: Jaedon Heger
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/1__gmail_service_setup.sql

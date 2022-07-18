@@ -1,7 +1,7 @@
 package hellothere.controller
 
 import hellothere.config.RestUrl.LEADERBOARDS
-import hellothere.dto.TopThreeDto
+import hellothere.dto.leaderboards.TopThreeDto
 import hellothere.service.LeaderboardsService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,7 +15,7 @@ class LeaderboardsController(
     private val leaderboardsService: LeaderboardsService
 ) {
 
-    @GetMapping("top-three")
+    @GetMapping("/top-three")
     fun getTop3(): ResponseEntity<TopThreeDto> {
         val topThree = leaderboardsService.getTopThreeUsers()
 

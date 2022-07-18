@@ -86,15 +86,17 @@ export default {
     };
   },
 
+  computed: {
+    ...mapGetters(['getProfile']),
+  },
+
   methods: {
     ...mapActions(['fetchUserInfo']),
-    ...mapGetters(['getProfile']),
   },
 
   created() {
     this.fetchUserInfo().then(() => {
       this.profileInfo = this.getProfile();
-      console.log(this.profileInfo);
     });
   },
 };
