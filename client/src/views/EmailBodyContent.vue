@@ -14,7 +14,9 @@
         :justify="getJustify(email)"
         :key="`${emailThread.id} - ${email.id}`"
       >
+        <div style="overflow-x: scroll" v-if="$vuetify.breakpoint.mobile" v-html="email.body"/>
         <v-col
+          v-else
           cols="5"
           :class="{
             'pa-6': true,
@@ -26,7 +28,7 @@
           <v-row style="margin-bottom: 1px;">
             <h4>{{email.from}}</h4>
           </v-row>
-          <v-row v-html="email.body"></v-row>
+          <v-row v-html="email.body"/>
         </v-col>
       </v-row>
     </v-container>

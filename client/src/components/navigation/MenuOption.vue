@@ -99,7 +99,4 @@ span {
   transform: scaleX(0);
 }
 
-@media only screen and (max-width: 1264px) {
-}
-
 </style>

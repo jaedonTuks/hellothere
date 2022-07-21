@@ -1,6 +1,9 @@
 <template>
   <v-app class="app">
-    <AppHeader v-if="shouldDisplayHeader && !isMobile"/>
+    <AppHeader
+      v-if="shouldDisplayHeader"
+      :is-mobile="isMobile"
+    />
     <v-main>
         <Loader/>
         <v-container style="width:100%">

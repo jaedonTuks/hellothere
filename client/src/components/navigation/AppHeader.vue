@@ -14,19 +14,21 @@
     </div>
 
     <v-spacer></v-spacer>
-    <MenuOption
-      route-name="Inbox"
-      icon-name="home"
-      :notification-count="notificationCount"
-    />
-    <MenuOption
-      route-name="Leaderboards"
-      icon-name="first-place"
-    />
-    <MenuOption
-      route-name="Profile"
-      icon-name="user"
-    />
+    <template v-if="!isMobile">
+      <MenuOption
+        route-name="Inbox"
+        icon-name="home"
+        :notification-count="notificationCount"
+      />
+      <MenuOption
+        route-name="Leaderboards"
+        icon-name="first-place"
+      />
+      <MenuOption
+        route-name="Profile"
+        icon-name="user"
+      />
+    </template>
 
   </v-app-bar>
 </template>
@@ -36,6 +38,10 @@ import MenuOption from '@/components/navigation/MenuOption.vue';
 export default {
   name: 'AppHeader',
   components: { MenuOption },
+  props: {
+    isMobile: Boolean,
+  },
+
   data() {
     return {
       notificationCount: 0,
@@ -118,7 +124,7 @@ span {
 
 @media only screen and (max-width: 1264px) {
   .logo {
-    font-size: 0.8em;
+    font-size: 1.4em;
   }
 }
 
