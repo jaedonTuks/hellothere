@@ -73,5 +73,6 @@ div {
 
 .app {
   background-color: #343E59 !important;
+  overflow-x: hidden;
 }
 </style>
