@@ -26,7 +26,7 @@ const routes = [
   },
   {
     path: '/inbox',
-    name: 'Home',
+    name: 'Inbox',
     component: Home,
   },
 ];

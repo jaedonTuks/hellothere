@@ -1,7 +1,6 @@
 <template>
   <v-app class="app">
-    <AppHeader v-if="shouldDisplayHeader"/>
-
+    <AppHeader v-if="shouldDisplayHeader && !isMobile"/>
     <v-main>
         <Loader/>
         <v-container style="width:100%">
@@ -10,25 +9,30 @@
           </v-slide-y-transition>
         </v-container>
     </v-main>
+    <AppBottomNav v-if="shouldDisplayHeader && isMobile"/>
   </v-app>
 </template>
 
 <script>
 
-import AppHeader from '@/components/AppHeader.vue';
-
+import AppHeader from '@/components/navigation/AppHeader.vue';
+import AppBottomNav from '@/components/navigation/AppBottomNav.vue';
 import Loader from '@/components/Loader.vue';
 import { mapMutations, mapState } from 'vuex';
 
 export default {
   name: 'App',
-  components: { AppHeader, Loader },
+  components: { AppHeader, AppBottomNav, Loader },
 
   computed: {
     ...mapState(['isLoggedIn']),
 
     shouldDisplayHeader() {
       return this.$route.name !== 'Login';
+    },
+
+    isMobile() {
+      return this.$vuetify.breakpoint.mobile;
     },
   },
 
