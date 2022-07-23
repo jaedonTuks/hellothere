@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="4" class="mt-5">
+  <v-col  cols="12" lg="4" class="mt-5">
     <v-card color="accent" class="pa-5">
       <v-card-title>{{ title }}</v-card-title>
       <v-card-text>

@@ -18,20 +18,20 @@
     >
       <v-img class="icon mr-2" :src="getImageUrl()"/>
     </v-badge>
-    <span v-if="!isMobile" class="mr-2 underlineEffect">{{ routeName }}</span>
+    <span v-if="isNotMobile" class="mr-2 underlineEffect">{{ routeName }}</span>
   </v-btn>
 </template>
 <script>
+import screenSizeMixin from '@/mixins/screenSizeMixin';
+
 export default {
   name: 'MenuOption',
+  mixins: [screenSizeMixin],
+
   props: {
     notificationCount: {
       type: Number,
       default: 0,
-    },
-    isMobile: {
-      type: Boolean,
-      default: false,
     },
     routeName: String,
     iconName: String,

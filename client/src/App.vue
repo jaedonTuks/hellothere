@@ -22,10 +22,12 @@ import AppHeader from '@/components/navigation/AppHeader.vue';
 import AppBottomNav from '@/components/navigation/AppBottomNav.vue';
 import Loader from '@/components/Loader.vue';
 import { mapMutations, mapState } from 'vuex';
+import screenSizeMixin from '@/mixins/screenSizeMixin';
 
 export default {
   name: 'App',
   components: { AppHeader, AppBottomNav, Loader },
+  mixins: [screenSizeMixin],
 
   computed: {
     ...mapState(['isLoggedIn']),
@@ -34,9 +36,6 @@ export default {
       return this.$route.name !== 'Login';
     },
 
-    isMobile() {
-      return this.$vuetify.breakpoint.mobile;
-    },
   },
 
   watch: {
@@ -75,4 +74,6 @@ div {
   background-color: #343E59 !important;
   overflow-x: hidden;
 }
+
+html { overflow-y: auto }
 </style>

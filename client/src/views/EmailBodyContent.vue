@@ -14,7 +14,7 @@
         :justify="getJustify(email)"
         :key="`${emailThread.id} - ${email.id}`"
       >
-        <div style="overflow-x: scroll" v-if="$vuetify.breakpoint.mobile" v-html="email.body"/>
+        <div style="overflow-x: scroll" v-if="isMobile" v-html="email.body"/>
         <v-col
           v-else
           cols="5"
@@ -48,9 +48,12 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import screenSizeMixin from '@/mixins/screenSizeMixin';
 
 export default {
   name: 'employeeBodyContent',
+  mixins: [screenSizeMixin],
+
   props: {
     emailThread: {},
     ownUserName: String,

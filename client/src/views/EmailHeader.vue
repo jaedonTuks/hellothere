@@ -7,7 +7,7 @@
               <span class="ml-2 subject">{{ emailThread.subject }}</span>
             </span>
     <span
-      v-if="!$vuetify.breakpoint.mobile"
+      v-if="isNotMobile"
       class="float-end label"
     >
       {{ filterLabels(emailThread.labelIds) }}
@@ -15,8 +15,12 @@
   </v-expansion-panel-header>
 </template>
 <script>
+import screenSizeMixin from '@/mixins/screenSizeMixin';
+
 export default {
   name: 'emailHeader',
+  mixins: [screenSizeMixin],
+
   props: {
     emailThread: Object,
   },

@@ -14,7 +14,7 @@
     </div>
 
     <v-spacer></v-spacer>
-    <template v-if="!isMobile">
+    <template v-if="isNotMobile">
       <MenuOption
         route-name="Inbox"
         icon-name="home"
@@ -34,13 +34,12 @@
 </template>
 <script>
 import MenuOption from '@/components/navigation/MenuOption.vue';
+import screenSizeMixin from '@/mixins/screenSizeMixin';
 
 export default {
   name: 'AppHeader',
   components: { MenuOption },
-  props: {
-    isMobile: Boolean,
-  },
+  mixins: [screenSizeMixin],
 
   data() {
     return {
