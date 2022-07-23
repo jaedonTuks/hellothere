@@ -5,40 +5,25 @@
     </div>
     <div class="topThree">
       <h1>Top Three</h1>
-      <v-row class="mt-5">
-        <v-col class="secondPlace" cols="4">
-          <v-card color="accent" height="300">
-            <v-card-title class="secondPlaceTitle">
-              <v-icon class="secondPlaceTitleIcon" x-large>mdi-medal-outline</v-icon>
-              <h2>Second place</h2>
-              <LeaderBoardCardInfo
-                :user-info="topThree.second"
-              />
-            </v-card-title>
-          </v-card>
-        </v-col>
-        <v-col class="firstPlace" cols="4">
-          <v-card color="accent" height="350">
-            <v-card-title class="firstPlaceTitle">
-              <v-icon class="firstPlaceTitleIcon" x-large>mdi-medal-outline</v-icon>
-              <h2>First place</h2>
-              <LeaderBoardCardInfo
-                :user-info="topThree.first"
-              />
-            </v-card-title>
-          </v-card>
-        </v-col>
-        <v-col class="thirdPlace" cols="4">
-          <v-card color="accent" height="250">
-            <v-card-title class="thirdPlaceTitle">
-              <v-icon class="thirdPlaceTitleIcon" x-large>mdi-medal-outline</v-icon>
-              <h2>Third place</h2>
-              <LeaderBoardCardInfo
-                :user-info="topThree.third"
-              />
-            </v-card-title>
-          </v-card>
-        </v-col>
+      <v-row align="center" class="mt-5">
+        <LeaderBoardCard
+          v-if="isMobile"
+          is-first-place
+          :user-info="topThree.first"
+        />
+        <LeaderBoardCard
+          is-second-place
+          :user-info="topThree.second"
+        />
+        <LeaderBoardCard
+          v-if="isNotMobile"
+          is-first-place
+          :user-info="topThree.first"
+        />
+        <LeaderBoardCard
+          is-third-place
+          :user-info="topThree.third"
+        />
       </v-row>
     </div>
   </div>
@@ -46,13 +31,14 @@
 
 <script>
 import { mapActions } from 'vuex';
-import LeaderBoardCardInfo from '@/components/LeaderBoardCardInfo.vue';
+import LeaderBoardCard from '@/views/LeaderBoardCard.vue';
 import loadingMixin from '@/mixins/loadingMixin';
+import screenSizeMixin from '@/mixins/screenSizeMixin';
 
 export default {
   name: 'Leaderboards',
-  components: { LeaderBoardCardInfo },
-  mixins: [loadingMixin],
+  components: { LeaderBoardCard },
+  mixins: [loadingMixin, screenSizeMixin],
 
   data() {
     return {
@@ -85,33 +71,3 @@ export default {
 
 };
 </script>
-
-<style scoped>
-.firstPlace {
-  color: gold;
-  height: 30em;
-}
-
-.secondPlace {
-  color: silver;
-  margin-top: 50px;
-}
-
-.thirdPlace {
-  color: sandybrown;
-  margin-top: 100px;
-}
-
-.firstPlaceTitle, .firstPlaceTitleIcon {
-  color: gold !important;
-}
-
-.secondPlaceTitle, .secondPlaceTitleIcon {
-  color: silver !important;
-}
-
-.thirdPlaceTitle, .thirdPlaceTitleIcon {
-  color: sandybrown !important;
-}
-
-</style>

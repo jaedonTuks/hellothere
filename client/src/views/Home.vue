@@ -1,25 +1,35 @@
 <template>
   <v-row align="center" justify="center">
     <v-col class="mt-5">
+<!--      Todo eventually move to app header bar-->
       <v-row>
-        <v-col cols="6">
+        <v-col
+          class="pb-0 pt-0 pa-lg-4"
+          cols="12"
+          lg="6"
+        >
           <v-text-field
+            dark
+            dense
             v-model="searchString"
             label="Search"
             append-icon="mdi-magnify"
-            dark
             :loading="searchingEmails"
             :disabled="filteringEmails || searchingEmails"
             @keyup.enter="search(true)"
           />
         </v-col>
-        <v-col cols="6">
+        <v-col
+          class="pt-0 pa-lg-4"
+          cols="12"
+          lg="6"
+        >
           <v-autocomplete
             v-model="labels"
             dark
+            dense
             chips
             deletable-chips
-            dense
             multiple
             :items="filterItems"
             append-icon="mdi-filter"

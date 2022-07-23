@@ -1,8 +1,18 @@
 <template>
   <div v-if="profileInfo" class="about">
-    <h1>{{ profileInfo.username }}</h1>
-    <h3>Rank: {{ profileInfo.rank }}</h3>
-    <h2 class="mt-5">Badges</h2>
+    <h1 class="username">{{ profileInfo.username }}</h1>
+    <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
+    <h3 class="mt-4 mt-lg-1">Current XP: {{ profileInfo.experience }}</h3>
+
+    <v-row>
+      <v-col cols="12" lg="6">
+        <h2 class="mt-5">Challenges</h2>
+      </v-col>
+      <v-col cols="12" lg="6">
+        <h2 class="mt-5">Badges</h2>
+        <div>{{ getBadges() }}</div>
+      </v-col>
+    </v-row>
 
     <h2 class="mt-5">Weekly stats</h2>
     <v-row>
@@ -23,7 +33,7 @@
 </template>
 
 <script>
-import StatsCard from '@/components/StatsCard.vue';
+import StatsCard from '@/components/Leaderboard/StatsCard.vue';
 import { mapActions, mapGetters } from 'vuex';
 
 export default {
@@ -92,6 +102,13 @@ export default {
 
   methods: {
     ...mapActions(['fetchUserInfo']),
+
+    getBadges() {
+      if (this.profileInfo.badges) {
+        return this.profileInfo.badges;
+      }
+      return 'Complete challenges to earn badges';
+    },
   },
 
   created() {
@@ -101,3 +118,16 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+
+@media only screen and (max-width: 1264px) {
+  h1.username {
+    font-size: 1.3em!important;
+  }
+
+  h2 {
+    font-size: 1.4em;
+  }
+}
+</style>

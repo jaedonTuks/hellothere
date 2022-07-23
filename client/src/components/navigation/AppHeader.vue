@@ -14,62 +14,36 @@
     </div>
 
     <v-spacer></v-spacer>
-    <v-btn
-      text
-      plain
-      :ripple="false"
-      :class="{
-        button: true,
-        active: $route.name === 'Home'
-      }"
-      :to="{name: 'Home'}"
-    >
-      <v-badge
-        color="deep-purple accent-4"
-        overlap
-        :value="notificationCount"
-      >
-        <v-img class="icon mr-2" src="../assets/icons/home.png"/>
-      </v-badge>
-      <span class="mr-2 underlineEffect">Inbox</span>
-    </v-btn>
+    <template v-if="isNotMobile">
+      <MenuOption
+        route-name="Inbox"
+        icon-name="home"
+        :notification-count="notificationCount"
+      />
+      <MenuOption
+        route-name="Leaderboards"
+        icon-name="first-place"
+      />
+      <MenuOption
+        route-name="Profile"
+        icon-name="user"
+      />
+    </template>
 
-    <v-btn
-      text
-      plain
-      :ripple="false"
-      :to="{name: 'Leaderboards'}"
-      :class="{
-        button: true,
-        active: $route.name === 'Leaderboards'
-      }"
-    >
-      <v-img class="icon mr-2" src="../assets/icons/first-place.png"/>
-      <span class="mr-2 underlineEffect">Leaderboards</span>
-    </v-btn>
-
-    <v-btn
-      text
-      plain
-      :ripple="false"
-      :class="{
-        button: true,
-        active: $route.name === 'Profile'
-      }"
-      :to="{name: 'Profile'}"
-    >
-      <v-img class="icon mr-2" src="../assets/icons/user.png"/>
-      <span class="mr-2 underlineEffect">Profile</span>
-    </v-btn>
   </v-app-bar>
 </template>
 <script>
+import MenuOption from '@/components/navigation/MenuOption.vue';
+import screenSizeMixin from '@/mixins/screenSizeMixin';
+
 export default {
   name: 'AppHeader',
+  components: { MenuOption },
+  mixins: [screenSizeMixin],
 
   data() {
     return {
-      notificationCount: 10,
+      notificationCount: 0,
     };
   },
 
@@ -146,4 +120,11 @@ span {
 .v-btn {
   opacity: 0.85 !important;
 }
+
+@media only screen and (max-width: 1264px) {
+  .logo {
+    font-size: 1.4em;
+  }
+}
+
 </style>

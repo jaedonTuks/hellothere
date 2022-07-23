@@ -1,8 +1,15 @@
 <template>
   <v-app class="app">
-    <AppHeader v-if="shouldDisplayHeader"/>
-
-    <v-main>
+    <AppHeader
+      v-if="shouldDisplayHeader"
+      :is-mobile="isMobile"
+    />
+    <v-main
+      v-touch="{
+        left: () => swipe(false),
+        right: () => swipe(true),
+      }"
+    >
         <Loader/>
         <v-container style="width:100%">
           <v-slide-y-transition mode="out-in">
@@ -10,19 +17,24 @@
           </v-slide-y-transition>
         </v-container>
     </v-main>
+    <AppBottomNav
+      v-if="shouldDisplayHeader && isMobile"
+    />
   </v-app>
 </template>
 
 <script>
 
-import AppHeader from '@/components/AppHeader.vue';
-
+import AppHeader from '@/components/navigation/AppHeader.vue';
+import AppBottomNav from '@/components/navigation/AppBottomNav.vue';
 import Loader from '@/components/Loader.vue';
 import { mapMutations, mapState } from 'vuex';
+import screenSizeMixin from '@/mixins/screenSizeMixin';
 
 export default {
   name: 'App',
-  components: { AppHeader, Loader },
+  components: { AppHeader, AppBottomNav, Loader },
+  mixins: [screenSizeMixin],
 
   computed: {
     ...mapState(['isLoggedIn']),
@@ -30,6 +42,7 @@ export default {
     shouldDisplayHeader() {
       return this.$route.name !== 'Login';
     },
+
   },
 
   watch: {
@@ -50,6 +63,32 @@ export default {
         this.setIsLoggedIn(false);
       }
     },
+
+    swipe(isSwipeRight) {
+      switch (this.$router.currentRoute.name) {
+        case 'Inbox': {
+          this.handleSwipeNav(isSwipeRight, null, 'Leaderboards');
+          break;
+        }
+        case 'Leaderboards': {
+          this.handleSwipeNav(isSwipeRight, 'Inbox', 'Profile');
+          break;
+        }
+        case 'Profile': {
+          this.handleSwipeNav(isSwipeRight, 'Leaderboards', null);
+          break;
+        }
+        default: break;
+      }
+    },
+
+    handleSwipeNav(isSwipeRight, leftName, rightName) {
+      if (isSwipeRight) {
+        if (leftName) {
+          this.$router.push({ name: leftName });
+        }
+      } else if (rightName) this.$router.push({ name: rightName });
+    },
   },
 
   created() {
@@ -66,5 +105,8 @@ div {
 
 .app {
   background-color: #343E59 !important;
+  overflow-x: hidden;
 }
+
+html { overflow-y: auto }
 </style>

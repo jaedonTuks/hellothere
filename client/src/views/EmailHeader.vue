@@ -1,17 +1,26 @@
 <template>
   <v-expansion-panel-header class="text-h6">
-            <span style="width:90%">
+            <span class="emailText">
               <span class="ma-0 dateAndFrom">
                 {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
               </span>
               <span class="ml-2 subject">{{ emailThread.subject }}</span>
             </span>
-    <span class="float-end label">{{ filterLabels(emailThread.labelIds) }}</span>
+    <span
+      v-if="isNotMobile"
+      class="float-end label"
+    >
+      {{ filterLabels(emailThread.labelIds) }}
+    </span>
   </v-expansion-panel-header>
 </template>
 <script>
+import screenSizeMixin from '@/mixins/screenSizeMixin';
+
 export default {
   name: 'emailHeader',
+  mixins: [screenSizeMixin],
+
   props: {
     emailThread: Object,
   },
@@ -35,6 +44,10 @@ export default {
 };
 </script>
 <style scoped>
+.emailText {
+  width: 90%;
+}
+
 .subject {
   display: inline-block;
   border-left: 2px solid var(--v-secondary-base) !important;
@@ -52,6 +65,24 @@ export default {
 .dateAndFrom {
   display: inline-block;
   text-overflow: ellipsis;
+}
+
+@media only screen and (max-width: 1264px) {
+  .emailText {
+    width: 100%;
+  }
+
+  .dateAndFrom {
+    font-size: 0.8em!important;
+  }
+  .subject {
+    font-size: 0.9em!important;
+  }
+
+  .label {
+    font-size: 0.5em!important;
+  }
+
 }
 
 </style>
