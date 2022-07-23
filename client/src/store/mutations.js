@@ -8,6 +8,10 @@ const mutations = {
     state.loading = isLoading;
   },
 
+  setComposingEmail: (state, isComposing) => {
+    state.composingEmail = isComposing;
+  },
+
   setProfile: (state, info) => {
     state.userProfile = info;
   },

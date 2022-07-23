@@ -1,7 +1,7 @@
 <template>
   <v-row align="center" justify="center">
-    <v-col class="mt-5">
-<!--      Todo eventually move to app header bar-->
+    <ComposeEmailDialog/>
+    <v-col style="margin-bottom: 60px;" class="mt-5">
       <v-row>
         <v-col
           class="pb-0 pt-0 pa-lg-4"
@@ -58,6 +58,7 @@
         </v-expansion-panel>
       </v-expansion-panels>
     </v-col>
+    <SendActionButton/>
   </v-row>
 </template>
 
@@ -65,11 +66,15 @@
 import { mapActions, mapGetters } from 'vuex';
 import loadingMixin from '@/mixins/loadingMixin';
 import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
+import SendActionButton from '@/components/SendActionButton.vue';
 import EmailHeader from '@/views/EmailHeader.vue';
+import ComposeEmailDialog from '@/components/ComposeEmailDialog.vue';
 
 export default {
   name: 'Home',
-  components: { EmailHeader, EmployeeBodyContent },
+  components: {
+    EmailHeader, EmployeeBodyContent, SendActionButton, ComposeEmailDialog,
+  },
   mixins: [loadingMixin],
 
   data() {
