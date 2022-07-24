@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import hellothere.model.email.EnrichedLabel
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 data class EmailThreadDto(
@@ -20,10 +21,15 @@ data class EmailThreadDto(
         val enrichedLabelIds = mutableListOf<String>()
         enrichedLabelIds.addAll(originalLabelIds)
 
-        if(from.contains("no") && from.contains("reply")){
+        if (from.contains("no") && from.contains("reply")) {
             enrichedLabelIds.add(EnrichedLabel.NO_REPLY.value)
         }
         return enrichedLabelIds
+    }
+
+    @JsonProperty("instantSent")
+    fun getInstantSent(): Long? {
+        return latestDate?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
     }
 
     @JsonProperty("formattedDate")
@@ -34,5 +40,4 @@ data class EmailThreadDto(
 
         return latestDate?.format(DateTimeFormatter.ofPattern("d MMMM"))
     }
-
 }

@@ -138,7 +138,7 @@ export default {
     ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'searchEmails']),
 
     updateEmails() {
-      this.emailThreads = this.getEmailThreads();
+      this.emailThreads = this.getEmailThreads().sort((a, b) => b.instantSent - a.instantSent);
     },
 
     getFullEmailThread(emailThread) {
