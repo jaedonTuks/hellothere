@@ -54,6 +54,10 @@ const mutations = {
     state.currentThreadIds = emailThreads.map((email) => email.id);
   },
 
+  prependToCurrentThreadIds: (state, newId) => {
+    state.currentThreadIds.unshift(newId);
+  },
+
 };
 
 export default mutations;

@@ -99,6 +99,8 @@
                 name="input-7-4"
                 label="Message"
                 append-icon="mdi-send"
+                @click:append="sendComposedEmail"
+                @keyup.ctrl.enter="sendComposedEmail"
               />
             </v-col>
           </v-row>
@@ -109,13 +111,13 @@
 </template>
 
 <script>
-import { mapMutations, mapState } from 'vuex';
+import { mapActions, mapMutations, mapState } from 'vuex';
+import { EventBus } from '@/main';
 
 export default {
   name: 'ComposeEmailDialog',
   data() {
     return {
-      show: true,
       to: [],
       cc: [],
       labels: [],
@@ -130,11 +132,32 @@ export default {
 
   methods: {
     ...mapMutations(['setComposingEmail']),
+    ...mapActions(['sendEmail']),
+
+    resetFields() {
+      this.to = [];
+      this.cc = [];
+      this.labels = [];
+      this.subject = '';
+      this.message = '';
+    },
+
+    sendComposedEmail() {
+      const payload = {
+        to: this.to,
+        subject: this.subject,
+        body: this.message,
+      };
+
+      this.sendEmail(payload)
+        .then(() => {
+          this.resetFields();
+          EventBus.$emit('newEmail');
+          this.setComposingEmail(false);
+        });
+    },
   },
 
-  created() {
-    console.log(this.composingEmail);
-  },
 };
 </script>
 
