@@ -59,6 +59,7 @@ const actions = {
   sendEmail: ({ commit }, payload) => axios.post('/api/gmail/send', payload)
     .then((response) => {
       commit('updateEmailThreadsById', response.data);
+      commit('prependToCurrentThreadIds', response.data.id);
     })
     .catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);

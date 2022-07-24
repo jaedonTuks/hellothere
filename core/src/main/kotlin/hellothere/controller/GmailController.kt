@@ -102,7 +102,7 @@ class GmailController(
     fun sendEmail(
         request: HttpServletRequest,
         @RequestBody sendRequest: SendRequest
-    ): ResponseEntity<EmailDto> {
+    ): ResponseEntity<EmailThreadDto> {
         val username = securityService.getUsernameFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         val client = gmailService.getGmailClientFromUsername(username)
@@ -110,7 +110,8 @@ class GmailController(
 
         val email = gmailService.send(username, client, sendRequest)
             ?: return ResponseEntity.badRequest().build()
-        return ResponseEntity.noContent().build()
+
+        return ResponseEntity.ok(email)
     }
 
     @PostMapping("/reply")
@@ -136,7 +137,6 @@ class GmailController(
 
         return ResponseEntity.noContent().build()
     }
-
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(GmailController::class.java)

@@ -41,7 +41,7 @@
       </v-row>
       <v-expansion-panels dark>
         <v-expansion-panel
-          v-for="emailThread in Object.values(emailThreads)"
+          v-for="emailThread in emailThreads"
           class="mb-5 expansionPanel"
           color="accent"
           :key="emailThread.id"
@@ -69,6 +69,8 @@ import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
 import SendActionButton from '@/components/SendActionButton.vue';
 import EmailHeader from '@/views/EmailHeader.vue';
 import ComposeEmailDialog from '@/components/ComposeEmailDialog.vue';
+// eslint-disable-next-line import/no-cycle
+import { EventBus } from '@/main';
 
 export default {
   name: 'Home',
@@ -135,6 +137,10 @@ export default {
   methods: {
     ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'searchEmails']),
 
+    updateEmails() {
+      this.emailThreads = this.getEmailThreads();
+    },
+
     getFullEmailThread(emailThread) {
       if (emailThread.emails.every((email) => email.body != null)) {
         return;
@@ -185,6 +191,8 @@ export default {
         this.ownUsername = this.getProfile().username;
       });
     }
+
+    EventBus.$on('newEmail', () => { this.updateEmails(); });
   },
 };
 </script>
