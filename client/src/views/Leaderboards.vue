@@ -56,7 +56,6 @@ export default {
   },
 
   created() {
-    console.log('created why is it being called so much');
     this.setLoading(true);
     this.fetchLeaderboardTopThree().then((response) => {
       this.topThree = response.data;

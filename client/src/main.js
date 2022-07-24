@@ -12,6 +12,9 @@ Vue.component('apexchart', VueApexCharts);
 
 Vue.config.productionTip = false;
 
+// eslint-disable-next-line import/prefer-default-export
+export const EventBus = new Vue();
+
 new Vue({
   router,
   store,

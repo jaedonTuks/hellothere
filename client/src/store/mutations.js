@@ -8,6 +8,10 @@ const mutations = {
     state.loading = isLoading;
   },
 
+  setComposingEmail: (state, isComposing) => {
+    state.composingEmail = isComposing;
+  },
+
   setProfile: (state, info) => {
     state.userProfile = info;
   },
@@ -48,6 +52,10 @@ const mutations = {
   resetAndSetCurrentThreadIds: (state, emailThreads) => {
     state.currentThreadIds = [];
     state.currentThreadIds = emailThreads.map((email) => email.id);
+  },
+
+  prependToCurrentThreadIds: (state, newId) => {
+    state.currentThreadIds.unshift(newId);
   },
 
 };

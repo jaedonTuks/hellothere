@@ -1,5 +1,6 @@
 <template>
   <v-app class="app">
+
     <AppHeader
       v-if="shouldDisplayHeader"
       :is-mobile="isMobile"
@@ -33,7 +34,9 @@ import screenSizeMixin from '@/mixins/screenSizeMixin';
 
 export default {
   name: 'App',
-  components: { AppHeader, AppBottomNav, Loader },
+  components: {
+    AppHeader, AppBottomNav, Loader,
+  },
   mixins: [screenSizeMixin],
 
   computed: {

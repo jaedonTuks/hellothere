@@ -1,7 +1,7 @@
 <template>
   <v-row align="center" justify="center">
-    <v-col class="mt-5">
-<!--      Todo eventually move to app header bar-->
+    <ComposeEmailDialog/>
+    <v-col style="margin-bottom: 60px;" class="mt-5">
       <v-row>
         <v-col
           class="pb-0 pt-0 pa-lg-4"
@@ -41,7 +41,7 @@
       </v-row>
       <v-expansion-panels dark>
         <v-expansion-panel
-          v-for="emailThread in Object.values(emailThreads)"
+          v-for="emailThread in emailThreads"
           class="mb-5 expansionPanel"
           color="accent"
           :key="emailThread.id"
@@ -58,6 +58,7 @@
         </v-expansion-panel>
       </v-expansion-panels>
     </v-col>
+    <SendActionButton/>
   </v-row>
 </template>
 
@@ -65,11 +66,17 @@
 import { mapActions, mapGetters } from 'vuex';
 import loadingMixin from '@/mixins/loadingMixin';
 import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
+import SendActionButton from '@/components/SendActionButton.vue';
 import EmailHeader from '@/views/EmailHeader.vue';
+import ComposeEmailDialog from '@/components/ComposeEmailDialog.vue';
+// eslint-disable-next-line import/no-cycle
+import { EventBus } from '@/main';
 
 export default {
   name: 'Home',
-  components: { EmailHeader, EmployeeBodyContent },
+  components: {
+    EmailHeader, EmployeeBodyContent, SendActionButton, ComposeEmailDialog,
+  },
   mixins: [loadingMixin],
 
   data() {
@@ -130,6 +137,10 @@ export default {
   methods: {
     ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'searchEmails']),
 
+    updateEmails() {
+      this.emailThreads = this.getEmailThreads().sort((a, b) => b.instantSent - a.instantSent);
+    },
+
     getFullEmailThread(emailThread) {
       if (emailThread.emails.every((email) => email.body != null)) {
         return;
@@ -180,6 +191,8 @@ export default {
         this.ownUsername = this.getProfile().username;
       });
     }
+
+    EventBus.$on('newEmail', () => { this.updateEmails(); });
   },
 };
 </script>

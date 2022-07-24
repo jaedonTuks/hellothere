@@ -1,5 +1,6 @@
 function getDefaultState() {
   return {
+    composingEmail: false,
     isLoggedIn: true,
     loading: false,
     userProfile: {

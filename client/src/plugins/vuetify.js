@@ -26,6 +26,7 @@ export default new Vuetify({
         purpleAccent: '#bf78fb',
         pinkAccent: '#fa73c6',
         error: '#ef5350',
+        background: '#343E59',
       },
     },
   },

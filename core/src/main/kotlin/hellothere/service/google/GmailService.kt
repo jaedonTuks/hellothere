@@ -17,11 +17,13 @@ import hellothere.requests.email.ReplyRequest
 import hellothere.requests.email.SendRequest
 import hellothere.service.ConversionService
 import hellothere.service.user.UserService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -191,6 +193,7 @@ class GmailService(
         }.toMutableList()
     }
 
+    @Transactional
     fun saveNewThreadsFromGmail(
         threads: List<com.google.api.services.gmail.model.Thread>,
         username: String
@@ -280,12 +283,19 @@ class GmailService(
             ?.value ?: ""
     }
 
-    fun send(username: String, client: Gmail, sendRequest: SendRequest): Message? {
+    fun send(username: String, client: Gmail, sendRequest: SendRequest): EmailThreadDto? {
         return try {
             val message = buildMessageFromSendRequest(sendRequest, username)
                 ?: return null
-            val sentMessage = client.users().messages().send(USER_SELF_ACCESS, message).execute()
-            sentMessage
+
+            val sentMessage = client.users()
+                .messages()
+                .send(USER_SELF_ACCESS, message)
+                .execute()
+
+            val thread = getEmailThreadBaseData(client, sentMessage.threadId, username)
+
+            thread?.let { buildEmailThreadDto(it) }
         } catch (e: GoogleJsonResponseException) {
             LOGGER.error("Unable to send message: " + e.details)
             null
@@ -302,10 +312,15 @@ class GmailService(
             .send(USER_SELF_ACCESS, message)
             .execute()
 
-        val sentEmailSummary = getEmailBaseData(client, sentMessage.id, username) ?: return null
-        val emailDto = buildEmailDto(sentEmailSummary)
+        val emailDto = buildEmailDtoFromMessage(username, client, sentMessage) ?: return null
         emailDto.body = replyRequest.reply
+
         return emailDto
+    }
+
+    private fun buildEmailDtoFromMessage(username: String, client: Gmail, sentMessage: Message): EmailDto? {
+        val sentEmailSummary = getEmailBaseData(client, sentMessage.id, username) ?: return null
+        return buildEmailDto(sentEmailSummary)
     }
 
     private fun buildMessageFromSendRequest(sendRequest: SendRequest, username: String): Message? {
@@ -334,7 +349,7 @@ class GmailService(
 
         return buildMessage(
             username,
-            to,
+            listOf(to),
             subject,
             replyRequest.reply,
             replyHeaders
@@ -343,12 +358,12 @@ class GmailService(
 
     fun buildMimeMessage(
         from: String,
-        to: String,
+        to: List<String>,
         subject: String,
         body: String,
         additionalHeaders: Map<String, String> = mapOf()
     ): MimeMessage? {
-        if (!isValidEmailAddress(from) || !isValidEmailAddress(to)) {
+        if (hasInvalidEmailAddresses(to + from)) {
             LOGGER.info("Stopping mime message build. invalid email addresses")
             return null
         }
@@ -359,7 +374,7 @@ class GmailService(
         val mimeMessageHelper = MimeMessageHelper(mimeMessage)
 
         mimeMessageHelper.setFrom(from)
-        mimeMessageHelper.setTo(to)
+        mimeMessageHelper.setTo(to.toTypedArray())
         mimeMessageHelper.setSubject(subject)
         mimeMessageHelper.setText(body)
 
@@ -370,9 +385,19 @@ class GmailService(
         return mimeMessage
     }
 
+    private fun hasInvalidEmailAddresses(to: List<String>): Boolean {
+        to.forEach {
+            if (!isValidEmailAddress(it)) {
+                return true
+            }
+        }
+
+        return false
+    }
+
     fun buildMessage(
         from: String,
-        to: String,
+        to: List<String>,
         subject: String,
         body: String,
         additionalHeaders: Map<String, String> = mapOf()
@@ -437,7 +462,7 @@ class GmailService(
     fun buildEmailDto(userEmail: UserEmail): EmailDto {
         return EmailDto(
             userEmail.gmailId,
-            userEmail.thread?.threadId ?: "",
+            userEmail.thread?.threadId ?: userEmail.gmailId,
             userEmail.fromEmail,
             userEmail.dateSent,
             null
