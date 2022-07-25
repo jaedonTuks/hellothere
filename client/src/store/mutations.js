@@ -16,6 +16,10 @@ const mutations = {
     state.userProfile = info;
   },
 
+  setLabels: (state, labels) => {
+    state.labels = labels;
+  },
+
   setThreadsById: (state, emailThreads) => {
     const threadsObj = state.threadsById;
 

@@ -8,6 +8,7 @@ function getDefaultState() {
       rank: '',
       currentWeekStats: null,
     },
+    labels: [],
     emailsById: {},
     threadsById: {},
     currentThreadIds: [],

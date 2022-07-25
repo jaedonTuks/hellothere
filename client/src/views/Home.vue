@@ -25,13 +25,13 @@
           lg="6"
         >
           <v-autocomplete
-            v-model="labels"
+            v-model="selectedLabels"
             dark
             dense
             chips
             deletable-chips
             multiple
-            :items="filterItems"
+            :items="labels"
             append-icon="mdi-filter"
             :loading="filteringEmails"
             :disabled="filteringEmails || searchingEmails"
@@ -82,60 +82,23 @@ export default {
   data() {
     return {
       ownUsername: null,
+      labels: [],
       emailThreads: [],
       searchString: '',
       searchingEmails: false,
       filteringEmails: false,
       reply: '',
       loadingEmailThread: false,
-      filterItems: [
-        {
-          text: 'Important',
-          value: 'IMPORTANT',
-          disabled: false,
-          divider: false,
-        },
-        {
-          text: 'Sent',
-          value: 'SENT',
-          disabled: false,
-          divider: false,
-        },
-        {
-          text: 'Spam',
-          value: 'SPAM',
-          disabled: false,
-          divider: false,
-        },
-        {
-          text: 'Starred',
-          value: 'STARRED',
-          disabled: false,
-          divider: false,
-        },
-        {
-          text: 'Unread',
-          value: 'UNREAD',
-          disabled: false,
-          divider: false,
-        },
-        {
-          text: 'No reply',
-          value: 'NO_REPLY',
-          disabled: false,
-          divider: false,
-        },
-      ],
-      labels: [],
+      selectedLabels: [],
     };
   },
 
   computed: {
-    ...mapGetters(['getProfile', 'getEmailThread', 'getEmailThreads']),
+    ...mapGetters(['getProfile', 'getEmailThread', 'getEmailThreads', 'getLabelNames']),
   },
 
   methods: {
-    ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'searchEmails']),
+    ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'fetchLabels', 'searchEmails']),
 
     updateEmails() {
       this.emailThreads = this.getEmailThreads().sort((a, b) => b.instantSent - a.instantSent);
@@ -164,7 +127,7 @@ export default {
       this.filteringEmails = !isSearchLoading;
       const payload = {
         searchString: this.searchString,
-        labels: this.labels.join(','),
+        labels: this.selectedLabels.join(','),
       };
       this.searchEmails(payload)
         .then(() => {
@@ -179,6 +142,9 @@ export default {
 
   created() {
     this.setLoading(true);
+    this.fetchLabels().then(() => {
+      this.labels = this.getLabelNames();
+    });
     this.fetchEmails()
       .finally(() => {
         this.emailThreads = this.getEmailThreads();
@@ -193,6 +159,10 @@ export default {
     }
 
     EventBus.$on('newEmail', () => { this.updateEmails(); });
+  },
+
+  beforeDestroy() {
+    EventBus.$off('newEmail');
   },
 };
 </script>

@@ -35,6 +35,16 @@ const actions = {
       console.error(e);
     }),
 
+  fetchLabels: ({ commit }) => axios.get('/api/gmail/labels')
+    .then((response) => {
+      commit('setLabels', response.data);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
   searchEmails: ({ commit }, payload) => axios.get(`/api/gmail/search?searchString=${payload.searchString}&labels=${payload.labels}`)
     .then((response) => {
       commit('setThreadsById', response.data);
