@@ -33,3 +33,10 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: db/changelog/migrations/1__gmail_service_setup.sql
+
+  - changeSet:
+      id: 16__user_labels.sql
+      author: Jaedon Heger
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/16__user_labels.sql

@@ -6,6 +6,7 @@ import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Message
 import hellothere.dto.email.EmailDto
 import hellothere.dto.email.EmailThreadDto
+import hellothere.dto.label.LabelDto
 import hellothere.model.email.EmailFormat
 import hellothere.model.email.EmailHeaderName
 import hellothere.model.email.EmailThread
@@ -16,6 +17,7 @@ import hellothere.repository.email.UserEmailRepository
 import hellothere.requests.email.ReplyRequest
 import hellothere.requests.email.SendRequest
 import hellothere.service.ConversionService
+import hellothere.service.label.LabelService
 import hellothere.service.user.UserService
 import liquibase.pro.packaged.it
 import org.slf4j.Logger
@@ -42,6 +44,7 @@ class GmailService(
     private val googleAuthenticationService: GoogleAuthenticationService,
     private val userService: UserService,
     private val conversionService: ConversionService,
+    private val labelService: LabelService
 ) {
     fun getGmailClientFromCredentials(credentials: Credential): Gmail {
         return Gmail.Builder(
@@ -484,6 +487,10 @@ class GmailService(
         } else {
             conversionService.getHtmlBody(fullBody)
         }
+    }
+
+    fun getLabels(client: Gmail, username: String): List<LabelDto> {
+        return labelService.getLabels(client, username)
     }
 
     companion object {
