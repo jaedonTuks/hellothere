@@ -1,7 +1,9 @@
 package hellothere.service.label
 
 import com.google.api.services.gmail.Gmail
+import com.google.api.services.gmail.model.ModifyThreadRequest
 import hellothere.dto.label.LabelDto
+import hellothere.model.email.EmailThread
 import hellothere.model.label.UserLabel
 import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
@@ -84,6 +86,29 @@ class LabelService(
             label.name,
             label.unreadThreads
         )
+    }
+
+    @Transactional
+    fun setThreadLabels(username: String, client: Gmail, thread: EmailThread, labels: List<String>) {
+        val cachedLabels = getCachedLabelsByNameAndUser(labels, username)
+        // todo make it possible to add extra labels here that werent cached
+        if (cachedLabels.isEmpty()) {
+            LOGGER.info("Skipping adding labels to thread")
+            return
+        }
+
+        val modifyThreadRequest = ModifyThreadRequest()
+        modifyThreadRequest.addLabelIds = cachedLabels.map { it.gmailId }
+        client.users()
+            .threads()
+            .modify(USER_SELF_ACCESS, thread.threadId, modifyThreadRequest)
+            .execute()
+
+        LOGGER.info("Setting labels [$labels] for thread: ${thread.threadId} - user: $username")
+    }
+
+    private fun getCachedLabelsByNameAndUser(labels: List<String>, username: String): List<UserLabel> {
+        return userLabelRepository.findAllByUserIdAndNameInIgnoreCase(username, labels)
     }
 
     companion object {

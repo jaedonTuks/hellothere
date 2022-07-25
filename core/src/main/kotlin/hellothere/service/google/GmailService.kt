@@ -298,7 +298,13 @@ class GmailService(
 
             val thread = getEmailThreadBaseData(client, sentMessage.threadId, username)
 
-            thread?.let { buildEmailThreadDto(it) }
+            if (thread == null) {
+                LOGGER.error("Error fetching new thread info")
+                return null
+            }
+            // todo investigate if it can be included in send request
+            labelService.setThreadLabels(username, client, thread, sendRequest.labels)
+            buildEmailThreadDto(thread)
         } catch (e: GoogleJsonResponseException) {
             LOGGER.error("Unable to send message: " + e.details)
             null
