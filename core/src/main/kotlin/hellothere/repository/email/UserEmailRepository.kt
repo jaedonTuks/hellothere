@@ -10,5 +10,7 @@ interface UserEmailRepository : JpaRepository<UserEmail, String> {
 
     fun findAllByThreadThreadIdAndThreadUserId(threadId: String, userId: String): List<UserEmail>
 
+    fun findAllByThreadThreadIdInAndThreadUserId(threadIds: List<String>, userId: String): List<UserEmail>
+
     fun findAllByThreadUserIdAndGmailIdIn(userId: String, gmailId: List<String>): List<UserEmail>
 }

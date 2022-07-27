@@ -6,7 +6,6 @@ import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Message
 import hellothere.dto.email.EmailDto
 import hellothere.dto.email.EmailThreadDto
-import hellothere.dto.label.LabelDto
 import hellothere.model.email.EmailFormat
 import hellothere.model.email.EmailHeaderName
 import hellothere.model.email.EmailThread
@@ -134,7 +133,7 @@ class GmailService(
         alreadyCachedEmails.forEach { emailIdsToFetch.remove(it) }
 
         val newThreads = getMutableThreadsList(emailIdsToFetch, EmailFormat.METADATA, client)
-        
+
         val newEmailThreads = saveNewThreadsFromGmail(newThreads, username)
 
         return cachedEmailThreads + newEmailThreads
@@ -497,10 +496,6 @@ class GmailService(
         } else {
             conversionService.getHtmlBody(fullBody)
         }
-    }
-
-    fun getLabels(client: Gmail, username: String): List<LabelDto> {
-        return labelService.getLabels(client, username)
     }
 
     companion object {

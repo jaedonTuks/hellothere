@@ -35,7 +35,17 @@ const actions = {
       console.error(e);
     }),
 
-  fetchLabels: ({ commit }) => axios.get('/api/gmail/labels')
+  fetchLabels: ({ commit }) => axios.get('/api/label')
+    .then((response) => {
+      commit('setLabels', response.data);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
+  updateLabels: ({ commit }) => axios.get('/api/label/update')
     .then((response) => {
       commit('setLabels', response.data);
     })

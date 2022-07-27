@@ -1,13 +1,17 @@
 package hellothere.service.label
 
 import com.google.api.services.gmail.Gmail
-import com.google.api.services.gmail.model.ModifyThreadRequest
+import com.google.api.services.gmail.model.BatchModifyMessagesRequest
 import hellothere.dto.label.LabelDto
+import hellothere.dto.label.LabelUpdateDto
+import hellothere.model.email.UserEmail
 import hellothere.model.label.UserLabel
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
+import hellothere.requests.label.UpdateLabelsRequest
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -90,13 +94,105 @@ class LabelService(
     }
 
     @Transactional
+    fun batchUpdateLabels(
+        username: String,
+        client: Gmail,
+        threadIds: List<String>,
+        labelsToAdd: List<String> = listOf(),
+        labelsToRemove: List<String> = listOf()
+    ): LabelUpdateDto? {
+        val (cachedAddLabels, cachedRemoveLabels) = getCachedLabels(labelsToAdd, labelsToRemove, username)
+            ?: return null
+
+        val messagesToModify = userEmailRepository.findAllByThreadThreadIdInAndThreadUserId(
+            threadIds,
+            username
+        )
+        // todo verify that all emails actually have the values to add or remove?
+
+        val batchModifyThreadRequest = BatchModifyMessagesRequest()
+        batchModifyThreadRequest.ids = messagesToModify.map { it.gmailId }
+        batchModifyThreadRequest.addLabelIds = cachedAddLabels.map { it.gmailId }
+        batchModifyThreadRequest.removeLabelIds = cachedRemoveLabels.map { it.gmailId }
+
+        client.users()
+            .messages()
+            .batchModify(USER_SELF_ACCESS, batchModifyThreadRequest)
+            .execute()
+
+        val updatedMessages = updateLabelCache(messagesToModify, cachedAddLabels, cachedRemoveLabels)
+
+        LOGGER.info("Finished adding labels $labelsToAdd and removing $labelsToRemove for threads: $threadIds - user: $username")
+
+        val labelsPerThread = updatedMessages
+            .filter { it.thread?.threadId != null }
+            .groupBy { it.thread!!.threadId }
+            .mapValues { mapEntry -> mapEntry.value.flatMap { it.labelIdsString.split(",") }.toSet() }
+
+        val allUserLabels = userLabelRepository.findAllByUserId(username)
+
+       return LabelUpdateDto(
+            labelsPerThread,
+            allUserLabels.map { buildLabelDto(it) }
+        )
+    }
+
     fun updateLabels(
         username: String,
         client: Gmail,
         threadId: String,
         labelsToAdd: List<String> = listOf(),
         labelsToRemove: List<String> = listOf()
-    ) {
+    ): LabelUpdateDto? {
+        return batchUpdateLabels(
+            username,
+            client,
+            listOf(threadId),
+            labelsToAdd,
+            labelsToRemove
+        )
+    }
+
+    fun updateLabels(
+        username: String,
+        client: Gmail,
+        updateLabelRequest: UpdateLabelsRequest
+    ): LabelUpdateDto? {
+        return batchUpdateLabels(
+            username,
+            client,
+            updateLabelRequest.threadIds,
+            updateLabelRequest.addLabels,
+            updateLabelRequest.removeLabels
+        )
+    }
+
+    @Transactional
+    protected fun updateLabelCache(
+        allThreadMessages: List<UserEmail>,
+        cachedAddLabels: List<UserLabel>,
+        cachedRemoveLabels: List<UserLabel>
+    ): List<UserEmail> {
+        // todo refactor to a list of labels Many to one in email
+        val oldLabelToRemove = cachedRemoveLabels.map { it.gmailId }.toSet()
+        val newLabelToAdd = cachedAddLabels.map { it.gmailId }.toSet()
+
+        allThreadMessages.forEach {
+            val labels = it.labelIdsString.split(",").toMutableSet()
+            labels.removeAll(oldLabelToRemove)
+            labels.addAll(newLabelToAdd)
+            it.labelIdsString = labels.joinToString(",")
+        }
+
+        return userEmailRepository.saveAll(allThreadMessages)
+    }
+
+    @Transactional
+    protected fun getCachedLabels(
+        labelsToAdd: List<String>,
+        labelsToRemove: List<String>,
+        username: String
+    ): Pair<List<UserLabel>, List<UserLabel>>? {
         val cachedAddLabels = getCachedLabelsByNameAndUser(labelsToAdd, username)
         val cachedRemoveLabels = getCachedLabelsByNameAndUser(labelsToRemove, username)
 
@@ -109,42 +205,10 @@ class LabelService(
         }
 
         if (cachedAddLabels.isEmpty() && cachedRemoveLabels.isEmpty()) {
-            return
+            return null
         }
 
-        val modifyThreadRequest = ModifyThreadRequest()
-
-        modifyThreadRequest.addLabelIds = cachedAddLabels.map { it.gmailId }
-        modifyThreadRequest.removeLabelIds = cachedRemoveLabels.map { it.gmailId }
-
-        client.users()
-            .threads()
-            .modify(USER_SELF_ACCESS, threadId, modifyThreadRequest)
-            .execute()
-
-        updateLabelCache(username, threadId, cachedAddLabels, cachedRemoveLabels)
-
-        LOGGER.info("Adding labels [$labelsToAdd] and removing [$cachedRemoveLabels] for thread: $threadId - user: $username")
-    }
-
-    private fun updateLabelCache(
-        username: String,
-        threadId: String,
-        cachedAddLabels: List<UserLabel>,
-        cachedRemoveLabels: List<UserLabel>
-    ) {
-        val allThreadMessages = userEmailRepository.findAllByThreadThreadIdAndThreadUserId(threadId, username)
-        val oldLabelToRemove = cachedRemoveLabels.map { it.gmailId }.toSet()
-        val newLabelToAdd = cachedAddLabels.map { it.gmailId }.toSet()
-
-        allThreadMessages.forEach {
-            val labels = it.labelIdsString.split(",").toMutableSet()
-            labels.removeAll(oldLabelToRemove)
-            labels.addAll(newLabelToAdd)
-            it.labelIdsString = labels.joinToString (",")
-        }
-
-        userEmailRepository.saveAll(allThreadMessages)
+        return Pair(cachedAddLabels, cachedRemoveLabels)
     }
 
     private fun getCachedLabelsByNameAndUser(labels: List<String>, username: String): List<UserLabel> {

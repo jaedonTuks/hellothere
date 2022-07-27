@@ -1,6 +1,5 @@
 package hellothere.controller
 
-import com.google.api.services.gmail.Gmail
 import hellothere.config.RestUrl.GMAIL
 import hellothere.dto.email.EmailDto
 import hellothere.dto.email.EmailThreadDto
@@ -27,7 +26,7 @@ class GmailController(
     private val gmailService: GmailService,
     private val userService: UserService,
     private val securityService: SecurityService
-) {
+) : BaseController(gmailService, securityService) {
 
     @GetMapping("/login")
     fun googleConnectionStatus(request: HttpServletRequest?): RedirectView? {
@@ -66,16 +65,6 @@ class GmailController(
 
         return ResponseEntity.ok(emailThread)
     }
-
-    @GetMapping("/labels")
-    fun getLabels(request: HttpServletRequest): ResponseEntity<List<LabelDto>> {
-        val (username, client) = getUsernameAndClientFromRequest(request)
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-
-        val labels = gmailService.getLabels(client, username)
-        return ResponseEntity.ok(labels)
-    }
-
 
     @GetMapping("/emails")
     fun getEmails(request: HttpServletRequest): ResponseEntity<List<EmailThreadDto>> {
@@ -126,16 +115,6 @@ class GmailController(
         val email = gmailService.sendReply(username, client, replyRequest)
             ?: return ResponseEntity.badRequest().build()
         return ResponseEntity.ok(email)
-    }
-
-    private fun getUsernameAndClientFromRequest(request: HttpServletRequest): Pair<String, Gmail>? {
-        val username = securityService.getUsernameFromRequest(request)
-            ?: return null
-
-        val client = gmailService.getGmailClientFromUsername(username)
-            ?: return null
-
-        return Pair(username, client)
     }
 
     companion object {

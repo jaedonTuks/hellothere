@@ -7,5 +7,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface UserLabelRepository : JpaRepository<UserLabel, Long> {
    fun findAllByGmailIdIn(gmailIds: List<String>): List<UserLabel>
+
+   fun findAllByUserId(userId: String): List<UserLabel>
    fun findAllByUserIdAndNameInIgnoreCase(userId: String, names: List<String>): List<UserLabel>
 }
