@@ -50,6 +50,7 @@ export default {
 
   watch: {
     isLoggedIn() {
+      // todo fix up this flow
       if (!this.isLoggedIn && !this.isLoggedInFromPreviousSession()) {
         this.$router.push({ name: 'Login' });
       }

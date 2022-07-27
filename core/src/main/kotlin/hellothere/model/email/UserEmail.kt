@@ -24,7 +24,7 @@ class UserEmail(
     val dateSent: LocalDateTime,
 
     @Column(name = "labelIdsString")
-    val labelIdsString: String,
+    var labelIdsString: String,
 
     @ManyToOne
     @JoinColumn(name = "thread_id")

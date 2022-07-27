@@ -19,7 +19,6 @@ import hellothere.requests.email.SendRequest
 import hellothere.service.ConversionService
 import hellothere.service.label.LabelService
 import hellothere.service.user.UserService
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -113,6 +112,11 @@ class GmailService(
     fun getFullEmailThreadData(client: Gmail, gmailIds: List<String>, username: String): List<EmailThreadDto> {
         LOGGER.info("Fetching full emails for user: $username with ids $gmailIds")
         val threads = getMutableThreadsList(gmailIds, EmailFormat.FULL, client)
+
+        threads.forEach {
+            labelService.updateLabels(username,client, it.id, listOf(), listOf("Unread"))
+        }
+
         return threads.mapNotNull { buildEmailThreadDto(it) }
     }
 
@@ -130,7 +134,7 @@ class GmailService(
         alreadyCachedEmails.forEach { emailIdsToFetch.remove(it) }
 
         val newThreads = getMutableThreadsList(emailIdsToFetch, EmailFormat.METADATA, client)
-
+        
         val newEmailThreads = saveNewThreadsFromGmail(newThreads, username)
 
         return cachedEmailThreads + newEmailThreads
@@ -303,7 +307,7 @@ class GmailService(
                 return null
             }
             // todo investigate if it can be included in send request
-            labelService.setThreadLabels(username, client, thread, sendRequest.labels)
+            labelService.updateLabels(username, client, thread.threadId, sendRequest.labels)
             buildEmailThreadDto(thread)
         } catch (e: GoogleJsonResponseException) {
             LOGGER.error("Unable to send message: " + e.details)

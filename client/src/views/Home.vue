@@ -2,7 +2,7 @@
   <v-row align="center" justify="center">
     <ComposeEmailDialog/>
     <v-col style="margin-bottom: 60px;" class="mt-5">
-      <v-row>
+      <v-row align-content="start">
         <v-col
           class="pb-0 pt-0 pa-lg-4"
           cols="12"
@@ -20,7 +20,7 @@
           />
         </v-col>
         <v-col
-          class="pt-0 pa-lg-4"
+          class="mt-1 pb-0 pt-0 pa-lg-4"
           cols="12"
           lg="6"
         >
@@ -31,8 +31,10 @@
             chips
             deletable-chips
             multiple
-            :items="labels"
+            height="20px"
             append-icon="mdi-filter"
+            label="Labels"
+            :items="labels"
             :loading="filteringEmails"
             :disabled="filteringEmails || searchingEmails"
             @change="search(false)"
@@ -42,12 +44,13 @@
       <v-expansion-panels dark>
         <v-expansion-panel
           v-for="emailThread in emailThreads"
-          class="mb-5 expansionPanel"
+          class="expansionPanel"
           color="accent"
           :key="emailThread.id"
           @change="getFullEmailThread(emailThread)"
         >
           <emailHeader
+            :ref="`${emailThread.id}-header`"
             :emailThread="emailThread"
           />
           <employeeBodyContent
@@ -114,12 +117,21 @@ export default {
           const fullEmailThread = this.getEmailThread(emailThread.id);
           const outdatedEmailThread = this.emailThreads
             .find((searchingEmailThread) => searchingEmailThread.id === emailThread.id);
-
           outdatedEmailThread.emails = fullEmailThread.emails;
+          this.updateEmailLabels(emailThread);
         })
         .finally(() => {
           this.loadingEmailThread = false;
         });
+    },
+
+    updateEmailLabels(emailThread) {
+      try {
+        const refKey = `${emailThread.id}-header`;
+        this.$refs[refKey][0].updateLabels();
+      } catch (e) {
+        console.error(e);
+      }
     },
 
     search(isSearchLoading) {
@@ -171,6 +183,11 @@ export default {
 
 .expansionPanel {
   background-color: var(--v-accent-base) !important;
+}
+
+.expansionPanel  .v-expansion-panel-header {
+  padding-top: 2px!important;
+  padding-bottom: 2px!important;
 }
 
 </style>

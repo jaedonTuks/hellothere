@@ -22,6 +22,10 @@ const getters = {
 
   getEmailThread: (state) => (id) => {
     return state.threadsById[id]
+  },
+
+  getThreadLabels: (state) => (id) => {
+    return state.threadsById[id].labelIds
   }
 };
 

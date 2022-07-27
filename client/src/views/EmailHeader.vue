@@ -1,21 +1,24 @@
 <template>
-  <v-expansion-panel-header class="text-h6">
-            <span class="emailText">
-              <span class="ma-0 dateAndFrom">
-                {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
-              </span>
-              <span class="ml-2 subject">{{ emailThread.subject }}</span>
-            </span>
+  <v-expansion-panel-header
+    class="text-h6 hover"
+  >
+     <span class="emailText">
+         <span class="ma-0 dateAndFrom">
+                  {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
+         </span>
+         <span class="ml-2 subject">{{ emailThread.subject }}</span>
+     </span>
     <span
       v-if="isNotMobile"
       class="float-end label"
     >
-      {{ filterLabels(emailThread.labelIds) }}
+      {{ filterLabels }}
     </span>
   </v-expansion-panel-header>
 </template>
 <script>
 import screenSizeMixin from '@/mixins/screenSizeMixin';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'emailHeader',
@@ -23,6 +26,24 @@ export default {
 
   props: {
     emailThread: Object,
+  },
+
+  data() {
+    return {
+      labels: [],
+    };
+  },
+
+  computed: {
+    ...mapGetters(['getThreadLabels']),
+
+    filterLabels() {
+      const removedCategory = this.labels.filter((label) => !label.includes('CATEGORY'));
+      const removedInbox = removedCategory.filter((label) => label !== 'INBOX');
+      return removedInbox
+        .map((label) => label.toLowerCase())
+        .join(',');
+    },
   },
 
   methods: {
@@ -33,17 +54,21 @@ export default {
       return emailFrom.slice(0, -charsToRemove);
     },
 
-    filterLabels(labelIds) {
-      const removedCategory = labelIds.filter((label) => !label.includes('CATEGORY'));
-      const removedInbox = removedCategory.filter((label) => label !== 'INBOX');
-      return removedInbox
-        .map((label) => label.toLowerCase())
-        .join(',');
+    updateLabels() {
+      this.labels = this.getThreadLabels(this.emailThread.id);
     },
+  },
+
+  created() {
+    this.updateLabels();
   },
 };
 </script>
 <style scoped>
+.hover:hover {
+  filter: brightness(150%);
+}
+
 .emailText {
   width: 90%;
 }
@@ -73,14 +98,15 @@ export default {
   }
 
   .dateAndFrom {
-    font-size: 0.8em!important;
+    font-size: 0.8em !important;
   }
+
   .subject {
-    font-size: 0.9em!important;
+    font-size: 0.9em !important;
   }
 
   .label {
-    font-size: 0.5em!important;
+    font-size: 0.5em !important;
   }
 
 }
