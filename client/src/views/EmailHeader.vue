@@ -2,18 +2,33 @@
   <v-expansion-panel-header
     class="text-h6 hover"
   >
-     <span class="emailText">
-         <span class="ma-0 dateAndFrom">
-                  {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
-         </span>
-         <span class="ml-2 subject">{{ emailThread.subject }}</span>
-     </span>
-    <span
-      v-if="isNotMobile"
-      class="float-end label"
-    >
-      {{ filterLabels }}
-    </span>
+    <v-row align="center">
+      <v-col cols="auto">
+        <v-simple-checkbox
+          v-model="isChecked"
+          class="ma-0 mt-1"
+          :ripple="false"
+          @input="updatingCheckbox"
+        />
+      </v-col>
+      <v-col class="ml-0 pl-0" cols="8">
+         <span class="emailText">
+           <span class="ma-0 dateAndFrom">
+                    {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
+           </span>
+           <span class="ml-2 subject">{{ emailThread.subject }}</span>
+          </span>
+      </v-col>
+      <v-col cols="3">
+        <span
+          v-if="isNotMobile"
+          class="float-end label"
+        >
+          {{ filterLabels }}
+        </span>
+      </v-col>
+    </v-row>
+
   </v-expansion-panel-header>
 </template>
 <script>
@@ -30,6 +45,7 @@ export default {
 
   data() {
     return {
+      isChecked: false,
       labels: [],
     };
   },
@@ -57,6 +73,14 @@ export default {
     updateLabels() {
       this.labels = this.getThreadLabels(this.emailThread.id);
     },
+
+    updatingCheckbox() {
+      if (this.isChecked) {
+        this.$emit('selected', this.emailThread.id);
+      } else {
+        this.$emit('deselected', this.emailThread.id);
+      }
+    },
   },
 
   created() {
@@ -70,7 +94,7 @@ export default {
 }
 
 .emailText {
-  width: 90%;
+  text-align: start;
 }
 
 .subject {

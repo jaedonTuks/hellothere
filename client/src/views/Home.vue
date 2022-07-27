@@ -33,7 +33,7 @@
             multiple
             height="20px"
             append-icon="mdi-filter"
-            label="Labels"
+            label="Filter by labels"
             :items="labels"
             :loading="filteringEmails"
             :disabled="filteringEmails || searchingEmails"
@@ -41,6 +41,71 @@
           />
         </v-col>
       </v-row>
+      <v-toolbar class="mb-5 toolbar" color="background" elevation="0">
+        <v-row class="mt-4">
+          <v-col cols="1">
+            <v-checkbox
+              v-model="allSelected"
+              class="align-center"
+              dense
+              :label="allSelected? 'Deselect All' : 'Select all'"
+              @change="updateSelectAll"
+            />
+          </v-col>
+          <v-col cols="4">
+            <v-menu
+              bottom
+              style="overflow-y: hidden"
+              transition="slide-y-transition"
+              :close-on-content-click="false"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  dark
+                  small
+                  class="mt-0"
+                  color="background"
+                  elevation="0"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>mdi-label</v-icon>
+                  {{ on ? '' : 'Test' }}
+                </v-btn>
+              </template>
+              <v-list
+                style="max-height: 500px; padding: 10px"
+                class="overflow-y-auto backgroundDark"
+              >
+                <v-list-item-title class="borderBottom">
+                  <v-icon medium class="mr-2">mdi-label</v-icon>
+                  Manage label
+                </v-list-item-title>
+                <v-list-item
+                  v-for="(label, index) in labels"
+                  :key="index"
+                >
+                  <v-list-item-action>
+                    <v-checkbox @change="newLabelSelected($event, label)"/>
+                  </v-list-item-action>
+                  <v-list-item-title>{{ label }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+              <v-row justify="end" class="backgroundDark pa-3">
+                <v-col class="borderTop" cols="12">
+                  <v-btn
+                    color="secondary"
+                    class="float-end"
+                    :disabled="addLabels.length === 0"
+                  >
+                    Add labels
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-menu>
+          </v-col>
+        </v-row>
+      </v-toolbar>
       <v-expansion-panels dark>
         <v-expansion-panel
           v-for="emailThread in emailThreads"
@@ -52,6 +117,8 @@
           <emailHeader
             :ref="`${emailThread.id}-header`"
             :emailThread="emailThread"
+            @selected="addSelectedEmail"
+            @deselected="removeSelectedEmail"
           />
           <employeeBodyContent
             :emailThread="emailThread"
@@ -84,6 +151,7 @@ export default {
 
   data() {
     return {
+      allSelected: false,
       ownUsername: null,
       labels: [],
       emailThreads: [],
@@ -93,11 +161,17 @@ export default {
       reply: '',
       loadingEmailThread: false,
       selectedLabels: [],
+      selectedEmailIds: [],
+      addLabels: [],
     };
   },
 
   computed: {
     ...mapGetters(['getProfile', 'getEmailThread', 'getEmailThreads', 'getLabelNames']),
+
+    toolbarActionsDisabled() {
+      return this.selectedEmailIds.length === 0;
+    },
   },
 
   methods: {
@@ -150,6 +224,39 @@ export default {
           this.filteringEmails = false;
         });
     },
+
+    addSelectedEmail(newId) {
+      this.selectedEmailIds.push(newId);
+    },
+
+    removeSelectedEmail(oldId) {
+      this.selectedEmailIds = this.selectedEmailIds.filter(
+        (selectedEmailId) => selectedEmailId !== oldId,
+      );
+    },
+
+    updateSelectAll() {
+      this.selectedEmailIds = [];
+      this.emailThreads.forEach((emailThread) => {
+        const refKey = `${emailThread.id}-header`;
+        this.$refs[refKey][0].isChecked = this.allSelected;
+        if (this.allSelected) {
+          this.selectedEmailIds.push(emailThread.id);
+        }
+      });
+    },
+
+    newLabelSelected(selected, label) {
+      if (selected) {
+        this.addLabels.push(label);
+      } else {
+        this.addLabels = this.addLabels.filter(
+          (selectedEmailId) => selectedEmailId !== label,
+        );
+      }
+
+      console.log(this.addLabels);
+    },
   },
 
   created() {
@@ -170,7 +277,9 @@ export default {
       });
     }
 
-    EventBus.$on('newEmail', () => { this.updateEmails(); });
+    EventBus.$on('newEmail', () => {
+      this.updateEmails();
+    });
   },
 
   beforeDestroy() {
@@ -180,14 +289,37 @@ export default {
 </script>
 
 <style scoped>
+.leftBorder {
+  border-left: 2px solid var(--v-secondary-base) !important;
+}
+
+.borderBottom {
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--v-secondary-base) !important;
+}
+
+.borderTop {
+  border-top: 2px solid var(--v-info-darken4) !important;
+}
+
+.toolbar {
+  border-bottom: 1px solid red var(--v-accent-base) !important;
+}
 
 .expansionPanel {
   background-color: var(--v-accent-base) !important;
 }
 
-.expansionPanel  .v-expansion-panel-header {
-  padding-top: 2px!important;
-  padding-bottom: 2px!important;
+.expansionPanel .v-expansion-panel-header {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
 }
 
+.backgroundDark {
+  background-color: var(--v-accent-darken2) !important;
+}
+
+.v-menu__content {
+  overflow-y: hidden!important;
+}
 </style>
