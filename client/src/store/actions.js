@@ -45,9 +45,11 @@ const actions = {
       console.error(e);
     }),
 
-  updateLabels: ({ commit }) => axios.get('/api/label/update')
+  updateLabels: ({ commit }, payload) => axios.post('/api/label/update', payload)
     .then((response) => {
-      commit('setLabels', response.data);
+      console.log(response);
+      commit('setLabels', response.data.allLabels);
+      commit('updateEmailThreadLabels', response.data.threadLabelMap);
     })
     .catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);

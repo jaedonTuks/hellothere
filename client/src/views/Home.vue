@@ -57,6 +57,7 @@
               bottom
               style="overflow-y: hidden"
               transition="slide-y-transition"
+              ref="labelMenu"
               :close-on-content-click="false"
             >
               <template v-slot:activator="{ on, attrs }">
@@ -70,7 +71,6 @@
                   v-on="on"
                 >
                   <v-icon>mdi-label</v-icon>
-                  {{ on ? '' : 'Test' }}
                 </v-btn>
               </template>
               <v-list
@@ -97,6 +97,7 @@
                     color="secondary"
                     class="float-end"
                     :disabled="addLabels.length === 0"
+                    @click="sendAddLabelsRequest"
                   >
                     Add labels
                   </v-btn>
@@ -163,6 +164,7 @@ export default {
       selectedLabels: [],
       selectedEmailIds: [],
       addLabels: [],
+      removeLabels: [],
     };
   },
 
@@ -175,7 +177,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'fetchLabels', 'searchEmails']),
+    ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'fetchLabels', 'searchEmails', 'updateLabels']),
 
     updateEmails() {
       this.emailThreads = this.getEmailThreads().sort((a, b) => b.instantSent - a.instantSent);
@@ -206,6 +208,27 @@ export default {
       } catch (e) {
         console.error(e);
       }
+    },
+
+    sendAddLabelsRequest() {
+      const payload = {
+        threadIds: this.selectedEmailIds,
+        addLabels: this.addLabels,
+        removeLabels: this.removeLabels,
+      };
+
+      this.updateLabels(payload)
+        .then(() => {
+          this.emailThreads.forEach((emailThread) => {
+            const refKey = `${emailThread.id}-header`;
+            this.$refs[refKey][0].updateLabels();
+          });
+        }).finally(() => {
+          this.selectedEmailIds = [];
+          this.addLabels = [];
+          this.removeLabels = [];
+          this.$refs.labelMenu.click();
+        });
     },
 
     search(isSearchLoading) {
@@ -254,8 +277,6 @@ export default {
           (selectedEmailId) => selectedEmailId !== label,
         );
       }
-
-      console.log(this.addLabels);
     },
   },
 
@@ -320,6 +341,6 @@ export default {
 }
 
 .v-menu__content {
-  overflow-y: hidden!important;
+  overflow-y: hidden !important;
 }
 </style>

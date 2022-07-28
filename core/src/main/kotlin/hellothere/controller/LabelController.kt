@@ -41,7 +41,7 @@ class LabelController(
 
         return labelService.updateLabels(username, client, updateLabelRequest)?.let {
             ResponseEntity.ok(it)
-        } ?: ResponseEntity.status(HttpStatus.SERVER_ERROR).build()
+        } ?: ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
     }
 
     companion object {
