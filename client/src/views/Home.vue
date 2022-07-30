@@ -53,6 +53,7 @@
             />
           </v-col>
           <v-col cols="4">
+<!--            :disabled="selectedEmailIds.length === 0"-->
             <v-menu
               v-model="isLabelMenuOpen"
               bottom
@@ -60,7 +61,7 @@
               transition="slide-y-transition"
               ref="labelMenu"
               :close-on-content-click="false"
-              :disabled="selectedEmailIds.length === 0"
+
               @click="isLabelMenuOpen=true"
             >
               <template v-slot:activator="{ on, attrs }">
@@ -90,7 +91,7 @@
                 >
                   <v-list-item-action>
                     <v-checkbox
-                      :ref="`${label}-alterLabelCheckbox`"
+                      v-model="labelCheckboxSelected[index]"
                       @change="newLabelSelected($event, label)"
                     />
                   </v-list-item-action>
@@ -174,6 +175,7 @@ export default {
       selectedEmailIds: [],
       addLabels: [],
       removeLabels: [],
+      labelCheckboxSelected: [],
     };
   },
 
@@ -229,22 +231,27 @@ export default {
 
       this.updateLabels(payload)
         .then(() => {
-          this.emailThreads.forEach((emailThread) => {
-            const refKey = `${emailThread.id}-header`;
-            this.$refs[refKey][0].updateLabels();
-            this.$refs[refKey][0].deselect();
-          });
+          this.updateAllEmailHeaders();
         }).finally(() => {
+          this.resetLabelSelections();
           this.labelChangeLoading = false;
-          this.selectedEmailIds = [];
-          this.addLabels = [];
-          this.removeLabels = [];
-          this.isLabelMenuOpen = false;
-          this.labels.forEach((label) => {
-            const refKey = `${label}-alterLabelCheckbox`;
-            this.$refs[refKey][0].value = false;
-          });
         });
+    },
+
+    updateAllEmailHeaders() {
+      this.emailThreads.forEach((emailThread) => {
+        const refKey = `${emailThread.id}-header`;
+        this.$refs[refKey][0].updateLabels();
+        this.$refs[refKey][0].deselect();
+      });
+    },
+
+    resetLabelSelections() {
+      this.selectedEmailIds = [];
+      this.addLabels = [];
+      this.removeLabels = [];
+      this.isLabelMenuOpen = false;
+      this.labelCheckboxSelected = [];
     },
 
     search(isSearchLoading) {
