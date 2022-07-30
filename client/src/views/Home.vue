@@ -54,11 +54,14 @@
           </v-col>
           <v-col cols="4">
             <v-menu
+              v-model="isLabelMenuOpen"
               bottom
               style="overflow-y: hidden"
               transition="slide-y-transition"
               ref="labelMenu"
               :close-on-content-click="false"
+              :disabled="selectedEmailIds.length === 0"
+              @click="isLabelMenuOpen=true"
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
@@ -86,7 +89,10 @@
                   :key="index"
                 >
                   <v-list-item-action>
-                    <v-checkbox @change="newLabelSelected($event, label)"/>
+                    <v-checkbox
+                      :ref="`${label}-alterLabelCheckbox`"
+                      @change="newLabelSelected($event, label)"
+                    />
                   </v-list-item-action>
                   <v-list-item-title>{{ label }}</v-list-item-title>
                 </v-list-item>
@@ -97,6 +103,7 @@
                     color="secondary"
                     class="float-end"
                     :disabled="addLabels.length === 0"
+                    :loading="labelChangeLoading"
                     @click="sendAddLabelsRequest"
                   >
                     Add labels
@@ -152,6 +159,7 @@ export default {
 
   data() {
     return {
+      isLabelMenuOpen: false,
       allSelected: false,
       ownUsername: null,
       labels: [],
@@ -159,6 +167,7 @@ export default {
       searchString: '',
       searchingEmails: false,
       filteringEmails: false,
+      labelChangeLoading: false,
       reply: '',
       loadingEmailThread: false,
       selectedLabels: [],
@@ -211,6 +220,7 @@ export default {
     },
 
     sendAddLabelsRequest() {
+      this.labelChangeLoading = true;
       const payload = {
         threadIds: this.selectedEmailIds,
         addLabels: this.addLabels,
@@ -222,12 +232,18 @@ export default {
           this.emailThreads.forEach((emailThread) => {
             const refKey = `${emailThread.id}-header`;
             this.$refs[refKey][0].updateLabels();
+            this.$refs[refKey][0].deselect();
           });
         }).finally(() => {
+          this.labelChangeLoading = false;
           this.selectedEmailIds = [];
           this.addLabels = [];
           this.removeLabels = [];
-          this.$refs.labelMenu.click();
+          this.isLabelMenuOpen = false;
+          this.labels.forEach((label) => {
+            const refKey = `${label}-alterLabelCheckbox`;
+            this.$refs[refKey][0].value = false;
+          });
         });
     },
 

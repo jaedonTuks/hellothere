@@ -74,6 +74,10 @@ export default {
       this.labels = this.getThreadLabels(this.emailThread.id);
     },
 
+    deselect() {
+      this.isChecked = false;
+    },
+
     updatingCheckbox() {
       if (this.isChecked) {
         this.$emit('selected', this.emailThread.id);
