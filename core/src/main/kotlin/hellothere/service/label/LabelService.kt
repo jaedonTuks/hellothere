@@ -11,7 +11,6 @@ import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
 import hellothere.requests.label.UpdateLabelsRequest
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -23,6 +22,12 @@ class LabelService(
     private val userLabelRepository: UserLabelRepository,
     private val userEmailRepository: UserEmailRepository,
 ) {
+
+    @Transactional
+    fun getAllUserLabels(username: String): List<UserLabel> {
+        return userLabelRepository.findAllByUserId(username)
+    }
+
     @Transactional
     fun getLabels(client: Gmail, username: String): List<LabelDto> {
         val labelIds = getLabelIds(client, username)
@@ -127,11 +132,11 @@ class LabelService(
         val labelsPerThread = updatedMessages
             .filter { it.thread?.threadId != null }
             .groupBy { it.thread!!.threadId }
-            .mapValues { mapEntry -> mapEntry.value.flatMap { it.labelIdsString.split(",") }.toSet() }
+            .mapValues { mapEntry -> mapEntry.value.flatMap { it.getLabelList() }.toSet() }
 
         val allUserLabels = userLabelRepository.findAllByUserId(username)
 
-       return LabelUpdateDto(
+        return LabelUpdateDto(
             labelsPerThread,
             allUserLabels.map { buildLabelDto(it) }
         )
@@ -173,15 +178,9 @@ class LabelService(
         cachedAddLabels: List<UserLabel>,
         cachedRemoveLabels: List<UserLabel>
     ): List<UserEmail> {
-        // todo refactor to a list of labels Many to one in email
-        val oldLabelToRemove = cachedRemoveLabels.map { it.gmailId }.toSet()
-        val newLabelToAdd = cachedAddLabels.map { it.gmailId }.toSet()
-
         allThreadMessages.forEach {
-            val labels = it.labelIdsString.split(",").toMutableSet()
-            labels.removeAll(oldLabelToRemove)
-            labels.addAll(newLabelToAdd)
-            it.labelIdsString = labels.joinToString(",")
+            it.addAllLabels(cachedAddLabels)
+            it.removeAllLabels(cachedRemoveLabels)
         }
 
         return userEmailRepository.saveAll(allThreadMessages)
