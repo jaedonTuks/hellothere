@@ -12,6 +12,7 @@ import hellothere.repository.user.UserAccessTokenRepository
 import hellothere.repository.user.UserRepository
 import hellothere.repository.user.WeekStatsRepository
 import hellothere.service.google.GmailService
+import hellothere.service.label.LabelService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -22,6 +23,7 @@ import java.time.temporal.ChronoField
 
 @Service
 class UserService(
+    private val labelService: LabelService,
     private val userRepository: UserRepository,
     private val weekStatsRepository: WeekStatsRepository,
     private val userAccessTokenRepository: UserAccessTokenRepository,
@@ -59,11 +61,11 @@ class UserService(
         val gmailProfile = getGmailUserInfo(client)
 
         return getUserById(gmailProfile.emailAddress)
-            ?: signupNewUser(gmailProfile.emailAddress)
+            ?: signupNewUser(gmailProfile.emailAddress, client)
     }
 
     @Transactional
-    fun signupNewUser(newUserId: String): User? {
+    fun signupNewUser(newUserId: String, client: Gmail): User? {
         val zonedDateTime = ZonedDateTime.now()
         val firstOfWeek: ZonedDateTime =
             zonedDateTime.with(ChronoField.DAY_OF_WEEK, 1) // ISO 8601, Monday is first day of week.
@@ -84,6 +86,8 @@ class UserService(
 
         userRepository.save(newUser)
         weekStatsRepository.save(newWeeklyStats)
+
+        labelService.getLabels(client, newUserId)
 
         return newUser
     }

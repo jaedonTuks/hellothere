@@ -1,30 +1,31 @@
 CREATE TABLE user_labels
 (
-    id         bigserial,
-    gmail_id VARCHAR(255),
-    hidden boolean,
-    name VARCHAR(255),
+    gmail_id       VARCHAR(255),
+    app_user       VARCHAR(127),
+    hidden         boolean,
+    name           VARCHAR(255),
     unread_threads INT,
-    app_user   VARCHAR(127),
 
-    PRIMARY KEY (id),
+    PRIMARY KEY (gmail_id, app_user),
     CONSTRAINT user_label_fk
-        FOREIGN KEY(app_user)
-            REFERENCES app_user(username)
+        FOREIGN KEY (app_user)
+            REFERENCES app_user (username)
 );
 
 CREATE TABLE email_labels
 (
-    email_id        bigint,
-    label_id         bigint,
+    email_id bigint,
+    gmail_id VARCHAR(255),
+    app_user VARCHAR(127),
 
-    PRIMARY KEY (email_id, label_id),
+    PRIMARY KEY (email_id, gmail_id, app_user),
     CONSTRAINT email_label_thread_fk
-        FOREIGN KEY(email_id)
-            REFERENCES user_email_summary(id),
+        FOREIGN KEY (email_id)
+            REFERENCES user_email_summary (id),
     CONSTRAINT email_label_label_fk
-        FOREIGN KEY(label_id)
-            REFERENCES user_labels(id)
+        FOREIGN KEY (gmail_id, app_user)
+            REFERENCES user_labels (gmail_id, app_user)
 );
 
-alter table user_email_summary drop column label_ids_string;
+alter table user_email_summary
+    drop column label_ids_string;

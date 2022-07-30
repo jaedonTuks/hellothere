@@ -6,13 +6,8 @@ import javax.persistence.*
 @Entity
 @Table(name = "user_labels")
 class UserLabel(
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    val id: Long? = null,
-
-    @Column(name = "gmail_id")
-    val gmailId: String,
+    @EmbeddedId
+    val id: UserLabelId,
 
     @Column(name = "name")
     val name: String,
@@ -21,6 +16,7 @@ class UserLabel(
     val unreadThreads: Int,
 
     @ManyToOne
+    @MapsId("app_user")
     @JoinColumn(name = "app_user")
     val user: User? = null
 )

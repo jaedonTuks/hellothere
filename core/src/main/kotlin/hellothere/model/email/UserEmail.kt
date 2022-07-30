@@ -33,7 +33,10 @@ class UserEmail(
     @JoinTable(
         name = "email_labels",
         joinColumns = [JoinColumn(name = "email_id")],
-        inverseJoinColumns = [JoinColumn(name = "label_id")]
+        inverseJoinColumns = [
+            JoinColumn(name = "app_user"),
+            JoinColumn(name = "gmail_id")
+        ]
     )
     val emailLabels: MutableSet<UserLabel> = mutableSetOf()
 
@@ -54,6 +57,6 @@ class UserEmail(
     }
 
     fun getLabelList(): List<String> {
-        return emailLabels.map { it.gmailId }
+        return emailLabels.map { it.id.gmailId }
     }
 }

@@ -6,11 +6,13 @@ import hellothere.dto.label.LabelDto
 import hellothere.dto.label.LabelUpdateDto
 import hellothere.model.email.UserEmail
 import hellothere.model.label.UserLabel
+import hellothere.model.label.UserLabelId
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
 import hellothere.requests.label.UpdateLabelsRequest
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -32,10 +34,10 @@ class LabelService(
     fun getLabels(client: Gmail, username: String): List<LabelDto> {
         val labelIds = getLabelIds(client, username)
 
-        val cachedLabels = getCachedLabels(labelIds)
+        val cachedLabels = getCachedLabels(labelIds, username)
 
         val labelIdsToFetch = labelIds.filter { labelId ->
-            cachedLabels.none { cachedLabel -> labelId != cachedLabel.gmailId }
+            cachedLabels.none { cachedLabel -> labelId != cachedLabel.id.gmailId }
         }
 
         val newLabels = fetchAndCacheLabels(labelIdsToFetch, client, username)
@@ -66,8 +68,7 @@ class LabelService(
 
         val labelsToSave = labels.map {
             UserLabel(
-                null,
-                it.id,
+                UserLabelId(it.id, user.id),
                 it.name,
                 it.threadsUnread,
                 user
@@ -87,8 +88,8 @@ class LabelService(
         return labelResponse.labels.map { it.id }
     }
 
-    fun getCachedLabels(labelIds: List<String>): List<UserLabel> {
-        return userLabelRepository.findAllByGmailIdIn(labelIds)
+    fun getCachedLabels(labelIds: List<String>, username: String): List<UserLabel> {
+        return userLabelRepository.findAllByIdIn(labelIds.map { UserLabelId(it, username) })
     }
 
     fun buildLabelDto(label: UserLabel): LabelDto {
@@ -117,8 +118,8 @@ class LabelService(
 
         val batchModifyThreadRequest = BatchModifyMessagesRequest()
         batchModifyThreadRequest.ids = messagesToModify.map { it.gmailId }
-        batchModifyThreadRequest.addLabelIds = cachedAddLabels.map { it.gmailId }
-        batchModifyThreadRequest.removeLabelIds = cachedRemoveLabels.map { it.gmailId }
+        batchModifyThreadRequest.addLabelIds = cachedAddLabels.map { it.id.gmailId }
+        batchModifyThreadRequest.removeLabelIds = cachedRemoveLabels.map { it.id.gmailId }
 
         client.users()
             .messages()

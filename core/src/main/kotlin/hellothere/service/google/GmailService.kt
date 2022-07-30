@@ -255,7 +255,7 @@ class GmailService(
         }
         val threadIds = emails.map { it.threadId }
         val cachedThreads = emailThreadRepository.findAllByUserIdAndThreadIdIn(username, threadIds)
-        val allUserLabels = labelService.getAllUserLabels(username).associateBy { it.gmailId }
+        val allUserLabels = labelService.getAllUserLabels(username).associateBy { it.id.gmailId }
 
         val emailsToSave = emails.map { message ->
             val savedThread = cachedThreads.firstOrNull { it.threadId == message.threadId }
