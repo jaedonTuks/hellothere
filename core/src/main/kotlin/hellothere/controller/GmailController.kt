@@ -3,6 +3,7 @@ package hellothere.controller
 import hellothere.config.RestUrl.GMAIL
 import hellothere.dto.email.EmailDto
 import hellothere.dto.email.EmailThreadDto
+import hellothere.dto.label.LabelDto
 import hellothere.requests.email.ReplyRequest
 import hellothere.requests.email.SendRequest
 import hellothere.service.google.GmailService
@@ -25,7 +26,7 @@ class GmailController(
     private val gmailService: GmailService,
     private val userService: UserService,
     private val securityService: SecurityService
-) {
+) : BaseController(gmailService, securityService) {
 
     @GetMapping("/login")
     fun googleConnectionStatus(request: HttpServletRequest?): RedirectView? {
@@ -57,10 +58,7 @@ class GmailController(
 
     @GetMapping("/email/{id}")
     fun getFullEmailFromId(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<EmailThreadDto> {
-        val username = securityService.getUsernameFromRequest(request)
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-
-        val client = gmailService.getGmailClientFromUsername(username)
+        val (username, client) = getUsernameAndClientFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val emailThread = gmailService.getFullEmailThreadData(client, username, id)
@@ -70,10 +68,7 @@ class GmailController(
 
     @GetMapping("/emails")
     fun getEmails(request: HttpServletRequest): ResponseEntity<List<EmailThreadDto>> {
-        val username = securityService.getUsernameFromRequest(request)
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-
-        val client = gmailService.getGmailClientFromUsername(username)
+        val (username, client) = getUsernameAndClientFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val emails = gmailService.getThreadsBaseData(client, username).sortedByDescending { it.latestDate }
@@ -87,10 +82,7 @@ class GmailController(
         @RequestParam searchString: String,
         @RequestParam labels: List<String> = listOf()
     ): ResponseEntity<List<EmailThreadDto>> {
-        val username = securityService.getUsernameFromRequest(request)
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-
-        val client = gmailService.getGmailClientFromUsername(username)
+        val (username, client) = getUsernameAndClientFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val emails = gmailService.getThreadsBaseData(client, username, searchString, labels).sortedByDescending { it.latestDate }
@@ -103,9 +95,7 @@ class GmailController(
         request: HttpServletRequest,
         @RequestBody sendRequest: SendRequest
     ): ResponseEntity<EmailThreadDto> {
-        val username = securityService.getUsernameFromRequest(request)
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        val client = gmailService.getGmailClientFromUsername(username)
+        val (username, client) = getUsernameAndClientFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val email = gmailService.send(username, client, sendRequest)
@@ -119,23 +109,12 @@ class GmailController(
         request: HttpServletRequest,
         @RequestBody replyRequest: ReplyRequest
     ): ResponseEntity<EmailDto> {
-        val username = securityService.getUsernameFromRequest(request)
+        val (username, client) = getUsernameAndClientFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-        val client = gmailService.getGmailClientFromUsername(username)
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         val email = gmailService.sendReply(username, client, replyRequest)
             ?: return ResponseEntity.badRequest().build()
         return ResponseEntity.ok(email)
-    }
-
-    @PostMapping("/test")
-    fun test(
-        request: HttpServletRequest,
-        @RequestBody replyRequest: ReplyRequest
-    ): ResponseEntity<EmailDto> {
-
-        return ResponseEntity.noContent().build()
     }
 
     companion object {

@@ -1,5 +1,6 @@
 package hellothere.model.email
 
+import hellothere.model.label.UserLabel
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -23,14 +24,39 @@ class UserEmail(
     @Column(name = "date_sent")
     val dateSent: LocalDateTime,
 
-    @Column(name = "labelIdsString")
-    val labelIdsString: String,
-
     @ManyToOne
     @JoinColumn(name = "thread_id")
-    var thread: EmailThread? = null
+    var thread: EmailThread? = null,
 ) {
+    // todo maybe investigate here https://www.baeldung.com/jpa-many-to-many
+    @OneToMany
+    @JoinTable(
+        name = "email_labels",
+        joinColumns = [JoinColumn(name = "email_id")],
+        inverseJoinColumns = [
+            JoinColumn(name = "app_user"),
+            JoinColumn(name = "gmail_id")
+        ]
+    )
+    val emailLabels: MutableSet<UserLabel> = mutableSetOf()
+
+    fun addLabel(newLabel: UserLabel) {
+        emailLabels.add(newLabel)
+    }
+
+    fun addAllLabels(newLabels: List<UserLabel>) {
+        emailLabels.addAll(newLabels)
+    }
+
+    fun removeLabel(oldLabel: UserLabel) {
+        emailLabels.remove(oldLabel)
+    }
+
+    fun removeAllLabels(oldLabels: List<UserLabel>) {
+        emailLabels.removeAll(oldLabels)
+    }
+
     fun getLabelList(): List<String> {
-        return labelIdsString.split(",")
+        return emailLabels.map { it.id.gmailId }
     }
 }

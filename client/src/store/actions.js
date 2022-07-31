@@ -35,6 +35,28 @@ const actions = {
       console.error(e);
     }),
 
+  fetchLabels: ({ commit }) => axios.get('/api/label')
+    .then((response) => {
+      commit('setLabels', response.data);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
+  updateLabels: ({ commit }, payload) => axios.post('/api/label/update', payload)
+    .then((response) => {
+      console.log(response);
+      commit('setLabels', response.data.allLabels);
+      commit('updateEmailThreadLabels', response.data.threadLabelMap);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
   searchEmails: ({ commit }, payload) => axios.get(`/api/gmail/search?searchString=${payload.searchString}&labels=${payload.labels}`)
     .then((response) => {
       commit('setThreadsById', response.data);

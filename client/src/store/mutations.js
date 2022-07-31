@@ -16,6 +16,10 @@ const mutations = {
     state.userProfile = info;
   },
 
+  setLabels: (state, labels) => {
+    state.labels = labels;
+  },
+
   setThreadsById: (state, emailThreads) => {
     const threadsObj = state.threadsById;
 
@@ -38,6 +42,12 @@ const mutations = {
 
   updateEmailById: (state, email) => {
     state.emailsById[email.id] = email;
+  },
+
+  updateEmailThreadLabels: (state, threadLabelMap) => {
+    Object.entries(threadLabelMap).forEach(([key, value]) => {
+      state.threadsById[key].labelIds = value;
+    });
   },
 
   updateEmailThreadsById: (state, emailThread) => {

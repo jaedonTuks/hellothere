@@ -2,6 +2,8 @@
 const getters = {
   getProfile: (state) => () => state.userProfile,
 
+  getLabelNames: (state) => () => state.labels.map ((label) => label.name[0].toUpperCase() + label.name.substring(1).toLowerCase()),
+
   getEmailThreads: (state) => () => Object.entries(state.threadsById).filter((threadById) => {
     const [key] = threadById;
     return state.currentThreadIds.includes(key);
@@ -20,6 +22,10 @@ const getters = {
 
   getEmailThread: (state) => (id) => {
     return state.threadsById[id]
+  },
+
+  getThreadLabels: (state) => (id) => {
+    return state.threadsById[id].labelIds
   }
 };
 

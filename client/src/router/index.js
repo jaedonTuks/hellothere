@@ -39,7 +39,7 @@ const router = new VueRouter({
 
 function handleRouting(to, from, next) {
   if (to.name === 'Login' && store.state.isLoggedIn) {
-    next({ name: 'Home' });
+    next({ name: 'Inbox' });
   } else if (to.name !== 'Login' && !store.state.isLoggedIn) {
     next({ name: 'Login' });
   } else {

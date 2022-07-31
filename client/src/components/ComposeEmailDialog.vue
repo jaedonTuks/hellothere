@@ -65,7 +65,7 @@
           <v-row class="pa-5 pt-0 mt-0" justify="start">
             <v-col class="mt-0"  cols="6">
               <v-combobox
-                v-model="labels"
+                v-model="selectedLabels"
                 dark
                 dense
                 chips
@@ -74,6 +74,7 @@
                 label="Labels"
                 prepend-inner-icon="mdi-label"
                 append-icon=""
+                :items="labels"
               />
             </v-col>
           </v-row>
@@ -111,16 +112,19 @@
 </template>
 
 <script>
-import { mapActions, mapMutations, mapState } from 'vuex';
+import {
+  mapActions, mapGetters, mapMutations, mapState,
+} from 'vuex';
 import { EventBus } from '@/main';
 
 export default {
   name: 'ComposeEmailDialog',
   data() {
     return {
+      labels: [],
       to: [],
       cc: [],
-      labels: [],
+      selectedLabels: [],
       subject: '',
       message: '',
     };
@@ -128,16 +132,17 @@ export default {
 
   computed: {
     ...mapState(['composingEmail']),
+    ...mapGetters(['getLabelNames']),
   },
 
   methods: {
     ...mapMutations(['setComposingEmail']),
-    ...mapActions(['sendEmail']),
+    ...mapActions(['sendEmail', 'fetchLabels']),
 
     resetFields() {
       this.to = [];
       this.cc = [];
-      this.labels = [];
+      this.selectedLabels = [];
       this.subject = '';
       this.message = '';
     },
@@ -145,6 +150,8 @@ export default {
     sendComposedEmail() {
       const payload = {
         to: this.to,
+        cc: this.cc,
+        labels: this.selectedLabels,
         subject: this.subject,
         body: this.message,
       };
@@ -156,6 +163,15 @@ export default {
           this.setComposingEmail(false);
         });
     },
+  },
+
+  created() {
+    this.labels = this.getLabelNames();
+    if (this.labels.length === 0) {
+      this.fetchLabels().then(() => {
+        this.labels = this.getLabelNames();
+      });
+    }
   },
 
 };
