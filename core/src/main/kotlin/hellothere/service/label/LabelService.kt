@@ -12,6 +12,7 @@ import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
 import hellothere.requests.label.UpdateLabelsRequest
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
+import hellothere.service.user.UserStatsService
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -22,6 +23,7 @@ class LabelService(
     private val userRepository: UserRepository,
     private val userLabelRepository: UserLabelRepository,
     private val userEmailRepository: UserEmailRepository,
+    private val userStatsService: UserStatsService,
 ) {
 
     @Transactional

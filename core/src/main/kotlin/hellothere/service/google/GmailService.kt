@@ -42,7 +42,7 @@ class GmailService(
     private val googleAuthenticationService: GoogleAuthenticationService,
     private val userService: UserService,
     private val conversionService: ConversionService,
-    private val labelService: LabelService
+    private val labelService: LabelService,
 ) {
     fun getGmailClientFromCredentials(credentials: Credential): Gmail {
         return Gmail.Builder(
@@ -106,6 +106,7 @@ class GmailService(
     }
 
     fun getFullEmailThreadData(client: Gmail, username: String, id: String): EmailThreadDto? {
+
         val emails = getFullEmailThreadData(client, listOf(id), username)
         return emails.firstOrNull()
     }

@@ -84,6 +84,8 @@ class UserService(
             listOf(newWeeklyStats)
         )
 
+        newWeeklyStats.user = newUser
+
         userRepository.save(newUser)
         weekStatsRepository.save(newWeeklyStats)
 

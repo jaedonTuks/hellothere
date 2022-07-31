@@ -12,21 +12,29 @@ class WeekStats(
     val id: Long? = null,
 
     @Column(name = "experience")
-    val experience: Int = 0,
-
-    @Column(name = "end_date")
-    val endDate: LocalDate,
+    var experience: Int = 0,
 
     @Column(name = "start_date")
     val startDate: LocalDate,
 
+    @Column(name = "end_date")
+    val endDate: LocalDate,
+
     @ManyToOne
     @JoinColumn(name = "app_user")
-    val user: User? = null
+    var user: User? = null
 
 ) {
     fun isCurrentWeek(): Boolean {
         val thisWeek = LocalDate.now()
         return thisWeek >= startDate && thisWeek <= endDate
+    }
+
+    fun addXP(increaseAmount: Int): Boolean {
+        if (this.isCurrentWeek()) {
+            experience += increaseAmount
+        }
+
+        return this.isCurrentWeek()
     }
 }
