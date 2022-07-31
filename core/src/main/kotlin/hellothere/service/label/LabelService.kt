@@ -12,7 +12,6 @@ import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
 import hellothere.requests.label.UpdateLabelsRequest
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -76,6 +75,12 @@ class LabelService(
         }
 
         return userLabelRepository.saveAll(labelsToSave)
+    }
+
+    fun getLabelIdsByName(labelNames: List<String>, username: String): List<String> {
+        return getCachedLabelsByNameAndUser(labelNames, username).map {
+            it.id.gmailId
+        }
     }
 
     fun getLabelIds(client: Gmail, username: String): List<String> {
@@ -211,8 +216,8 @@ class LabelService(
         return Pair(cachedAddLabels, cachedRemoveLabels)
     }
 
-    private fun getCachedLabelsByNameAndUser(labels: List<String>, username: String): List<UserLabel> {
-        return userLabelRepository.findAllByUserIdAndNameInIgnoreCase(username, labels)
+    private fun getCachedLabelsByNameAndUser(labelNames: List<String>, username: String): List<UserLabel> {
+        return userLabelRepository.findAllByUserIdAndNameInIgnoreCase(username, labelNames)
     }
 
     companion object {

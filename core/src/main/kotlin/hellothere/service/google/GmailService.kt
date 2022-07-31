@@ -96,9 +96,11 @@ class GmailService(
         client: Gmail,
         username: String,
         search: String? = null,
-        labels: List<String> = listOf()
+        labelsNames: List<String> = listOf()
     ): List<EmailThreadDto> {
-        val ids = getEmailThreadIdList(client, search, labels)
+        val labelIds = labelService.getLabelIdsByName(labelsNames, username)
+
+        val ids = getEmailThreadIdList(client, search, labelIds)
         val emailThreads = getThreadsBaseData(client, ids, username)
         return emailThreads.map { buildEmailThreadDto(it) }
     }
