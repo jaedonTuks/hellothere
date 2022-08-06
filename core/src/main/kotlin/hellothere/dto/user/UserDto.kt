@@ -10,5 +10,5 @@ data class UserDto(
     val username: String,
     val rank: Rank,
     val currentWeekStats: WeekStatsDto?,
-    val experience: Int = 0
+    val totalExperience: Int = 0,
 )

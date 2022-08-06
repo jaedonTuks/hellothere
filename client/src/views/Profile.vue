@@ -2,7 +2,7 @@
   <div v-if="profileInfo" class="about">
     <h1 class="username">{{ profileInfo.username }}</h1>
     <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
-    <h3 class="mt-4 mt-lg-1">Current XP: {{ profileInfo.experience }}</h3>
+    <h3 class="mt-4 mt-lg-1">Total XP: {{ profileInfo.totalExperience }}</h3>
 
     <v-row>
       <v-col cols="12" lg="6">

@@ -7,6 +7,7 @@ import hellothere.dto.label.LabelUpdateDto
 import hellothere.model.email.UserEmail
 import hellothere.model.label.UserLabel
 import hellothere.model.label.UserLabelId
+import hellothere.model.stats.category.WeekStatsCategory
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
@@ -135,6 +136,10 @@ class LabelService(
 
         val updatedMessages = updateLabelCache(messagesToModify, cachedAddLabels, cachedRemoveLabels)
 
+        if (cachedRemoveLabels.map { it.id.gmailId }.contains("UNREAD")) {
+            userStatsService.updateUserStats(username, WeekStatsCategory.StatCategory.READ)
+        }
+        // todo update on managing labels but they can only be if they alter the labels once they get xp
         LOGGER.info("Finished adding labels $labelsToAdd and removing $labelsToRemove for threads: $threadIds - user: $username")
 
         val labelsPerThread = updatedMessages

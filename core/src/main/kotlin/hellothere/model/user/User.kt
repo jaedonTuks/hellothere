@@ -1,6 +1,7 @@
 package hellothere.model.user
 
 import hellothere.config.JPA.BATCH_SIZE
+import hellothere.model.stats.WeekStats
 import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
@@ -17,9 +18,6 @@ class User(
     @Enumerated(EnumType.STRING)
     val rank: Rank = Rank.NOOB,
 
-    @Column(name = "total_experience")
-    val totalExperience: Int = 0,
-
     @OneToMany(
         mappedBy = "user",
         fetch = FetchType.LAZY,
@@ -27,8 +25,17 @@ class User(
     @Fetch(FetchMode.SUBSELECT)
     @BatchSize(size = BATCH_SIZE)
     @OrderBy("endDate DESC")
-    val weeklyStats: List<WeekStats> = listOf()
+    val weeklyStats: MutableList<WeekStats> = mutableListOf()
 ) {
+
+    fun addWeekStats(weekStats: WeekStats) {
+        weeklyStats.add(weekStats)
+    }
+
+    fun getTotalExperience(): Int {
+        return weeklyStats.sumOf { it.getTotalExperience() }
+    }
+
     fun getCurrentWeeksStats(): WeekStats? {
         val latestWeek = weeklyStats.firstOrNull()
 
