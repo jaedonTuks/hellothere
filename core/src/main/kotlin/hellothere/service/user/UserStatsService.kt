@@ -2,7 +2,7 @@ package hellothere.service.user
 
 import hellothere.config.stats.StatsConfig
 import hellothere.dto.user.WeekStatsDto
-import hellothere.model.feature.FF4jProperty
+import hellothere.model.email.UserEmail
 import hellothere.model.stats.WeekStats
 import hellothere.model.stats.category.*
 import hellothere.model.user.User
@@ -58,17 +58,32 @@ class UserStatsService(
     fun updateUserStats(
         username: String,
         statCategory: StatCategory,
-        associatedMessageIds: List<Long> = listOf()
+        messages: List<UserEmail> = listOf()
     ) {
-        val moreXp: Int = when (statCategory) {
-            StatCategory.READ -> calculateReadXP(associatedMessageIds)
-            StatCategory.REPLY,
-            StatCategory.LABEL -> featureService.getProperty(FF4jProperty.ACTION_XP)
+        if (messages.isEmpty()) {
+            LOGGER.error("Attempted to add xp to incorrect no available emails for user {$username} for category $statCategory. ids given [${messages.joinToString { it.gmailId }}]")
+            return
         }
 
+        val workingMessages = messages.filterNot {
+            when (statCategory) {
+                StatCategory.READ -> it.hasHadReadXPAllocated
+                StatCategory.LABEL -> it.hasHadLabelXPAllocated
+                StatCategory.REPLY -> it.hasHadReplyXPAllocated
+            }
+        }
+
+        if (workingMessages.isEmpty()) {
+            LOGGER.info("Skipping add xp to for user {$username} in category $statCategory.Xp already allocated for message ids [${messages.joinToString { it.gmailId }}]")
+            return
+        }
+
+        val moreXp = calculateActionXP(workingMessages, statCategory)
         val weekStats = getOrCreateThisWeeksStats(username)
+
         if (weekStats?.addXP(moreXp, statCategory) == true) {
             weekStatsRepository.save(weekStats)
+            markMessagesAsCompletedCategory(workingMessages, statCategory)
             LOGGER.info("Finished adding $moreXp xp for to user {$username} for category $statCategory")
         } else {
             LOGGER.error("Attempted to add $moreXp xp to incorrect weekStats with id: [${weekStats?.id}] for user {$username} for category $statCategory")
@@ -90,25 +105,24 @@ class UserStatsService(
         return user?.let { createNewWeekStatsForUser(it) }
     }
 
-    // todo transactional?
-    private fun calculateReadXP(associatedMessageIds: List<Long>): Int {
-        val messages = userEmailRepository.findAllByIdIn(associatedMessageIds)
-
-        if (messages.isEmpty()) {
-            LOGGER.error("No emails available for calculating read xp, ids given [$associatedMessageIds]")
-            return 0
-        }
+    private fun calculateActionXP(messages: List<UserEmail>, category: StatCategory): Int {
         val now = LocalDateTime.now()
 
-        var totalXp = statsConfig.readConfig.xp * messages.size
+        val actionConfig = when (category) {
+            StatCategory.READ -> statsConfig.readConfig
+            StatCategory.LABEL -> statsConfig.labelConfig
+            StatCategory.REPLY -> statsConfig.replyConfig
+        }
+
+        var totalXp = actionConfig.xp * messages.size
 
         messages.forEach {
-            if (now > getMaxActionTime(StatCategory.READ, it.dateSent)) {
+            if (now > getMaxActionTime(category, it.dateSent)) {
                 totalXp -= if (now < it.dateSent.plusHours(statsConfig.cutOffHours)) {
-                    statsConfig.readConfig.penalty
+                    actionConfig.penalty
                 } else {
                     // todo mark message as past cutoff
-                    statsConfig.readConfig.cutOffPenalty
+                    actionConfig.cutOffPenalty
                 }
             }
         }
@@ -135,6 +149,19 @@ class UserStatsService(
         }
 
         return reasonableActionTime.plusMinutes(leniencyMinutes)
+    }
+
+    @Transactional
+    fun markMessagesAsCompletedCategory(messages: List<UserEmail>, category: StatCategory) {
+        messages.forEach {
+            when (category) {
+                StatCategory.READ -> it.hasHadReadXPAllocated = true
+                StatCategory.LABEL -> it.hasHadLabelXPAllocated = true
+                StatCategory.REPLY -> it.hasHadReplyXPAllocated = true
+            }
+        }
+
+        userEmailRepository.saveAll(messages)
     }
 
     fun buildWeekStatsDto(weekStats: WeekStats?): WeekStatsDto? {

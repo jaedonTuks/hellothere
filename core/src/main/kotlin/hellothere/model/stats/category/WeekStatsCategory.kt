@@ -9,13 +9,12 @@ open class WeekStatsCategory(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    val id: Long? = null,
+    open val id: Long? = null,
 
     @Column(name = "experience")
-    var experience: Int = 0
+    open var experience: Int = 0
 ) {
     fun addXP(xpToAdd: Int) {
         experience += xpToAdd
     }
-
 }

@@ -6,11 +6,11 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserEmailRepository : JpaRepository<UserEmail, String> {
-    fun findAllByIdIn(id: List<Long>): List<UserEmail>
+    fun findAllByGmailIdIn(id: List<String>): List<UserEmail>
 
     fun findAllByThreadThreadIdAndThreadUserId(threadId: String, userId: String): List<UserEmail>
 
-    fun findAllByThreadThreadIdInAndThreadUserId(threadIds: List<String>, userId: String): List<UserEmail>
+    fun findAllByThreadThreadIdInAndThreadUserIdOrderByDateSent(threadIds: List<String>, userId: String): List<UserEmail>
 
     fun findAllByThreadUserIdAndGmailIdIn(userId: String, gmailId: List<String>): List<UserEmail>
 }

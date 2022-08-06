@@ -7,11 +7,8 @@ import javax.persistence.*
 @Entity
 @Table(name = "user_email_summary")
 class UserEmail(
+    // todo not unique combine with maybe mime message id or use mime message id
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    val id: Long? = null,
-
     @Column(name = "gmail_id")
     val gmailId: String,
 
@@ -28,6 +25,15 @@ class UserEmail(
     @JoinColumn(name = "thread_id")
     var thread: EmailThread? = null,
 ) {
+    @Column(name = "has_had_read_xp_allocated")
+    var hasHadReadXPAllocated: Boolean = false
+
+    @Column(name = "has_had_label_xp_allocated")
+    var hasHadLabelXPAllocated: Boolean = false
+
+    @Column(name = "has_had_reply_xp_allocated")
+    var hasHadReplyXPAllocated: Boolean = false
+
     // todo maybe investigate here https://www.baeldung.com/jpa-many-to-many
     @OneToMany
     @JoinTable(

@@ -8,14 +8,12 @@ import hellothere.model.email.UserEmail
 import hellothere.model.label.UserLabel
 import hellothere.model.label.UserLabelId
 import hellothere.model.stats.category.StatCategory
-import hellothere.model.stats.category.WeekStatsCategory
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
 import hellothere.requests.label.UpdateLabelsRequest
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -120,7 +118,7 @@ class LabelService(
         val (cachedAddLabels, cachedRemoveLabels) = getCachedLabels(labelsToAdd, labelsToRemove, username)
             ?: return null
 
-        val messagesToModify = userEmailRepository.findAllByThreadThreadIdInAndThreadUserId(
+        val messagesToModify = userEmailRepository.findAllByThreadThreadIdInAndThreadUserIdOrderByDateSent(
             threadIds,
             username
         )
@@ -143,7 +141,7 @@ class LabelService(
             StatCategory.LABEL
         }
 
-        userStatsService.updateUserStats(username, category, updatedMessages.mapNotNull { it.id })
+        userStatsService.updateUserStats(username, category, updatedMessages)
 
         LOGGER.info("Finished adding labels $labelsToAdd and removing $labelsToRemove for threads: $threadIds - user: $username")
 
