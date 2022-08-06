@@ -21,6 +21,9 @@ class FF4jConfig {
         ff4j.eventRepository = EventRepositorySpringJdbc(dataSource)
         ff4j.audit(true)
         ff4j.autoCreate(false)
+
+        // todo add in caching
+
         return ff4j
     }
 }

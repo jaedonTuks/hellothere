@@ -1,9 +1,6 @@
 package hellothere.model.stats
 
-import hellothere.model.stats.category.LabelWeekStat
-import hellothere.model.stats.category.ReadWeekStat
-import hellothere.model.stats.category.ReplyWeekStat
-import hellothere.model.stats.category.WeekStatsCategory
+import hellothere.model.stats.category.*
 import hellothere.model.user.User
 import java.time.LocalDate
 import javax.persistence.*
@@ -40,12 +37,12 @@ class WeekStats(
         return thisWeek >= startDate && thisWeek <= endDate
     }
 
-    fun addXP(increaseAmount: Int, statCategory: WeekStatsCategory.StatCategory): Boolean {
+    fun addXP(increaseAmount: Int, statCategory: StatCategory): Boolean {
         if (this.isCurrentWeek()) {
             when (statCategory) {
-                WeekStatsCategory.StatCategory.READ -> readWeekStat.addXP(increaseAmount)
-                WeekStatsCategory.StatCategory.LABEL -> labelWeekStat.addXP(increaseAmount)
-                WeekStatsCategory.StatCategory.REPLY -> replyWeekStat.addXP(increaseAmount)
+                StatCategory.READ -> readWeekStat.addXP(increaseAmount)
+                StatCategory.LABEL -> labelWeekStat.addXP(increaseAmount)
+                StatCategory.REPLY -> replyWeekStat.addXP(increaseAmount)
             }
         }
 

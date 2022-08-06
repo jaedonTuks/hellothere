@@ -7,6 +7,7 @@ import hellothere.dto.label.LabelUpdateDto
 import hellothere.model.email.UserEmail
 import hellothere.model.label.UserLabel
 import hellothere.model.label.UserLabelId
+import hellothere.model.stats.category.StatCategory
 import hellothere.model.stats.category.WeekStatsCategory
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.label.UserLabelRepository
@@ -14,6 +15,7 @@ import hellothere.repository.user.UserRepository
 import hellothere.requests.label.UpdateLabelsRequest
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -135,11 +137,14 @@ class LabelService(
             .execute()
 
         val updatedMessages = updateLabelCache(messagesToModify, cachedAddLabels, cachedRemoveLabels)
-
-        if (cachedRemoveLabels.map { it.id.gmailId }.contains("UNREAD")) {
-            userStatsService.updateUserStats(username, WeekStatsCategory.StatCategory.READ)
+        val category = if (cachedRemoveLabels.map { it.id.gmailId }.contains("UNREAD")) {
+            StatCategory.READ
+        } else {
+            StatCategory.LABEL
         }
-        // todo update on managing labels but they can only be if they alter the labels once they get xp
+
+        userStatsService.updateUserStats(username, category, updatedMessages.mapNotNull { it.id })
+
         LOGGER.info("Finished adding labels $labelsToAdd and removing $labelsToRemove for threads: $threadIds - user: $username")
 
         val labelsPerThread = updatedMessages

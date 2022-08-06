@@ -3,6 +3,8 @@ package hellothere.service
 import hellothere.dto.leaderboards.TopThreeDto
 import hellothere.dto.leaderboards.UserLeaderBoardDTO
 import hellothere.model.feature.FF4jFeature
+import hellothere.repository.user.UserRepository
+import hellothere.repository.user.WeekStatsRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

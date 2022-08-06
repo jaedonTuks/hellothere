@@ -1,16 +1,22 @@
 <template>
   <div v-if="profileInfo" class="about">
     <h1 class="username">{{ profileInfo.username }}</h1>
-    <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
     <h3 class="mt-4 mt-lg-1">Total XP: {{ profileInfo.totalExperience }}</h3>
+    <h3 class="mt-4 mt-lg-1">This weeks XP: {{ getCurrentWeeksXP() }}</h3>
+    <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
 
     <v-row>
-      <v-col cols="12" lg="6">
-        <h2 class="mt-5">Challenges</h2>
-      </v-col>
+
       <v-col cols="12" lg="6">
         <h2 class="mt-5">Badges</h2>
         <div>{{ getBadges() }}</div>
+      </v-col>
+      <v-col cols="12" lg="6">
+        <h2 class="mt-5">Challenges</h2>
+
+        <h3>Generals</h3>
+        <h3>Daily</h3>
+        <h3>Weekly</h3>
       </v-col>
     </v-row>
 
@@ -108,6 +114,14 @@ export default {
         return this.profileInfo.badges;
       }
       return 'Complete challenges to earn badges';
+    },
+
+    getCurrentWeeksXP() {
+      if (this.profileInfo && this.profileInfo.currentWeekStats) {
+        return this.profileInfo.currentWeekStats.experience;
+      }
+
+      return 0;
     },
   },
 

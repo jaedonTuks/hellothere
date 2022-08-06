@@ -18,9 +18,4 @@ open class WeekStatsCategory(
         experience += xpToAdd
     }
 
-    enum class StatCategory {
-        READ,
-        LABEL,
-        REPLY;
-    }
 }
