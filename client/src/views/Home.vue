@@ -41,7 +41,13 @@
           />
         </v-col>
       </v-row>
-      <v-toolbar class="mb-5 toolbar" color="background" elevation="0">
+      <v-toolbar
+        short
+        outlined
+        class="mb-1 toolbar"
+        color="background"
+        elevation="0"
+      >
         <v-row class="mt-4">
           <v-col cols="1">
             <v-checkbox
@@ -52,70 +58,71 @@
               @change="updateSelectAll"
             />
           </v-col>
-          <v-col cols="4">
-<!--            :disabled="selectedEmailIds.length === 0"-->
-            <v-menu
-              v-model="isLabelMenuOpen"
-              bottom
-              style="overflow-y: hidden"
-              transition="slide-y-transition"
-              ref="labelMenu"
-              :close-on-content-click="false"
-
-              @click="isLabelMenuOpen=true"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  dark
-                  small
-                  class="mt-0"
-                  color="background"
-                  elevation="0"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>mdi-label</v-icon>
-                </v-btn>
-              </template>
-              <v-list
-                style="max-height: 500px; padding: 10px"
-                class="overflow-y-auto backgroundDark"
+          <v-slide-x-transition>
+            <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
+              <v-menu
+                v-model="isLabelMenuOpen"
+                bottom
+                style="overflow-y: hidden"
+                transition="slide-y-transition"
+                ref="labelMenu"
+                :close-on-content-click="false"
+                @click="isLabelMenuOpen=true"
               >
-                <v-list-item-title class="borderBottom">
-                  <v-icon medium class="mr-2">mdi-label</v-icon>
-                  Manage label
-                </v-list-item-title>
-                <v-list-item
-                  v-for="(label, index) in labels"
-                  :key="index"
-                >
-                  <v-list-item-action>
-                    <v-checkbox
-                      v-model="labelCheckboxSelected[index]"
-                      @change="newLabelSelected($event, label)"
-                    />
-                  </v-list-item-action>
-                  <v-list-item-title>{{ label }}</v-list-item-title>
-                </v-list-item>
-              </v-list>
-              <v-row justify="end" class="backgroundDark pa-3">
-                <v-col class="borderTop" cols="12">
+                <template v-slot:activator="{ on, attrs }">
                   <v-btn
-                    color="secondary"
-                    class="float-end"
-                    :disabled="addLabels.length === 0"
-                    :loading="labelChangeLoading"
-                    @click="sendAddLabelsRequest"
+                    dark
+                    small
+                    class="mt-0"
+                    color="background"
+                    elevation="0"
+                    v-bind="attrs"
+                    v-on="on"
                   >
-                    Add labels
+                    <v-icon>mdi-label</v-icon>
                   </v-btn>
-                </v-col>
-              </v-row>
-            </v-menu>
-          </v-col>
+                </template>
+                <v-list
+                  style="max-height: 500px; padding: 10px"
+                  class="overflow-y-auto backgroundDark"
+                >
+                  <v-list-item-title class="borderBottom">
+                    <v-icon medium class="mr-2">mdi-label</v-icon>
+                    Manage label
+                  </v-list-item-title>
+                  <v-list-item
+                    v-for="(label, index) in labels"
+                    :key="index"
+                  >
+                    <v-list-item-action>
+                      <v-checkbox
+                        v-model="labelCheckboxSelected[index]"
+                        @change="newLabelSelected($event, label)"
+                      />
+                    </v-list-item-action>
+                    <v-list-item-title>{{ label }}</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+                <v-row justify="end" class="backgroundDark pa-3">
+                  <v-col class="borderTop" cols="12">
+                    <v-btn
+                      color="secondary"
+                      class="float-end"
+                      :disabled="addLabels.length === 0"
+                      :loading="labelChangeLoading"
+                      @click="sendAddLabelsRequest"
+                    >
+                      Add labels
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-menu>
+            </v-col>
+          </v-slide-x-transition>
         </v-row>
       </v-toolbar>
-      <v-expansion-panels dark>
+      <hr class="mb-4"/>
+      <v-expansion-panels dark class="expansionPanels">
         <v-expansion-panel
           v-for="emailThread in emailThreads"
           class="expansionPanel"
@@ -346,10 +353,6 @@ export default {
   border-top: 2px solid var(--v-info-darken4) !important;
 }
 
-.toolbar {
-  border-bottom: 1px solid red var(--v-accent-base) !important;
-}
-
 .expansionPanel {
   background-color: var(--v-accent-base) !important;
 }
@@ -365,5 +368,13 @@ export default {
 
 .v-menu__content {
   overflow-y: hidden !important;
+}
+
+.toolbarBottomBorder {
+  content:''!important;
+  width:200px!important;
+  height:20px!important;
+  color: red!important;
+  display: block!important;
 }
 </style>

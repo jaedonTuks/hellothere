@@ -26,6 +26,6 @@ alter table email_labels add  CONSTRAINT email_label_thread_fk
     FOREIGN KEY (email_id)
         REFERENCES user_email_summary (gmail_id);
 
-alter table user_email_summary add column has_had_read_xp_allocated boolean default false;
-alter table user_email_summary add column has_had_label_xp_allocated boolean default false;
-alter table user_email_summary add column has_had_reply_xp_allocated boolean default false;
+alter table user_email_summary add column has_had_read_xp_allocated timestamp;
+alter table user_email_summary add column has_had_label_xp_allocated timestamp;
+alter table user_email_summary add column has_had_reply_xp_allocated timestamp;

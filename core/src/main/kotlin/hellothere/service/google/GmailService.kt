@@ -271,6 +271,7 @@ class GmailService(
 
         val emailsToSave = emails.map { message ->
             val savedThread = cachedThreads.firstOrNull { it.threadId == message.threadId }
+            val lastSavedMessage = savedThread?.emails?.lastOrNull()
             val email = UserEmail(
                 message.id,
                 getEmailHeader(message, EmailHeaderName.MESSAGE_ID),
@@ -280,7 +281,7 @@ class GmailService(
             )
             val labels = message.labelIds.mapNotNull { allUserLabels[it] }
             email.addAllLabels(labels)
-            email.hasHadReplyXPAllocated = isReply
+            email.setCategoryXp(isReply, lastSavedMessage)
             email
         }
 

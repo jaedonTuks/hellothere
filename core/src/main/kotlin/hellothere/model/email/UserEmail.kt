@@ -1,6 +1,8 @@
 package hellothere.model.email
 
 import hellothere.model.label.UserLabel
+import hellothere.model.stats.category.StatCategory
+import liquibase.pro.packaged.it
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -26,13 +28,13 @@ class UserEmail(
     var thread: EmailThread? = null,
 ) {
     @Column(name = "has_had_read_xp_allocated")
-    var hasHadReadXPAllocated: Boolean = false
+    var readXpAllocatedDate: LocalDateTime? = null
 
     @Column(name = "has_had_label_xp_allocated")
-    var hasHadLabelXPAllocated: Boolean = false
+    var labelXPAllocatedDate: LocalDateTime? = null
 
     @Column(name = "has_had_reply_xp_allocated")
-    var hasHadReplyXPAllocated: Boolean = false
+    var replyXPAllocatedDate: LocalDateTime? = null
 
     // todo maybe investigate here https://www.baeldung.com/jpa-many-to-many
     @OneToMany
@@ -64,5 +66,35 @@ class UserEmail(
 
     fun getLabelList(): List<String> {
         return emailLabels.map { it.id.gmailId }
+    }
+
+    fun hasHadCategoryXpAllocated(statCategory: StatCategory): Boolean {
+        val actionDate = when (statCategory) {
+            StatCategory.READ -> readXpAllocatedDate
+            StatCategory.LABEL -> labelXPAllocatedDate
+            StatCategory.REPLY -> replyXPAllocatedDate
+        }
+        return actionDate != null
+    }
+
+    fun setCategoryXp(isReply: Boolean, lastSavedMessage: UserEmail?) {
+        val replyAndReadDate = if(isReply) {
+            LocalDateTime.now()
+        } else {
+            null
+        }
+
+        replyXPAllocatedDate = replyAndReadDate
+        readXpAllocatedDate = replyAndReadDate
+        labelXPAllocatedDate = lastSavedMessage?.labelXPAllocatedDate
+    }
+
+    fun markCompletedCategoryXP(category: StatCategory) {
+        val now = LocalDateTime.now()
+        when (category) {
+            StatCategory.READ -> readXpAllocatedDate = now
+            StatCategory.LABEL -> labelXPAllocatedDate = now
+            StatCategory.REPLY -> replyXPAllocatedDate = now
+        }
     }
 }

@@ -66,12 +66,9 @@ class UserStatsService(
         }
 
         val workingMessages = messages.filterNot {
-            when (statCategory) {
-                StatCategory.READ -> it.hasHadReadXPAllocated
-                StatCategory.LABEL -> it.hasHadLabelXPAllocated
-                StatCategory.REPLY -> it.hasHadReplyXPAllocated
-            }
-        }
+            it.hasHadCategoryXpAllocated(statCategory)
+        }.distinctBy { it.thread?.threadId }
+        // todo reduce to one per thread mark all still
 
         if (workingMessages.isEmpty()) {
             LOGGER.info("Skipping add xp to for user {$username} in category $statCategory.Xp already allocated for message ids [${messages.joinToString { it.gmailId }}]")
@@ -83,7 +80,7 @@ class UserStatsService(
 
         if (weekStats?.addXP(moreXp, statCategory) == true) {
             weekStatsRepository.save(weekStats)
-            markMessagesAsCompletedCategory(workingMessages, statCategory)
+            markMessagesAsCompletedCategory(messages, statCategory)
             LOGGER.info("Finished adding $moreXp xp for to user {$username} for category $statCategory")
         } else {
             LOGGER.error("Attempted to add $moreXp xp to incorrect weekStats with id: [${weekStats?.id}] for user {$username} for category $statCategory")
@@ -154,11 +151,7 @@ class UserStatsService(
     @Transactional
     fun markMessagesAsCompletedCategory(messages: List<UserEmail>, category: StatCategory) {
         messages.forEach {
-            when (category) {
-                StatCategory.READ -> it.hasHadReadXPAllocated = true
-                StatCategory.LABEL -> it.hasHadLabelXPAllocated = true
-                StatCategory.REPLY -> it.hasHadReplyXPAllocated = true
-            }
+            it.markCompletedCategoryXP(category)
         }
 
         userEmailRepository.saveAll(messages)
