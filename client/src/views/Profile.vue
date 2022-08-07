@@ -5,7 +5,7 @@
     <h3 class="mt-4 mt-lg-1">This weeks XP: {{ getCurrentWeeksXP() }}</h3>
     <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
 
-    <v-row>
+    <v-row class="borderTop mt-4 pa-2">
 
       <v-col cols="12" lg="6">
         <h2 class="mt-5">Badges</h2>
@@ -20,8 +20,34 @@
       </v-col>
     </v-row>
 
-    <h2 class="mt-5">Weekly stats</h2>
+    <v-row class="borderTop pa-3">
+      <h2>Weekly stats</h2>
+    </v-row>
     <v-row>
+      <v-col cols="12">
+        <h3>Totals</h3>
+      </v-col>
+      <v-col cols="6">
+        <span class="mr-2">Total Email Threads:</span>
+        <span>{{profileInfo.messageTotalsSummary.totalEmailThreads}}</span>
+      </v-col>
+      <v-col cols="6">
+        <span class="mr-2">Total Emails:</span>
+        <span>{{profileInfo.messageTotalsSummary.totalEmails}}</span>
+      </v-col>
+      <v-col cols="6">
+        <span class="mr-2">Total Emails Read:</span>
+        <span>{{profileInfo.messageTotalsSummary.totalRead}}</span>
+      </v-col>
+      <v-col cols="6">
+        <span class="mr-2">Total Emails Labeled:</span>
+        <span>{{profileInfo.messageTotalsSummary.totalLabeled}}</span>
+      </v-col>
+      <v-col cols="6">
+        <span class="mr-2">Total Email Replied:</span>
+        <span>{{profileInfo.messageTotalsSummary.totalReplied}}</span>
+      </v-col>
+      <v-col cols="6"></v-col>
       <StatsCard
         title="Bar"
         type="bar"
@@ -134,10 +160,13 @@ export default {
 </script>
 
 <style scoped>
+.borderTop {
+  border-top: solid 2px white;
+}
 
 @media only screen and (max-width: 1264px) {
   h1.username {
-    font-size: 1.3em!important;
+    font-size: 1.3em !important;
   }
 
   h2 {

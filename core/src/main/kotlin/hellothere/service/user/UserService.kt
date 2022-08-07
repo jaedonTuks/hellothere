@@ -32,12 +32,14 @@ class UserService(
         return buildUserDto(user)
     }
 
+    @Transactional
     fun buildUserDto(user: User?): UserDto? {
         return user?.let {
             UserDto(
                 it.id,
                 it.rank,
                 userStatsService.buildWeekStatsDto(it.getCurrentWeeksStats()),
+                userStatsService.getMessageTotalsSummary(user.id),
                 it.getTotalExperience()
             )
         }

@@ -1,6 +1,7 @@
 package hellothere.service.user
 
 import hellothere.config.stats.StatsConfig
+import hellothere.dto.stats.MessageTotalsSummaryDTO
 import hellothere.dto.user.WeekStatsDto
 import hellothere.model.email.UserEmail
 import hellothere.model.stats.WeekStats
@@ -154,6 +155,17 @@ class UserStatsService(
         }
 
         userEmailRepository.saveAll(messages)
+    }
+
+    @Transactional
+    fun getMessageTotalsSummary(username: String): MessageTotalsSummaryDTO {
+        return MessageTotalsSummaryDTO(
+            totalEmailThreads = userEmailRepository.countDistinctByThreadUserId(username),
+            totalEmails = userEmailRepository.countByThreadUserId(username),
+            totalRead = userEmailRepository.countByThreadUserIdAndReadXpAllocatedDateNotNull(username),
+            totalLabeled = userEmailRepository.countByThreadUserIdAndLabelXPAllocatedDateNotNull(username),
+            totalReplied = userEmailRepository.countByThreadUserIdAndReplyXPAllocatedDateNotNull(username)
+        )
     }
 
     fun buildWeekStatsDto(weekStats: WeekStats?): WeekStatsDto? {
