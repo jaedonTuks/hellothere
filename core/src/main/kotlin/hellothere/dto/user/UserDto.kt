@@ -1,6 +1,7 @@
 package hellothere.dto.user
 
 import hellothere.dto.stats.MessageTotalsSummaryDTO
+import hellothere.model.stats.WeekStats
 import hellothere.model.user.Rank
 
 // todo add badge names
@@ -11,6 +12,7 @@ data class UserDto(
     val username: String,
     val rank: Rank,
     val currentWeekStats: WeekStatsDto?,
+    val orderedWeekStats: List<WeekStatsDto> = listOf(),
     val messageTotalsSummary: MessageTotalsSummaryDTO? = null,
     val totalExperience: Int = 0,
 )

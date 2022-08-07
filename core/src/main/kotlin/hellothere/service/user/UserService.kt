@@ -39,6 +39,7 @@ class UserService(
                 it.id,
                 it.rank,
                 userStatsService.buildWeekStatsDto(it.getCurrentWeeksStats()),
+                userStatsService.buildWeekStatsDtos(it.weeklyStats),
                 userStatsService.getMessageTotalsSummary(user.id),
                 it.getTotalExperience()
             )

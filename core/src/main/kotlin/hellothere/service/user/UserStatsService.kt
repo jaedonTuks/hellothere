@@ -11,6 +11,7 @@ import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.user.UserRepository
 import hellothere.repository.user.WeekStatsRepository
 import hellothere.service.FeatureService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -179,6 +180,10 @@ class UserStatsService(
                 it.replyWeekStat.experience
             )
         }
+    }
+
+    fun buildWeekStatsDtos(weeklyStats: MutableList<WeekStats>): List<WeekStatsDto> {
+        return weeklyStats.mapNotNull { buildWeekStatsDto(it) }.sortedBy { it.startDate }
     }
 
     companion object {

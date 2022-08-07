@@ -2,7 +2,7 @@
   <div v-if="profileInfo" class="about">
     <h1 class="username">{{ profileInfo.username }}</h1>
     <h3 class="mt-4 mt-lg-1">Total XP: {{ profileInfo.totalExperience }}</h3>
-    <h3 class="mt-4 mt-lg-1">This weeks XP: {{ getCurrentWeeksXP() }}</h3>
+    <h3 class="mt-4 mt-lg-1">This weeks XP: {{ currentWeekXP }}</h3>
     <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
 
     <v-row class="borderTop mt-4 pa-2">
@@ -24,42 +24,31 @@
       <h2>Weekly stats</h2>
     </v-row>
     <v-row>
-      <v-col cols="12">
-        <h3>Totals</h3>
-      </v-col>
-      <v-col cols="6">
-        <span class="mr-2">Total Email Threads:</span>
-        <span>{{profileInfo.messageTotalsSummary.totalEmailThreads}}</span>
-      </v-col>
-      <v-col cols="6">
+      <v-col cols="12 mb-0">
         <span class="mr-2">Total Emails:</span>
         <span>{{profileInfo.messageTotalsSummary.totalEmails}}</span>
       </v-col>
-      <v-col cols="6">
-        <span class="mr-2">Total Emails Read:</span>
-        <span>{{profileInfo.messageTotalsSummary.totalRead}}</span>
-      </v-col>
-      <v-col cols="6">
-        <span class="mr-2">Total Emails Labeled:</span>
-        <span>{{profileInfo.messageTotalsSummary.totalLabeled}}</span>
-      </v-col>
-      <v-col cols="6">
-        <span class="mr-2">Total Email Replied:</span>
-        <span>{{profileInfo.messageTotalsSummary.totalReplied}}</span>
-      </v-col>
-      <v-col cols="6"></v-col>
       <StatsCard
-        title="Bar"
+        title="Weekly experience overview"
         type="bar"
-        :chart-options="barChart.chartOptions"
-        :series="barChart.series"
+        :series="getExperienceSeries()"
       />
       <StatsCard
-        title="Radial Bar"
+        title="Challenges Completed"
         type="radialBar"
-        :chart-options="radialBarOptions.plotOptions"
-        :series="radialBarOptions.series"
+        :series="getTotalsRadialSeries()"
+        :labels="getTotalsLabels()"
       />
+      <StatsCard
+        title="Interaction Overview"
+        type="radialBar"
+        :series="getTotalsRadialSeries()"
+        :labels="getTotalsLabels()"
+      />
+<!--      <StatsCard-->
+<!--        title="Bar"-->
+<!--        type="bar"-->
+<!--      />-->
     </v-row>
   </div>
 </template>
@@ -67,73 +56,49 @@
 <script>
 import StatsCard from '@/components/Leaderboard/StatsCard.vue';
 import { mapActions, mapGetters } from 'vuex';
+import ScreenSizeMixin from '@/mixins/screenSizeMixin';
 
 export default {
   name: 'Profile',
   components: { StatsCard },
+  mixins: [ScreenSizeMixin],
+
   data() {
     return {
       profileInfo: null,
-      radialBarOptions: {
-        chart: {
-          type: 'radialBar',
-          height: 350,
-          width: 380,
-        },
-        plotOptions: {
-          radialBar: {
-            size: undefined,
-            inverseOrder: true,
-            hollow: {
-              margin: 5,
-              size: '48%',
-              background: 'transparent',
-
-            },
-            track: {
-              show: false,
-            },
-            startAngle: -180,
-            endAngle: 180,
-
-          },
-        },
-        stroke: {
-          lineCap: 'round',
-        },
-        series: [71, 63, 77],
-        labels: ['June', 'May', 'April'],
-        legend: {
-          show: true,
-          floating: true,
-          position: 'right',
-          offsetX: 70,
-          offsetY: 240,
-        },
-      },
-      barChart: {
-        chartOptions: {
-          chart: {
-            id: `vuechart-${this.title}`,
-          },
-          xaxis: {
-            categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998],
-          },
-        },
-        series: [{
-          name: 'series-1',
-          data: [30, 40, 45, 50, 49, 60, 70, 81],
-        }],
-      },
     };
   },
 
   computed: {
     ...mapGetters(['getProfile']),
+
+    currentWeekXP() {
+      if (this.profileInfo && this.profileInfo.currentWeekStats) {
+        return this.profileInfo.currentWeekStats.experience;
+      }
+
+      return 0;
+    },
+
+    totalRead() {
+      return this.getTotalsPercentage(this.profileInfo.messageTotalsSummary.totalRead);
+    },
+
+    totalLabeled() {
+      return this.getTotalsPercentage(this.profileInfo.messageTotalsSummary.totalLabeled);
+    },
+
+    totalReplied() {
+      return this.getTotalsPercentage(this.profileInfo.messageTotalsSummary.totalReplied);
+    },
   },
 
   methods: {
     ...mapActions(['fetchUserInfo']),
+
+    getTotalsPercentage(value) {
+      return Math.round((value / this.profileInfo.messageTotalsSummary.totalEmails) * 100);
+    },
 
     getBadges() {
       if (this.profileInfo.badges) {
@@ -142,13 +107,41 @@ export default {
       return 'Complete challenges to earn badges';
     },
 
-    getCurrentWeeksXP() {
-      if (this.profileInfo && this.profileInfo.currentWeekStats) {
-        return this.profileInfo.currentWeekStats.experience;
-      }
-
-      return 0;
+    getTotalsRadialSeries() {
+      return [
+        this.totalRead,
+        this.totalLabeled,
+        this.totalReplied,
+      ];
     },
+
+    getTotalsLabels() {
+      if (!this.isMobile) {
+        return ['Read', 'Labeled', 'Replied'];
+      }
+      return [
+        `Read ${this.totalRead}%`,
+        `Labeled ${this.totalLabeled}%`,
+        `Replied ${this.totalReplied}%`,
+      ];
+    },
+
+    getExperienceSeries() {
+      const xpArray = [];
+
+      this.profileInfo.orderedWeekStats.forEach((stat, index) => {
+        xpArray.push({
+          x: `Week ${index} xp`,
+          y: `${stat.experience} xp`,
+        });
+      });
+      return [{ data: xpArray }];
+    },
+
+    getExperienceLabels() {
+      return [];
+    },
+
   },
 
   created() {
