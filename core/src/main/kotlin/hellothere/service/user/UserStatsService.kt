@@ -68,7 +68,6 @@ class UserStatsService(
         val workingMessages = messages.filterNot {
             it.hasHadCategoryXpAllocated(statCategory)
         }.distinctBy { it.thread?.threadId }
-        // todo reduce to one per thread mark all still
 
         if (workingMessages.isEmpty()) {
             LOGGER.info("Skipping add xp to for user {$username} in category $statCategory.Xp already allocated for message ids [${messages.joinToString { it.gmailId }}]")
