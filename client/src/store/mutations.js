@@ -70,6 +70,10 @@ const mutations = {
     state.currentThreadIds.unshift(newId);
   },
 
+  setProfileLeaderboardUsername: (state, newName) => {
+    state.profile.leaderboardUsername = newName;
+  },
+
   resetToDefault: (state) => {
     Object.assign(state, getDefaultState());
   },

@@ -14,9 +14,8 @@ class User(
     @Column(name = "username")
     val id: String,
 
-    @Column(name = "rank")
-    @Enumerated(EnumType.STRING)
-    val rank: Rank = Rank.NOOB,
+    @Column(name = "leaderboard_username")
+    var leaderboardUsername: String,
 
     @OneToMany(
         mappedBy = "user",

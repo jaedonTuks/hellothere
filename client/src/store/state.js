@@ -4,7 +4,7 @@ export function getDefaultState() {
     isLoggedIn: true,
     loading: false,
     userProfile: {
-      username: '',
+      leaderboardUsername: '',
       rank: '',
       currentWeekStats: null,
     },

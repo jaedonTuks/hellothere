@@ -37,7 +37,7 @@ class JwtTokenService(
 
     fun createClaimsFromUser(user: UserDto): Claims {
         val claims = Jwts.claims()
-        claims.subject = user.username
+        claims.subject = user.email
         return claims
     }
 

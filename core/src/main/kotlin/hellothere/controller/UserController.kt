@@ -3,6 +3,7 @@ package hellothere.controller
 import hellothere.annotation.RequiresFeatureAspect
 import hellothere.config.RestUrl.USER
 import hellothere.dto.user.UserDto
+import hellothere.requests.user.UpdateUsernameRequest
 import hellothere.service.security.SecurityService
 import hellothere.service.user.UserService
 import liquibase.pro.packaged.it
@@ -10,9 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -33,6 +32,18 @@ class UserController(
         return userService.getUserDto(username)?.let {
             ResponseEntity.ok(it)
         } ?: ResponseEntity.notFound().build()
+    }
+
+    @PostMapping("/edit-username")
+    fun sendEmail(
+        request: HttpServletRequest,
+        @RequestBody updateUsernameRequest: UpdateUsernameRequest
+    ): ResponseEntity<String> {
+        val username = securityService.getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        return userService.updateLeaderboardUsername(username, updateUsernameRequest)?.let {
+            ResponseEntity.ok(it.leaderboardUsername)
+        } ?: ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
     }
 
     @GetMapping("/isLoggedIn")

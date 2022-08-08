@@ -101,7 +101,7 @@ const actions = {
       console.error(e);
     }),
 
-  sendLogoutRequest: ({ commit }, payload) => axios.get('/api/gmail/logout', payload)
+  sendLogoutRequest: ({ commit }) => axios.get('/api/gmail/logout')
     .then(() => {
       commit('setIsLoggedIn', false);
       commit('resetToDefault', false);
@@ -110,6 +110,16 @@ const actions = {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
       commit('setIsLoggedIn', newLoggedIn);
       console.error(e);
+    }),
+
+  sendUpdateUsernameRequest: ({ commit }, payload) => axios.post('/api/user/edit-username', payload)
+    .then((response) => {
+      commit('setProfileLeaderboardUsername', response.data);
+    }).catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+      throw e;
     }),
 };
 

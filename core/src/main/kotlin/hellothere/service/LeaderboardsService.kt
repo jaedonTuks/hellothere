@@ -53,7 +53,7 @@ class LeaderboardsService(
     }
 
     private fun buildUserLeadboardGeneralDTO(weekStats: WeekStats, rank: Int): UserLeaderBoardGeneralDTO? {
-        return weekStats.user?.id?.let {
+        return weekStats.user?.leaderboardUsername?.let {
             UserLeaderBoardGeneralDTO(
                 rank,
                 it,
@@ -76,7 +76,7 @@ class LeaderboardsService(
         }
 
         return UserLeaderBoardDTO(
-            user.id,
+            user.leaderboardUsername,
             user.getCurrentWeeksStats()!!.getTotalExperience()
         )
     }

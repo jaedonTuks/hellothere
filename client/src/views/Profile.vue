@@ -1,10 +1,36 @@
 <template>
   <div v-if="profileInfo" class="about">
-    <h1 class="username">{{ profileInfo.username }}</h1>
-    <h3 class="mt-4 mt-lg-1">Total XP: {{ profileInfo.totalExperience }}</h3>
-    <h3 class="mt-4 mt-lg-1">This weeks XP: {{ currentWeekXP }}</h3>
-    <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
-    <v-btn class="mt-4" @click="logout">Logout</v-btn>
+    <v-row dense class="mt-3">
+      <v-col cols="2">
+        <v-text-field
+          v-model="newUserName"
+          flat
+          background-color="background"
+          ref="usernameField"
+          style="font-size: 2em; margin: 0"
+          hide-details="auto"
+          class="pl-0 ml-0"
+          :solo="!editingUsername"
+          :append-icon="editingUsername ? 'mdi-check' : 'mdi-pencil' "
+          :readonly="!editingUsername"
+          @click:append="toggleEditUsername"
+        />
+      </v-col>
+      <v-col cols="12">
+        <h3 class="mt-4 mt-lg-1">Email: {{ profileInfo.email }}</h3>
+      </v-col>
+      <v-col cols="12">
+        <h3 class="mt-4 mt-lg-1">Total XP: {{ profileInfo.totalExperience }}</h3>
+      </v-col>
+      <v-col cols="12">
+        <h3 class="mt-4 mt-lg-1">This weeks XP: {{ currentWeekXP }}</h3>
+      </v-col>
+      <v-col cols="12">
+        <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
+      </v-col>
+    </v-row>
+
+    <v-btn class="mt-4  mr-2" color="secondary" @click="logout">Logout</v-btn>
     <div class="mb-4 mt-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
     <v-row class="mt-4 pa-2">
       <v-col cols="12" lg="6">
@@ -27,7 +53,7 @@
     <v-row>
       <v-col cols="12 mb-0">
         <span class="mr-2">Total Emails:</span>
-        <span>{{profileInfo.messageTotalsSummary.totalEmails}}</span>
+        <span>{{ profileInfo.messageTotalsSummary.totalEmails }}</span>
       </v-col>
       <StatsCard
         title="Weekly experience overview"
@@ -62,6 +88,8 @@ export default {
   data() {
     return {
       profileInfo: null,
+      editingUsername: false,
+      newUserName: '',
     };
   },
 
@@ -90,7 +118,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchUserInfo', 'sendLogoutRequest']),
+    ...mapActions(['fetchUserInfo', 'sendLogoutRequest', 'sendUpdateUsernameRequest']),
 
     getTotalsPercentage(value) {
       return Math.round((value / this.profileInfo.messageTotalsSummary.totalEmails) * 100);
@@ -139,8 +167,16 @@ export default {
       return [{ data: xpArray }];
     },
 
-    getExperienceLabels() {
-      return [];
+    toggleEditUsername() {
+      this.editingUsername = !this.editingUsername;
+      if (this.editingUsername) {
+        this.$refs.usernameField.focus();
+      } else {
+        this.sendUpdateUsernameRequest({ newUsername: this.newUserName })
+          .then(() => {
+            this.newUserName = this.profileInfo.leaderboardUsername;
+          });
+      }
     },
 
     logout() {
@@ -155,6 +191,7 @@ export default {
   created() {
     this.fetchUserInfo().then(() => {
       this.profileInfo = this.getProfile();
+      this.newUserName = this.profileInfo.leaderboardUsername;
     });
   },
 };

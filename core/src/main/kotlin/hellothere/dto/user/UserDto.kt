@@ -9,7 +9,8 @@ import hellothere.model.user.Rank
 // for first and second and third
 // return xp
 data class UserDto(
-    val username: String,
+    val email: String,
+    val leaderboardUsername: String,
     val rank: Long,
     val currentWeekStats: WeekStatsDto?,
     val orderedWeekStats: List<WeekStatsDto> = listOf(),

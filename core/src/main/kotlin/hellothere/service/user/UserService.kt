@@ -3,11 +3,11 @@ package hellothere.service.user
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Profile
 import hellothere.dto.user.UserDto
-import hellothere.model.user.Rank
 import hellothere.model.user.User
 import hellothere.model.user.UserAccessToken
 import hellothere.repository.user.UserAccessTokenRepository
 import hellothere.repository.user.UserRepository
+import hellothere.requests.user.UpdateUsernameRequest
 import hellothere.service.LeaderboardsService
 import hellothere.service.google.GmailService
 import hellothere.service.label.LabelService
@@ -40,6 +40,7 @@ class UserService(
             val currentWeekStats = it.getCurrentWeeksStats()
             UserDto(
                 it.id,
+                it.leaderboardUsername,
                 leaderboardsService.getCurrentPlaceOnLeaderboards(currentWeekStats?.getTotalExperience() ?: 0),
                 userStatsService.buildWeekStatsDto(currentWeekStats),
                 userStatsService.buildWeekStatsDtos(it.weeklyStats),
@@ -60,7 +61,7 @@ class UserService(
     fun signupNewUser(newUserId: String, client: Gmail): User? {
         val newUser = User(
             newUserId,
-            Rank.NOOB
+            newUserId,
         )
         userRepository.save(newUser)
         userStatsService.createNewWeekStatsForUser(newUser)
@@ -86,6 +87,20 @@ class UserService(
             .users()
             .getProfile(GmailService.USER_SELF_ACCESS)
             .execute()
+    }
+
+    fun updateLeaderboardUsername(username: String, updateUsernameRequest: UpdateUsernameRequest): User? {
+        val user = getUserById(username)
+        val usersWithLeaderboardUsernameCount =
+            userRepository.countByLeaderboardUsername(updateUsernameRequest.newUsername)
+
+        if (user == null || usersWithLeaderboardUsernameCount != 0) {
+            LOGGER.info("Can't update leaderboard name for user: $username, user = $user and count = $usersWithLeaderboardUsernameCount")
+            return null
+        }
+
+        user.leaderboardUsername = updateUsernameRequest.newUsername
+        return userRepository.save(user)
     }
 
     companion object {
