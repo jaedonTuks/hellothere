@@ -100,6 +100,17 @@ const actions = {
       commit('setIsLoggedIn', newLoggedIn);
       console.error(e);
     }),
+
+  sendLogoutRequest: ({ commit }, payload) => axios.get('/api/gmail/logout', payload)
+    .then(() => {
+      commit('setIsLoggedIn', false);
+      commit('resetToDefault', false);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
 };
 
 export default actions;

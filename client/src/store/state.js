@@ -1,4 +1,4 @@
-function getDefaultState() {
+export function getDefaultState() {
   return {
     composingEmail: false,
     isLoggedIn: true,

@@ -4,8 +4,8 @@
     <h3 class="mt-4 mt-lg-1">Total XP: {{ profileInfo.totalExperience }}</h3>
     <h3 class="mt-4 mt-lg-1">This weeks XP: {{ currentWeekXP }}</h3>
     <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
+    <v-btn class="mt-4" @click="logout">Logout</v-btn>
     <div class="mb-4 mt-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
-
     <v-row class="mt-4 pa-2">
       <v-col cols="12" lg="6">
         <h2 class="mt-5">Badges</h2>
@@ -90,7 +90,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchUserInfo']),
+    ...mapActions(['fetchUserInfo', 'sendLogoutRequest']),
 
     getTotalsPercentage(value) {
       return Math.round((value / this.profileInfo.messageTotalsSummary.totalEmails) * 100);
@@ -141,6 +141,13 @@ export default {
 
     getExperienceLabels() {
       return [];
+    },
+
+    logout() {
+      this.sendLogoutRequest()
+        .then(() => {
+          this.$router.push({ name: 'Login' });
+        });
     },
 
   },

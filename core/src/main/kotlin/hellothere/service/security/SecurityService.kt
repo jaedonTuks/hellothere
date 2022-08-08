@@ -28,6 +28,10 @@ class SecurityService(
         return user
     }
 
+    fun logout(response: HttpServletResponse) {
+        response.setHeader("Set-Cookie", "$JWT_TOKEN_COOKIE_NAME=''; Path=/; Max-Age=0; HttpOnly;")
+    }
+
     companion object {
         val LOGGER: Logger = org.slf4j.LoggerFactory.getLogger(SecurityService::class.java)
         const val JWT_TOKEN_COOKIE_NAME = "jwt-token"

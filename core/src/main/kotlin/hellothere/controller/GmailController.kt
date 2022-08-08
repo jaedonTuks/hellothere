@@ -3,7 +3,6 @@ package hellothere.controller
 import hellothere.config.RestUrl.GMAIL
 import hellothere.dto.email.EmailDto
 import hellothere.dto.email.EmailThreadDto
-import hellothere.dto.label.LabelDto
 import hellothere.requests.email.ReplyRequest
 import hellothere.requests.email.SendRequest
 import hellothere.service.google.GmailService
@@ -27,6 +26,12 @@ class GmailController(
     private val userService: UserService,
     private val securityService: SecurityService
 ) : BaseController(gmailService, securityService) {
+    @GetMapping("/logout")
+    fun logout(httpServletResponse: HttpServletResponse) {
+        securityService.logout(httpServletResponse)
+        httpServletResponse.status = HttpServletResponse.SC_FOUND
+        httpServletResponse.setHeader("Location", "http://localhost:8080/login")
+    }
 
     @GetMapping("/login")
     fun googleConnectionStatus(request: HttpServletRequest?): RedirectView? {
@@ -85,7 +90,8 @@ class GmailController(
         val (username, client) = getUsernameAndClientFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-        val emails = gmailService.getThreadsBaseData(client, username, searchString, labels).sortedByDescending { it.latestDate }
+        val emails =
+            gmailService.getThreadsBaseData(client, username, searchString, labels).sortedByDescending { it.latestDate }
 
         return ResponseEntity.ok(emails)
     }
