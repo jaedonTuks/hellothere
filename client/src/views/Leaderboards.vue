@@ -153,7 +153,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .tableRowHighlighted {
   background-color: var(--v-accent-darken1) !important;
 }
