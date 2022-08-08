@@ -2,35 +2,82 @@ package hellothere.service
 
 import hellothere.dto.leaderboards.TopThreeDto
 import hellothere.dto.leaderboards.UserLeaderBoardDTO
+import hellothere.dto.leaderboards.UserLeaderBoardGeneralDTO
 import hellothere.model.feature.FF4jFeature
-import hellothere.repository.user.UserRepository
+import hellothere.model.stats.WeekStats
+import hellothere.model.user.User
 import hellothere.repository.user.WeekStatsRepository
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class LeaderboardsService(
+    private val weekStatsRepository: WeekStatsRepository,
     private val featureService: FeatureService
 ) {
+
+    @Transactional
+    fun getCurrentPlaceOnLeaderboards(currentXp: Int): Long {
+        return weekStatsRepository.findCountWithWithXpAbove(currentXp, LocalDate.now()) + 1
+    }
+
+    @Transactional
     fun getTopThreeUsers(): TopThreeDto? {
         if (featureService.isDisabled(FF4jFeature.LEADERBOARDS)) {
             LOGGER.info("Leaderboards feature disabled")
             return null
         }
+        val allCurrentStats = weekStatsRepository.findAllByDateBetween(LocalDate.now())
 
         return TopThreeDto(
-            getUserAtPosition(1),
-            getUserAtPosition(2),
-            getUserAtPosition(3)
+            getUserAtPosition(allCurrentStats.getOrNull(0)?.user, 0),
+            getUserAtPosition(allCurrentStats.getOrNull(1)?.user, 1),
+            getUserAtPosition(allCurrentStats.getOrNull(2)?.user, 2)
         )
     }
 
-    private fun getUserAtPosition(rank: Int): UserLeaderBoardDTO {
+    @Transactional
+    fun getAllLeaderBoardValues(): List<UserLeaderBoardGeneralDTO> {
+        if (featureService.isDisabled(FF4jFeature.LEADERBOARDS)) {
+            LOGGER.info("Leaderboards feature disabled")
+            return listOf()
+        }
+
+        val allCurrentStats = weekStatsRepository.findAllByDateBetween(LocalDate.now())
+
+        return allCurrentStats.mapIndexedNotNull { index, it -> buildUserLeadboardGeneralDTO(it, index + 1) }
+    }
+
+    private fun buildUserLeadboardGeneralDTO(weekStats: WeekStats, rank: Int): UserLeaderBoardGeneralDTO? {
+        return weekStats.user?.id?.let {
+            UserLeaderBoardGeneralDTO(
+                rank,
+                it,
+                weekStats.getTotalExperience()
+            )
+        }
+    }
+
+    private fun getUserAtPosition(user: User?, position: Int): UserLeaderBoardDTO? {
+        if (user == null) {
+            LOGGER.info("No user found for position $position")
+            if (position == -1) {
+                return null
+            }
+
+            return UserLeaderBoardDTO(
+                "Unclaimed",
+                0
+            )
+        }
+
         return UserLeaderBoardDTO(
-            "User $rank",
-            "Noob",
-            "Very good"
+            user.id,
+            user.getCurrentWeeksStats()!!.getTotalExperience()
         )
     }
 

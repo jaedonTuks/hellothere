@@ -1,0 +1,17 @@
+.gradiantBorderBottom::after {
+    content:'';
+    margin: 0 auto;
+    width:20%;
+    height:4px;
+    border-radius: 2px;
+    display: block;
+    background: -webkit-linear-gradient(
+            0.5turn,
+            rgba(135, 240, 252, 1),
+            rgba(191, 120, 251, 1),
+            rgba(250, 115, 198, 1));
+}
+
+.gradiantBorderBottomFullWidth::after {
+    width: 100% !important;
+}
