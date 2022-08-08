@@ -30,3 +30,23 @@ gmail:
         accessTokenUri: "https://oauth2.googleapis.com/token"
         clientAuthenticationScheme: "query"
         preferTokenInfo: true
+
+stats:
+    workingStartTime: "08:00:00"
+    workingEndTime: "17:00:00"
+    cutOffHours: 48
+    readConfig:
+        xp: 10
+        penalty: 5
+        cutOffPenalty: 8
+        leniencyMinutes: 60
+    labelConfig:
+        xp: 10
+        penalty: 5
+        cutOffPenalty: 8
+        leniencyMinutes: 60
+    replyConfig:
+        xp: 10
+        penalty: 5
+        cutOffPenalty: 8
+        leniencyMinutes: 60

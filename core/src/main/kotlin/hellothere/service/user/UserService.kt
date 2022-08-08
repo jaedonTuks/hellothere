@@ -3,14 +3,11 @@ package hellothere.service.user
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Profile
 import hellothere.dto.user.UserDto
-import hellothere.dto.user.WeekStatsDto
 import hellothere.model.user.Rank
 import hellothere.model.user.User
 import hellothere.model.user.UserAccessToken
-import hellothere.model.user.WeekStats
 import hellothere.repository.user.UserAccessTokenRepository
 import hellothere.repository.user.UserRepository
-import hellothere.repository.user.WeekStatsRepository
 import hellothere.service.google.GmailService
 import hellothere.service.label.LabelService
 import org.slf4j.Logger
@@ -18,14 +15,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoField
 
 @Service
 class UserService(
     private val labelService: LabelService,
     private val userRepository: UserRepository,
-    private val weekStatsRepository: WeekStatsRepository,
+    private val userStatsService: UserStatsService,
     private val userAccessTokenRepository: UserAccessTokenRepository,
 ) {
     fun getUserById(username: String): User? {
@@ -37,22 +32,16 @@ class UserService(
         return buildUserDto(user)
     }
 
+    @Transactional
     fun buildUserDto(user: User?): UserDto? {
         return user?.let {
             UserDto(
                 it.id,
                 it.rank,
-                buildWeekStatsDto(it.getCurrentWeeksStats())
-            )
-        }
-    }
-
-    fun buildWeekStatsDto(weekStats: WeekStats?): WeekStatsDto? {
-        return weekStats?.let {
-            WeekStatsDto(
-                it.experience,
-                it.startDate,
-                it.endDate
+                userStatsService.buildWeekStatsDto(it.getCurrentWeeksStats()),
+                userStatsService.buildWeekStatsDtos(it.weeklyStats),
+                userStatsService.getMessageTotalsSummary(user.id),
+                it.getTotalExperience()
             )
         }
     }
@@ -66,27 +55,12 @@ class UserService(
 
     @Transactional
     fun signupNewUser(newUserId: String, client: Gmail): User? {
-        val zonedDateTime = ZonedDateTime.now()
-        val firstOfWeek: ZonedDateTime =
-            zonedDateTime.with(ChronoField.DAY_OF_WEEK, 1) // ISO 8601, Monday is first day of week.
-        val firstOfNextWeek = firstOfWeek.plusWeeks(1).minusDays(1)
-
-        val newWeeklyStats = WeekStats(
-            null,
-            0,
-            firstOfWeek.toLocalDate(),
-            firstOfNextWeek.toLocalDate()
-        )
         val newUser = User(
             newUserId,
-            Rank.NOOB,
-            0,
-            listOf(newWeeklyStats)
+            Rank.NOOB
         )
-
         userRepository.save(newUser)
-        weekStatsRepository.save(newWeeklyStats)
-
+        userStatsService.createNewWeekStatsForUser(newUser)
         labelService.getLabels(client, newUserId)
 
         return newUser
