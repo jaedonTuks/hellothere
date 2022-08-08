@@ -34,21 +34,16 @@
         :series="getExperienceSeries()"
       />
       <StatsCard
-        title="Challenges Completed"
-        type="radialBar"
-        :series="getTotalsRadialSeries()"
-        :labels="getTotalsLabels()"
-      />
-      <StatsCard
         title="Interaction Overview"
         type="radialBar"
         :series="getTotalsRadialSeries()"
         :labels="getTotalsLabels()"
       />
-<!--      <StatsCard-->
-<!--        title="Bar"-->
-<!--        type="bar"-->
-<!--      />-->
+      <StatsCard
+        title="Challenges Completed"
+        type="radialBarPercentage"
+        :series="getChallengesCompletedPercentageSeries()"
+      />
     </v-row>
   </div>
 </template>
@@ -107,6 +102,11 @@ export default {
       return 'Complete challenges to earn badges';
     },
 
+    getChallengesCompletedPercentageSeries() {
+      // todo implement correctly
+      return [100];
+    },
+
     getTotalsRadialSeries() {
       return [
         this.totalRead,
@@ -131,7 +131,7 @@ export default {
 
       this.profileInfo.orderedWeekStats.forEach((stat, index) => {
         xpArray.push({
-          x: `Week ${index} xp`,
+          x: `Week ${index + 1} xp`,
           y: `${stat.experience} xp`,
         });
       });

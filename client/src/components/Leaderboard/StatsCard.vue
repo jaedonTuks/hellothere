@@ -4,7 +4,7 @@
       <v-card-title>{{ title }}</v-card-title>
       <v-card-text>
         <apexchart
-          :type="type"
+          :type="apexChartType"
           :options="chartOptions"
           :series="series"
         />
@@ -15,6 +15,34 @@
 <script type="module">
 export default {
   name: 'StatsCard',
+
+  data() {
+    return {
+      chartHeight: 350,
+      chartWidth: 380,
+      radialDataLabels: {
+        name: {
+          fontSize: '30px',
+          show: true,
+        },
+        value: {
+          color: '#FFF',
+          fontSize: '20px',
+          show: true,
+        },
+      },
+      legend: {
+        horizontalAlign: 'center',
+        show: true,
+        floating: true,
+        position: 'bottom',
+        fontSize: '20px',
+        labels: {
+          colors: ['#FFF'],
+        },
+      },
+    };
+  },
 
   props: {
     title: {
@@ -37,11 +65,24 @@ export default {
 
   computed: {
     chartOptions() {
-      if (this.type === 'radialBar') {
-        return this.getGenericRadialChartOptions();
+      switch (this.type) {
+        case 'radialBar':
+          return this.getGenericRadialChartOptions();
+        case 'radialBarPercentage':
+          return this.getGenericRadialBarProgressOptions();
+        default:
+          return this.getGenericBarChartOptions();
       }
+    },
 
-      return this.getGenericBarChartOptions();
+    apexChartType() {
+      switch (this.type) {
+        case 'radialBar':
+        case 'radialBarPercentage':
+          return 'radialBar';
+        default:
+          return 'bar';
+      }
     },
   },
 
@@ -51,8 +92,8 @@ export default {
       return {
         chart: {
           type: 'radialBar',
-          height: 350,
-          width: 380,
+          height: this.chartHeight,
+          width: this.chartWidth,
         },
         plotOptions: {
           radialBar: {
@@ -66,17 +107,7 @@ export default {
             track: {
               show: false,
             },
-            dataLabels: {
-              name: {
-                fontSize: '30px',
-                show: true,
-              },
-              value: {
-                color: '#FFF',
-                fontSize: '20px',
-                show: true,
-              },
-            },
+            dataLabels: this.radialDataLabels,
           },
           total: {
             show: true,
@@ -87,16 +118,7 @@ export default {
           lineCap: 'round',
         },
         labels: this.labels,
-        legend: {
-          horizontalAlign: 'center',
-          show: true,
-          floating: true,
-          position: 'bottom',
-          fontSize: '20px',
-          labels: {
-            colors: ['#FFF'],
-          },
-        },
+        legend: this.legend,
       };
     },
 
@@ -105,6 +127,9 @@ export default {
         chart: {
           height: 350,
           type: 'bar',
+          toolbar: {
+            show: false,
+          },
         },
         plotOptions: {
           bar: {
@@ -139,6 +164,77 @@ export default {
         },
       };
     },
+
+    getGenericRadialBarProgressOptions() {
+      return {
+        chart: {
+          height: 280,
+          type: 'radialBar',
+        },
+
+        series: [67],
+        colors: ['#87f0fc'],
+        plotOptions: {
+          radialBar: {
+            hollow: {
+              margin: 0,
+              size: '70%',
+              background: '#293450',
+            },
+            track: {
+              dropShadow: {
+                enabled: true,
+                top: 2,
+                left: 0,
+                blur: 4,
+                opacity: 0.15,
+              },
+            },
+            dataLabels: {
+              name: {
+                offsetY: -10,
+                color: '#fff',
+                fontSize: '20px',
+              },
+              value: {
+                color: '#fff',
+                fontSize: '30px',
+                show: true,
+              },
+            },
+          },
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shade: 'dark',
+            type: 'vertical',
+            colorStops: [
+              {
+                offset: 0,
+                color: '#87f0fc',
+                opacity: 1,
+              },
+              {
+                offset: 60,
+                color: '#bf78fb',
+                opacity: 1,
+              },
+              {
+                offset: 100,
+                color: '#fa73c6',
+                opacity: 1,
+              },
+            ],
+          },
+        },
+        stroke: {
+          lineCap: 'round',
+        },
+        labels: ['Challenges Completion'],
+      };
+    },
+
   },
 };
 </script>
