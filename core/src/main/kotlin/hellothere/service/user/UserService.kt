@@ -8,6 +8,7 @@ import hellothere.model.user.User
 import hellothere.model.user.UserAccessToken
 import hellothere.repository.user.UserAccessTokenRepository
 import hellothere.repository.user.UserRepository
+import hellothere.service.LeaderboardsService
 import hellothere.service.google.GmailService
 import hellothere.service.label.LabelService
 import org.slf4j.Logger
@@ -21,6 +22,7 @@ class UserService(
     private val labelService: LabelService,
     private val userRepository: UserRepository,
     private val userStatsService: UserStatsService,
+    private val leaderboardsService: LeaderboardsService,
     private val userAccessTokenRepository: UserAccessTokenRepository,
 ) {
     fun getUserById(username: String): User? {
@@ -35,10 +37,11 @@ class UserService(
     @Transactional
     fun buildUserDto(user: User?): UserDto? {
         return user?.let {
+            val currentWeekStats = it.getCurrentWeeksStats()
             UserDto(
                 it.id,
-                it.rank,
-                userStatsService.buildWeekStatsDto(it.getCurrentWeeksStats()),
+                leaderboardsService.getCurrentPlaceOnLeaderboards(currentWeekStats?.getTotalExperience() ?: 0),
+                userStatsService.buildWeekStatsDto(currentWeekStats),
                 userStatsService.buildWeekStatsDtos(it.weeklyStats),
                 userStatsService.getMessageTotalsSummary(user.id),
                 it.getTotalExperience()

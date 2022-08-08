@@ -4,9 +4,9 @@
     <h3 class="mt-4 mt-lg-1">Total XP: {{ profileInfo.totalExperience }}</h3>
     <h3 class="mt-4 mt-lg-1">This weeks XP: {{ currentWeekXP }}</h3>
     <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
+    <div class="mb-4 mt-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
 
-    <v-row class="borderTop mt-4 pa-2">
-
+    <v-row class="mt-4 pa-2">
       <v-col cols="12" lg="6">
         <h2 class="mt-5">Badges</h2>
         <div>{{ getBadges() }}</div>
@@ -19,8 +19,9 @@
         <h3>Weekly</h3>
       </v-col>
     </v-row>
+    <div class="mt-5 mb-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
 
-    <v-row class="borderTop pa-3">
+    <v-row class="pa-3">
       <h2>Weekly stats</h2>
     </v-row>
     <v-row>

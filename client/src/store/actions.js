@@ -24,6 +24,8 @@ const actions = {
 
   fetchLeaderboardTopThree: () => axios.get('/api/leaderboard/top-three'),
 
+  fetchFullLeaderboard: () => axios.get('/api/leaderboard/full-leaderboard'),
+
   fetchEmails: ({ commit }) => axios.get('/api/gmail/emails')
     .then((response) => {
       commit('setThreadsById', response.data);

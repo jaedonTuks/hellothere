@@ -121,7 +121,7 @@
           </v-slide-x-transition>
         </v-row>
       </v-toolbar>
-      <hr class="mb-4"/>
+      <div class="mb-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
       <v-expansion-panels dark class="expansionPanels">
         <v-expansion-panel
           v-for="emailThread in emailThreads"

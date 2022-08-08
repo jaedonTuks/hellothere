@@ -10,7 +10,7 @@ import hellothere.model.user.Rank
 // return xp
 data class UserDto(
     val username: String,
-    val rank: Rank,
+    val rank: Long,
     val currentWeekStats: WeekStatsDto?,
     val orderedWeekStats: List<WeekStatsDto> = listOf(),
     val messageTotalsSummary: MessageTotalsSummaryDTO? = null,

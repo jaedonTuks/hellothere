@@ -16,5 +16,20 @@ interface WeekStatsRepository : JpaRepository<WeekStats, Long> {
         @Param("date") date: LocalDate
     ): WeekStats?
 
+    @Query(
+        value = "select ws, (ws.labelWeekStat.experience + ws.readWeekStat.experience + ws.replyWeekStat.experience) as totalXP from WeekStats ws where ws.startDate <= :date and ws.endDate >= :date order by totalXP desc",
+    )
+    fun findAllByDateBetween(
+        @Param("date") date: LocalDate
+    ): List<WeekStats>
+
+    @Query(
+        value = "select count(ws) from WeekStats ws where ws.startDate <= :date and ws.endDate >= :date and ((ws.labelWeekStat.experience + ws.readWeekStat.experience + ws.replyWeekStat.experience) > :currentXP)",
+    )
+    fun findCountWithWithXpAbove(
+        @Param("currentXP") currentXP: Int,
+        @Param("date") date: LocalDate
+    ): Long
+
     fun findAllByUserId(userId: String): List<WeekStats>
 }
