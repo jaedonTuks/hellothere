@@ -1,10 +1,10 @@
-function getDefaultState() {
+export function getDefaultState() {
   return {
     composingEmail: false,
     isLoggedIn: true,
     loading: false,
     userProfile: {
-      username: '',
+      leaderboardUsername: '',
       rank: '',
       currentWeekStats: null,
     },

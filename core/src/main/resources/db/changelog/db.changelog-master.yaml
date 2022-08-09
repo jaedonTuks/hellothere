@@ -47,3 +47,10 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: db/changelog/migrations/12__user_stats.sql
+
+  - changeSet:
+      id: 20__general_improvements.sql
+      author: Jaedon Heger
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/20__general_improvements.sql

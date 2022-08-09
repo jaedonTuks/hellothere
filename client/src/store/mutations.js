@@ -1,3 +1,5 @@
+import { getDefaultState } from '@/store/state';
+
 const mutations = {
   setIsLoggedIn: (state, isLoggedIn) => {
     state.isLoggedIn = isLoggedIn;
@@ -66,6 +68,14 @@ const mutations = {
 
   prependToCurrentThreadIds: (state, newId) => {
     state.currentThreadIds.unshift(newId);
+  },
+
+  setProfileLeaderboardUsername: (state, newName) => {
+    state.profile.leaderboardUsername = newName;
+  },
+
+  resetToDefault: (state) => {
+    Object.assign(state, getDefaultState());
   },
 
 };

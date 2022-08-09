@@ -58,6 +58,9 @@
               @change="updateSelectAll"
             />
           </v-col>
+          <v-col cols="1" class="pt-4 selectedIndicator">
+            {{selectedEmailIds.length}} selected
+          </v-col>
           <v-slide-x-transition>
             <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
               <v-menu
@@ -117,6 +120,39 @@
                   </v-col>
                 </v-row>
               </v-menu>
+            </v-col>
+          </v-slide-x-transition>
+
+          <v-slide-x-transition>
+            <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="markAsSpam"
+                  >
+                    mdi-email-off-outline
+                  </v-icon>
+                </template>
+                <span>Mark as spam</span>
+              </v-tooltip>
+            </v-col>
+          </v-slide-x-transition>
+          <v-slide-x-transition>
+            <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="markAsTrash"
+                  >
+                    mdi-delete
+                  </v-icon>
+                </template>
+                <span>Delete</span>
+              </v-tooltip>
             </v-col>
           </v-slide-x-transition>
         </v-row>
@@ -226,6 +262,16 @@ export default {
       } catch (e) {
         console.error(e);
       }
+    },
+
+    markAsSpam() {
+      this.addLabels = ['SPAM'];
+      this.sendAddLabelsRequest();
+    },
+
+    markAsTrash() {
+      this.addLabels = ['TRASH'];
+      this.sendAddLabelsRequest();
     },
 
     sendAddLabelsRequest() {
@@ -340,6 +386,10 @@ export default {
 </script>
 
 <style scoped>
+.selectedIndicator {
+
+}
+
 .leftBorder {
   border-left: 2px solid var(--v-secondary-base) !important;
 }
@@ -371,10 +421,10 @@ export default {
 }
 
 .toolbarBottomBorder {
-  content:''!important;
-  width:200px!important;
-  height:20px!important;
-  color: red!important;
-  display: block!important;
+  content: '' !important;
+  width: 200px !important;
+  height: 20px !important;
+  color: red !important;
+  display: block !important;
 }
 </style>

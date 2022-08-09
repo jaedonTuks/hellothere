@@ -6,13 +6,11 @@ import hellothere.service.security.SecurityService.Companion.JWT_TOKEN_COOKIE_NA
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
-import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
 @Service
@@ -39,7 +37,7 @@ class JwtTokenService(
 
     fun createClaimsFromUser(user: UserDto): Claims {
         val claims = Jwts.claims()
-        claims.subject = user.username
+        claims.subject = user.email
         return claims
     }
 
