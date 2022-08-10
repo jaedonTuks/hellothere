@@ -3,6 +3,7 @@ export function getDefaultState() {
     composingEmail: false,
     isLoggedIn: true,
     loading: false,
+    challenges: [],
     userProfile: {
       leaderboardUsername: '',
       rank: '',

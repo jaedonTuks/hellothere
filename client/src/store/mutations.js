@@ -78,6 +78,16 @@ const mutations = {
     Object.assign(state, getDefaultState());
   },
 
+  setUserChallenges: (state, challenges) => {
+    state.challenges = challenges;
+  },
+
+  setUserChallengesById: (state, challenge) => {
+    const index = state.challenges.findIndex(
+      (storedChallenge) => storedChallenge.challengeId === challenge.challengeId,
+    );
+    state.challenges = state.challenges.splice(index, 1, challenge);
+  },
 };
 
 export default mutations;

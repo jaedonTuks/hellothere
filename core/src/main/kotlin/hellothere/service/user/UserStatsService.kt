@@ -1,17 +1,21 @@
 package hellothere.service.user
 
 import hellothere.config.stats.StatsConfig
+import hellothere.dto.UserChallengeDTO
 import hellothere.dto.stats.MessageTotalsSummaryDTO
 import hellothere.dto.user.WeekStatsDto
 import hellothere.model.email.UserEmail
 import hellothere.model.stats.WeekStats
-import hellothere.model.stats.category.*
+import hellothere.model.stats.category.LabelWeekStat
+import hellothere.model.stats.category.ReadWeekStat
+import hellothere.model.stats.category.ReplyWeekStat
+import hellothere.model.stats.category.StatCategory
 import hellothere.model.user.User
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.user.UserRepository
 import hellothere.repository.user.WeekStatsRepository
-import hellothere.service.FeatureService
-import liquibase.pro.packaged.it
+import hellothere.requests.challenge.ClaimChallengeRewardRequest
+import hellothere.service.challenge.ChallengeService
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -27,12 +31,11 @@ class UserStatsService(
     private val userRepository: UserRepository,
     private val userEmailRepository: UserEmailRepository,
     private val weekStatsRepository: WeekStatsRepository,
-    private val featureService: FeatureService,
+    private val challengeService: ChallengeService,
     private val statsConfig: StatsConfig
 ) {
     @Transactional
     fun createNewWeekStatsForUser(user: User): WeekStats {
-
         LOGGER.info("Creating new week stats for user: ${user.id}")
         val zonedDateTime = ZonedDateTime.now()
         val lastStatsEndDate = user.weeklyStats.lastOrNull()?.endDate
@@ -77,9 +80,35 @@ class UserStatsService(
         }
 
         val moreXp = calculateActionXP(workingMessages, statCategory)
+        challengeService.updateUserChallenges(username, statCategory)
         val weekStats = getOrCreateThisWeeksStats(username)
+        updateStats(moreXp, username, statCategory, weekStats, messages)
+    }
 
-        if (weekStats?.addXP(moreXp, statCategory) == true) {
+    @Transactional
+    fun claimChallengeRewards(claimChallengeRewardRequest: ClaimChallengeRewardRequest): UserChallengeDTO? {
+        val userChallengeClaimed = challengeService.claimUserChallengeRewardAndReturnXP(claimChallengeRewardRequest)
+            ?: return null
+
+        val weekStats = getOrCreateThisWeeksStats(claimChallengeRewardRequest.username)
+        updateStats(
+            userChallengeClaimed.challenge!!.reward,
+            claimChallengeRewardRequest.username,
+            StatCategory.CHALLENGE,
+            weekStats,
+            listOf()
+        )
+        return challengeService.buildUserChallengeDTO(userChallengeClaimed)
+    }
+
+    private fun updateStats(
+        moreXp: Int,
+        username: String,
+        statCategory: StatCategory,
+        weekStats: WeekStats?,
+        messages: List<UserEmail>
+    ) {
+        if (weekStats?.addXP((moreXp), statCategory) == true) {
             weekStatsRepository.save(weekStats)
             markMessagesAsCompletedCategory(messages, statCategory)
             LOGGER.info("Finished adding $moreXp xp for to user {$username} for category $statCategory")
@@ -110,6 +139,7 @@ class UserStatsService(
             StatCategory.READ -> statsConfig.readConfig
             StatCategory.LABEL -> statsConfig.labelConfig
             StatCategory.REPLY -> statsConfig.replyConfig
+            else -> StatsConfig.StatConfigItem()
         }
 
         var totalXp = actionConfig.xp * messages.size
@@ -135,6 +165,7 @@ class UserStatsService(
             StatCategory.READ -> statsConfig.readConfig.leniencyMinutes
             StatCategory.LABEL -> statsConfig.labelConfig.leniencyMinutes
             StatCategory.REPLY -> statsConfig.replyConfig.leniencyMinutes
+            else -> 0
         }
 
         val startWorkingTime = LocalTime.parse(statsConfig.workingStartTime)
@@ -151,6 +182,10 @@ class UserStatsService(
 
     @Transactional
     fun markMessagesAsCompletedCategory(messages: List<UserEmail>, category: StatCategory) {
+        if (messages.isEmpty()) {
+            return
+        }
+
         messages.forEach {
             it.markCompletedCategoryXP(category)
         }

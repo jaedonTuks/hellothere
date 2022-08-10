@@ -28,23 +28,15 @@
       <v-col cols="12">
         <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
       </v-col>
-    </v-row>
-
-    <v-btn class="mt-4  mr-2" color="secondary" @click="logout">Logout</v-btn>
-    <div class="mb-4 mt-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
-    <v-row class="mt-4 pa-2">
       <v-col cols="12" lg="6">
         <h2 class="mt-5">Badges</h2>
         <div>{{ getBadges() }}</div>
       </v-col>
-      <v-col cols="12" lg="6">
-        <h2 class="mt-5">Challenges</h2>
-
-        <h3>Generals</h3>
-        <h3>Daily</h3>
-        <h3>Weekly</h3>
-      </v-col>
     </v-row>
+
+    <v-btn class="mt-4  mr-2" color="secondary" @click="logout">Logout</v-btn>
+    <div class="mb-4 mt-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
+    <ChallengesOverview/>
     <div class="mt-5 mb-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
 
     <v-row class="pa-3">
@@ -61,7 +53,7 @@
         :series="getExperienceSeries()"
       />
       <StatsCard
-        title="Interaction Overview"
+        title="Emails Overview"
         type="radialBar"
         :series="getTotalsRadialSeries()"
         :labels="getTotalsLabels()"
@@ -77,13 +69,15 @@
 
 <script>
 import StatsCard from '@/components/Leaderboard/StatsCard.vue';
-import { mapActions, mapGetters } from 'vuex';
+import ChallengesOverview from '@/components/challenge/ChallengesOverview.vue';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import ScreenSizeMixin from '@/mixins/screenSizeMixin';
+import calculationsMixin from '@/mixins/calculationsMixin';
 
 export default {
   name: 'Profile',
-  components: { StatsCard },
-  mixins: [ScreenSizeMixin],
+  components: { StatsCard, ChallengesOverview },
+  mixins: [ScreenSizeMixin, calculationsMixin],
 
   data() {
     return {
@@ -94,7 +88,8 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getProfile']),
+    ...mapGetters(['getProfile', 'getCompletedChallenges']),
+    ...mapState(['challenges']),
 
     currentWeekXP() {
       if (this.profileInfo && this.profileInfo.currentWeekStats) {
@@ -115,13 +110,21 @@ export default {
     totalReplied() {
       return this.getTotalsPercentage(this.profileInfo.messageTotalsSummary.totalReplied);
     },
+
+    challengesCompleted() {
+      return this.getCompletedChallenges().length;
+    },
+
+    challengesCount() {
+      return this.challenges.length;
+    },
   },
 
   methods: {
     ...mapActions(['fetchUserInfo', 'sendLogoutRequest', 'sendUpdateUsernameRequest']),
 
     getTotalsPercentage(value) {
-      return Math.round((value / this.profileInfo.messageTotalsSummary.totalEmails) * 100);
+      return this.getPercentage(value, this.profileInfo.messageTotalsSummary.totalEmails);
     },
 
     getBadges() {
@@ -133,7 +136,7 @@ export default {
 
     getChallengesCompletedPercentageSeries() {
       // todo implement correctly
-      return [100];
+      return [this.getPercentage(this.challengesCompleted, this.challengesCount)];
     },
 
     getTotalsRadialSeries() {
