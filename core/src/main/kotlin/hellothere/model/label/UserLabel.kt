@@ -12,11 +12,15 @@ class UserLabel(
     @Column(name = "name")
     val name: String,
 
+    @Column(name = "color")
+    val color: String = "#FFF",
+
     @Column(name = "unread_threads")
     val unreadThreads: Int,
 
     @ManyToOne
     @MapsId("app_user")
     @JoinColumn(name = "app_user")
-    val user: User? = null
+    val user: User? = null,
+
 )

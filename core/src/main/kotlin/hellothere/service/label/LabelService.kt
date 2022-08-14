@@ -14,6 +14,7 @@ import hellothere.repository.user.UserRepository
 import hellothere.requests.label.UpdateLabelsRequest
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -43,8 +44,8 @@ class LabelService(
         }
 
         val newLabels = fetchAndCacheLabels(labelIdsToFetch, client, username)
-
-        return (newLabels + cachedLabels).map {
+        // todo find a way to add categories back in
+        return (newLabels + cachedLabels).filter { !it.name.contains("CATEGORY_") }.map {
             buildLabelDto(it)
         }
     }
@@ -72,6 +73,7 @@ class LabelService(
             UserLabel(
                 UserLabelId(it.id, user.id),
                 it.name,
+                it.color?.backgroundColor ?: "#FFF",
                 it.threadsUnread,
                 user
             )
@@ -102,8 +104,10 @@ class LabelService(
 
     fun buildLabelDto(label: UserLabel): LabelDto {
         return LabelDto(
+            label.id.gmailId,
             label.name,
-            label.unreadThreads
+            label.unreadThreads,
+            label.color
         )
     }
 
@@ -208,8 +212,8 @@ class LabelService(
         labelsToRemove: List<String>,
         username: String
     ): Pair<List<UserLabel>, List<UserLabel>>? {
-        val cachedAddLabels = getCachedLabelsByNameAndUser(labelsToAdd, username)
-        val cachedRemoveLabels = getCachedLabelsByNameAndUser(labelsToRemove, username)
+        val cachedAddLabels = getCachedLabelsByIdAndUser(labelsToAdd, username)
+        val cachedRemoveLabels = getCachedLabelsByIdAndUser(labelsToRemove, username)
 
         if (cachedAddLabels.isEmpty()) {
             LOGGER.info("Skipping adding labels to thread")
@@ -228,6 +232,10 @@ class LabelService(
 
     private fun getCachedLabelsByNameAndUser(labelNames: List<String>, username: String): List<UserLabel> {
         return userLabelRepository.findAllByUserIdAndNameInIgnoreCase(username, labelNames)
+    }
+
+    private fun getCachedLabelsByIdAndUser(labelIds: List<String>, username: String): List<UserLabel> {
+        return userLabelRepository.findAllByUserIdAndIdGmailIdInIgnoreCase(username, labelIds)
     }
 
     companion object {

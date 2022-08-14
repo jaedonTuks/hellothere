@@ -10,4 +10,5 @@ interface UserLabelRepository : JpaRepository<UserLabel, UserLabelId> {
     fun findAllByIdIn(ids: List<UserLabelId>): List<UserLabel>
     fun findAllByUserId(userId: String): List<UserLabel>
     fun findAllByUserIdAndNameInIgnoreCase(userId: String, names: List<String>): List<UserLabel>
+    fun findAllByUserIdAndIdGmailIdInIgnoreCase(userId: String, ids: List<String>): List<UserLabel>
 }

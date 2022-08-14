@@ -66,7 +66,9 @@
                             @change="newLabelSelected($event, label)"
                           />
                         </v-list-item-action>
-                        <v-list-item-title>{{ label }}</v-list-item-title>
+                        <v-list-item-title :style="{ 'color': label.color }">
+                          {{ label.name }}
+                        </v-list-item-title>
                       </v-list-item>
                     </v-list>
                     <v-row justify="end" class="backgroundDark pa-3">
@@ -142,7 +144,6 @@
               v-model="searchString"
               label="Search"
               append-icon="mdi-magnify"
-              :loading="searchingEmails"
               :disabled="filteringEmails || searchingEmails"
               @keyup.enter="search(true)"
             />
@@ -156,20 +157,31 @@
         center-active
         background-color="background"
         class="mb-4"
+        :slider-color="selectedLabelData.color"
         @change="changeLabelView()"
       >
         <v-tab>
-          <v-icon class="mr-2">mdi-label</v-icon> All
+          <v-icon class="mr-2">mdi-label</v-icon>
+          All
         </v-tab>
         <v-tab
           v-for="label in labels"
-          :key="label"
+          :key="label.name"
           class="mdi-format-text-wrapping-overflow"
         >
-          <v-icon class="mr-2">mdi-label</v-icon> {{label}}
+          <v-icon :color="label.color" class="mr-2">mdi-label</v-icon>
+          {{ label.name }}
         </v-tab>
       </v-tabs>
-      <v-expansion-panels dark class="expansionPanels">
+      <v-expansion-panels
+        dark
+        class="expansionPanels"
+      >
+        <v-progress-linear
+          v-show="filteringEmails || this.searchingEmails"
+          indeterminate
+          color="primary"
+        />
         <v-expansion-panel
           v-for="emailThread in emailThreads"
           class="expansionPanel"
@@ -237,15 +249,18 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getProfile', 'getEmailThread', 'getEmailThreads', 'getLabelNames']),
+    ...mapGetters(['getProfile', 'getEmailThread', 'getEmailThreads', 'getLabels', 'getLabelNames']),
 
     toolbarActionsDisabled() {
       return this.selectedEmailIds.length === 0;
     },
 
-    selectedLabelView() {
+    selectedLabelData() {
       if (this.selectedLabel === 0) {
-        return '';
+        return {
+          name: '',
+          color: '#FFF',
+        };
       }
       const selectedLabelIndex = this.selectedLabel - 1;
       return this.labels[selectedLabelIndex];
@@ -285,7 +300,7 @@ export default {
 
       const payload = {
         searchString: this.searchString,
-        labels: this.selectedLabelView,
+        labels: this.selectedLabelData.name,
       };
 
       this.searchEmails(payload)
@@ -382,19 +397,26 @@ export default {
 
     newLabelSelected(selected, label) {
       if (selected) {
-        this.addLabels.push(label);
+        this.addLabels.push(label.id);
       } else {
         this.addLabels = this.addLabels.filter(
-          (selectedEmailId) => selectedEmailId !== label,
+          (selectedLabelId) => selectedLabelId !== label.id,
         );
       }
+    },
+
+    // styling
+    getLabelColor(label) {
+      return {
+        color: `#${label.color}`,
+      };
     },
   },
 
   created() {
     this.setLoading(true);
     this.fetchLabels().then(() => {
-      this.labels = this.getLabelNames();
+      this.labels = this.getLabels();
     });
     this.fetchEmails()
       .finally(() => {

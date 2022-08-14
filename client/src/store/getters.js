@@ -2,7 +2,13 @@
 const getters = {
   getProfile: (state) => () => state.userProfile,
 
-  getLabelNames: (state) => () => state.labels.map ((label) => label.name[0].toUpperCase() + label.name.substring(1).toLowerCase()),
+  getLabelNames: (state) => () => state.labels.map ((label) => label.name),
+
+  getLabels: (state) => () => state.labels,
+
+  getLabelById: (state) => (labelId) => state.labels.find((label)=>label.name === labelId),
+
+  getLabelByName: (state) => (labelName) => state.labels.find((label) => label.name.toLowerCase() === labelName),
 
   getEmailThreads: (state) => () => Object.entries(state.threadsById).filter((threadById) => {
     const [key] = threadById;

@@ -24,6 +24,10 @@ data class EmailThreadDto(
         if (from.contains("no") && from.contains("reply")) {
             enrichedLabelIds.add(EnrichedLabel.NO_REPLY.value)
         }
+
+        // todo come back later
+        enrichedLabelIds.filter { !it.lowercase().contains("category_") }
+
         return enrichedLabelIds
     }
 
