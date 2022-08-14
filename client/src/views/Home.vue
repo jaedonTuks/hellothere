@@ -57,7 +57,7 @@
                         Manage label
                       </v-list-item-title>
                       <v-list-item
-                        v-for="(label, index) in labels"
+                        v-for="(label, index) in manageableLabels"
                         :key="index"
                       >
                         <v-list-item-action>
@@ -253,6 +253,10 @@ export default {
 
     toolbarActionsDisabled() {
       return this.selectedEmailIds.length === 0;
+    },
+
+    manageableLabels() {
+      return this.labels.filter((label) => label.isManageable);
     },
 
     selectedLabelData() {

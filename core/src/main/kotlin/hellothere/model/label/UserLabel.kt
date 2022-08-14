@@ -18,9 +18,26 @@ class UserLabel(
     @Column(name = "unread_threads")
     val unreadThreads: Int,
 
+    @Column(name = "is_manageable")
+    val isManageable: Boolean,
+
     @ManyToOne
     @MapsId("app_user")
     @JoinColumn(name = "app_user")
     val user: User? = null,
+) {
+    companion object {
+        private val nonManageableIds = listOf(
+            "INBOX",
+            "UNREAD",
+            "SPAM",
+            "TRASH",
+            "SENT",
+            "DRAFT"
+        )
 
-)
+        fun isManageableId(id: String): Boolean {
+            return !nonManageableIds.contains(id)
+        }
+    }
+}

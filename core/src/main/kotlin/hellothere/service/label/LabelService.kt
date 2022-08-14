@@ -1,17 +1,21 @@
 package hellothere.service.label
 
+import com.google.api.client.googleapis.batch.json.JsonBatchCallback
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.BatchModifyMessagesRequest
+import com.google.api.services.gmail.model.Label
 import hellothere.dto.label.LabelDto
 import hellothere.dto.label.LabelUpdateDto
 import hellothere.model.email.UserEmail
 import hellothere.model.label.UserLabel
+import hellothere.model.label.UserLabel.Companion.isManageableId
 import hellothere.model.label.UserLabelId
 import hellothere.model.stats.category.StatCategory
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
 import hellothere.requests.label.UpdateLabelsRequest
+import hellothere.service.google.BatchCallbacks.LabelBatchCallback
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
 import liquibase.pro.packaged.it
@@ -61,20 +65,26 @@ class LabelService(
             LOGGER.warn("No user found for username $username. ")
             return listOf()
         }
+        val labels = mutableListOf<Label>()
 
-        val labels = labelIds.map {
+        val batchRequest = client.batch()
+        val callback = LabelBatchCallback(labels)
+
+        labelIds.forEach { labelId ->
             client.users()
                 .Labels()
-                .get(USER_SELF_ACCESS, it)
-                .execute()
+                .get(USER_SELF_ACCESS, labelId)
+                .queue(batchRequest, callback)
         }
+        batchRequest.execute()
 
         val labelsToSave = labels.map {
             UserLabel(
                 UserLabelId(it.id, user.id),
-                it.name,
+                it.name.replace("CATEGORY_",""),
                 it.color?.backgroundColor ?: "#FFF",
                 it.threadsUnread,
+                isManageableId(it.id),
                 user
             )
         }
@@ -107,7 +117,8 @@ class LabelService(
             label.id.gmailId,
             label.name,
             label.unreadThreads,
-            label.color
+            label.color,
+            label.isManageable
         )
     }
 

@@ -17,6 +17,8 @@ import hellothere.repository.email.UserEmailRepository
 import hellothere.requests.email.ReplyRequest
 import hellothere.requests.email.SendRequest
 import hellothere.service.ConversionService
+import hellothere.service.google.BatchCallbacks.MessageBatchCallback
+import hellothere.service.google.BatchCallbacks.ThreadBatchCallback
 import hellothere.service.label.LabelService
 import hellothere.service.user.UserService
 import hellothere.service.user.UserStatsService
@@ -181,16 +183,21 @@ class GmailService(
         format: EmailFormat,
         client: Gmail
     ): MutableList<Message> {
-        // todo explore client.batch() in beta version
-        // will require you to build your own http request
-        return ids.map {
-            client
-                .users()
+        val messageList = mutableListOf<Message>()
+        val batchRequest = client.batch()
+        val callback = MessageBatchCallback(messageList)
+
+        ids.forEach {
+            client.users()
                 .messages()
                 .get(USER_SELF_ACCESS, it)
                 .setFormat(format.value)
-                .execute()
-        }.toMutableList()
+                .queue(batchRequest, callback)
+        }
+
+        batchRequest.execute()
+
+        return messageList
     }
 
     private fun getMutableThreadsList(
@@ -198,16 +205,21 @@ class GmailService(
         format: EmailFormat,
         client: Gmail
     ): MutableList<com.google.api.services.gmail.model.Thread> {
-        // todo explore client.batch() in beta version
-        // will require you to build your own http request
-        return ids.map {
-            client
-                .users()
+        val threadList = mutableListOf<com.google.api.services.gmail.model.Thread>()
+        val batchRequest = client.batch()
+        val callback = ThreadBatchCallback(threadList)
+
+        ids.forEach {
+            client.users()
                 .threads()
                 .get(USER_SELF_ACCESS, it)
                 .setFormat(format.value)
-                .execute()
-        }.toMutableList()
+                .queue(batchRequest, callback)
+        }
+
+        batchRequest.execute()
+
+        return threadList
     }
 
     @Transactional

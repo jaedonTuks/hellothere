@@ -166,6 +166,7 @@ export default {
   },
 
   created() {
+    // todo verify if this works
     this.labels = this.getLabelNames();
     if (this.labels.length === 0) {
       this.fetchLabels().then(() => {
