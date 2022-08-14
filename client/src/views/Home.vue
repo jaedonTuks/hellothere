@@ -48,7 +48,7 @@
         color="background"
         elevation="0"
       >
-        <v-row class="mt-4">
+        <v-row class="mt-4" align-content="start">
           <v-col cols="1">
             <v-checkbox
               v-model="allSelected"
@@ -59,7 +59,7 @@
             />
           </v-col>
           <v-col cols="1" class="pt-4 selectedIndicator">
-            {{selectedEmailIds.length}} selected
+            {{ selectedEmailIds.length }} selected
           </v-col>
           <v-slide-x-transition>
             <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
@@ -127,13 +127,19 @@
             <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
-                  <v-icon
+                  <v-btn
+                    dark
+                    small
+                    class="mt-0"
+                    color="background"
+                    elevation="0"
                     v-bind="attrs"
                     v-on="on"
+                    :loading="isMarkAsSpamLoading"
                     @click="markAsSpam"
                   >
-                    mdi-email-off-outline
-                  </v-icon>
+                    <v-icon>mdi-email-off-outline</v-icon>
+                  </v-btn>
                 </template>
                 <span>Mark as spam</span>
               </v-tooltip>
@@ -143,13 +149,19 @@
             <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
-                  <v-icon
+                  <v-btn
+                    dark
+                    small
+                    class="mt-0"
+                    color="background"
+                    elevation="0"
                     v-bind="attrs"
                     v-on="on"
+                    :loading="isMarkAsTrashLoading"
                     @click="markAsTrash"
                   >
-                    mdi-delete
-                  </v-icon>
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
                 </template>
                 <span>Delete</span>
               </v-tooltip>
@@ -205,6 +217,8 @@ export default {
     return {
       isLabelMenuOpen: false,
       allSelected: false,
+      isMarkAsSpamLoading: false,
+      isMarkAsTrashLoading: false,
       ownUsername: null,
       labels: [],
       emailThreads: [],
@@ -265,11 +279,13 @@ export default {
     },
 
     markAsSpam() {
+      this.isMarkAsSpamLoading = true;
       this.addLabels = ['SPAM'];
       this.sendAddLabelsRequest();
     },
 
     markAsTrash() {
+      this.isMarkAsTrashLoading = true;
       this.addLabels = ['TRASH'];
       this.sendAddLabelsRequest();
     },
@@ -288,6 +304,8 @@ export default {
         }).finally(() => {
           this.resetLabelSelections();
           this.labelChangeLoading = false;
+          this.isMarkAsSpamLoading = false;
+          this.isMarkAsTrashLoading = false;
         });
     },
 
