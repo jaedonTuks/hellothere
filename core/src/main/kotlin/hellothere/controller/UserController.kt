@@ -2,8 +2,10 @@ package hellothere.controller
 
 import hellothere.annotation.RequiresFeatureAspect
 import hellothere.config.RestUrl.USER
+import hellothere.dto.UserChallengeDTO
 import hellothere.dto.user.UserDto
 import hellothere.requests.user.UpdateUsernameRequest
+import hellothere.service.challenge.ChallengeService
 import hellothere.service.security.SecurityService
 import hellothere.service.user.UserService
 import liquibase.pro.packaged.it
@@ -18,6 +20,7 @@ import javax.servlet.http.HttpServletRequest
 @RequestMapping(USER)
 class UserController(
     private val userService: UserService,
+    private val challengeService: ChallengeService,
     private val securityService: SecurityService
 ) {
     @GetMapping
@@ -32,6 +35,18 @@ class UserController(
         return userService.getUserDto(username)?.let {
             ResponseEntity.ok(it)
         } ?: ResponseEntity.notFound().build()
+    }
+
+    @GetMapping("/challenges")
+    fun getUserChallenges(
+        request: HttpServletRequest
+    ): ResponseEntity<List<UserChallengeDTO>> {
+        val username = securityService.getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        LOGGER.debug("Fetching user challenges for {$username}")
+
+        return ResponseEntity.ok(challengeService.getUserChallengesDTO(username))
     }
 
     @PostMapping("/edit-username")

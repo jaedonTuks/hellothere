@@ -8,5 +8,6 @@ data class WeekStatsDto(
     val experience: Int = 0,
     val readExperience: Int = 0,
     val labelExperience: Int = 0,
-    val replyExperience: Int = 0
+    val replyExperience: Int = 0,
+    val challengeExperience: Int = 0
 )

@@ -26,7 +26,15 @@ const getters = {
 
   getThreadLabels: (state) => (id) => {
     return state.threadsById[id].labelIds
-  }
+  },
+
+  getCompletedChallenges: (state) => () => {
+    return state.challenges.filter((challenge)=> challenge.goal <= challenge.progress)
+  },
+
+  getChallenge: (state) => (challengeId) => {
+    return state.challenges.find((stateChallenge) => stateChallenge.challengeId === challengeId)
+  },
 };
 
 export default getters;

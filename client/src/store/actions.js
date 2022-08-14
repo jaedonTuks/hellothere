@@ -112,6 +112,27 @@ const actions = {
       console.error(e);
     }),
 
+  fetchUserChallenges: ({ commit }) => axios.get('/api/challenge')
+    .then((response) => {
+      commit('setUserChallenges', response.data);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
+  claimUserChallengeReward: ({ commit }, challengeId) => axios.get(`/api/challenge/claim-reward/${challengeId}`)
+    .then((response) => {
+      commit('setUserChallengesById', response.data);
+      commit('updateUserProfileXP', response.data);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
   sendUpdateUsernameRequest: ({ commit }, payload) => axios.post('/api/user/edit-username', payload)
     .then((response) => {
       commit('setProfileLeaderboardUsername', response.data);

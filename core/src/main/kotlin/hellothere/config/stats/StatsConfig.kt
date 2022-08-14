@@ -13,9 +13,9 @@ class StatsConfig {
     var replyConfig: StatConfigItem = StatConfigItem()
 
     class StatConfigItem {
-        var xp = 10
-        var penalty = 5
-        var cutOffPenalty = 8
+        var xp = 0
+        var penalty = 0
+        var cutOffPenalty = 0
         var leniencyMinutes = 60L
     }
 }

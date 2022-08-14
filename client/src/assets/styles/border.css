@@ -15,3 +15,8 @@
 .gradiantBorderBottomFullWidth::after {
     width: 100% !important;
 }
+
+.borderBottom {
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--v-secondary-base) !important;
+}

@@ -9,6 +9,7 @@ import hellothere.repository.user.UserAccessTokenRepository
 import hellothere.repository.user.UserRepository
 import hellothere.requests.user.UpdateUsernameRequest
 import hellothere.service.LeaderboardsService
+import hellothere.service.challenge.ChallengeService
 import hellothere.service.google.GmailService
 import hellothere.service.label.LabelService
 import org.slf4j.Logger
@@ -19,10 +20,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserService(
-    private val labelService: LabelService,
     private val userRepository: UserRepository,
+    private val labelService: LabelService,
     private val userStatsService: UserStatsService,
     private val leaderboardsService: LeaderboardsService,
+    private val challengeService: ChallengeService,
     private val userAccessTokenRepository: UserAccessTokenRepository,
 ) {
     fun getUserById(username: String): User? {
@@ -65,6 +67,7 @@ class UserService(
         )
         userRepository.save(newUser)
         userStatsService.createNewWeekStatsForUser(newUser)
+        challengeService.createUsersDefaultChallenges(newUser)
         labelService.getLabels(client, newUserId)
 
         return newUser

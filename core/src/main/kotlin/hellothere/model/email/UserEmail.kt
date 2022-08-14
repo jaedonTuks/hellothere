@@ -73,12 +73,13 @@ class UserEmail(
             StatCategory.READ -> readXpAllocatedDate
             StatCategory.LABEL -> labelXPAllocatedDate
             StatCategory.REPLY -> replyXPAllocatedDate
+            else -> null
         }
         return actionDate != null
     }
 
     fun setCategoryXp(isReply: Boolean, lastSavedMessage: UserEmail?) {
-        val replyAndReadDate = if(isReply) {
+        val replyAndReadDate = if (isReply) {
             LocalDateTime.now()
         } else {
             null

@@ -6,4 +6,5 @@ object RestUrl {
     const val GMAIL = "$ROOT_URL/gmail"
     const val LABEL = "$ROOT_URL/label"
     const val USER = "$ROOT_URL/user"
+    const val CHALLENGE = "$ROOT_URL/challenge"
 }

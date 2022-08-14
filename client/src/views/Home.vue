@@ -394,11 +394,6 @@ export default {
   border-left: 2px solid var(--v-secondary-base) !important;
 }
 
-.borderBottom {
-  padding-bottom: 5px;
-  border-bottom: 1px solid var(--v-secondary-base) !important;
-}
-
 .borderTop {
   border-top: 2px solid var(--v-info-darken4) !important;
 }

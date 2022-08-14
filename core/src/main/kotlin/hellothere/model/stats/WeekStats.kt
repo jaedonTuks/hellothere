@@ -28,6 +28,9 @@ class WeekStats(
     @OneToOne(cascade = [CascadeType.ALL])
     val replyWeekStat: ReplyWeekStat,
 
+    @OneToOne(cascade = [CascadeType.ALL])
+    val challengeWeekStat: ChallengeWeekStat,
+
     @ManyToOne
     @JoinColumn(name = "app_user")
     var user: User? = null
@@ -43,6 +46,7 @@ class WeekStats(
                 StatCategory.READ -> readWeekStat.addXP(increaseAmount)
                 StatCategory.LABEL -> labelWeekStat.addXP(increaseAmount)
                 StatCategory.REPLY -> replyWeekStat.addXP(increaseAmount)
+                StatCategory.CHALLENGE -> challengeWeekStat.addXP(increaseAmount)
             }
         }
 
@@ -50,6 +54,6 @@ class WeekStats(
     }
 
     fun getTotalExperience(): Int {
-        return readWeekStat.experience + labelWeekStat.experience + replyWeekStat.experience
+        return readWeekStat.experience + labelWeekStat.experience + replyWeekStat.experience + challengeWeekStat.experience
     }
 }
