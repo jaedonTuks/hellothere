@@ -6,10 +6,7 @@ import hellothere.dto.stats.MessageTotalsSummaryDTO
 import hellothere.dto.user.WeekStatsDto
 import hellothere.model.email.UserEmail
 import hellothere.model.stats.WeekStats
-import hellothere.model.stats.category.LabelWeekStat
-import hellothere.model.stats.category.ReadWeekStat
-import hellothere.model.stats.category.ReplyWeekStat
-import hellothere.model.stats.category.StatCategory
+import hellothere.model.stats.category.*
 import hellothere.model.user.User
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.user.UserRepository
@@ -51,6 +48,7 @@ class UserStatsService(
             ReadWeekStat(),
             LabelWeekStat(),
             ReplyWeekStat(),
+            ChallengeWeekStat(),
             user
         )
 
@@ -87,7 +85,7 @@ class UserStatsService(
 
     @Transactional
     fun claimChallengeRewards(claimChallengeRewardRequest: ClaimChallengeRewardRequest): UserChallengeDTO? {
-        val userChallengeClaimed = challengeService.claimUserChallengeRewardAndReturnXP(claimChallengeRewardRequest)
+        val userChallengeClaimed = challengeService.markUserChallengeAsClaimed(claimChallengeRewardRequest)
             ?: return null
 
         val weekStats = getOrCreateThisWeeksStats(claimChallengeRewardRequest.username)

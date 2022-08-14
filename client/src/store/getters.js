@@ -29,11 +29,11 @@ const getters = {
   },
 
   getCompletedChallenges: (state) => () => {
-    return Object.values(state.challenges).filter((challenge)=> challenge.goal < challenge.progress)
+    return state.challenges.filter((challenge)=> challenge.goal <= challenge.progress)
   },
 
-  getUserChallenges: (state) => () => {
-    return Object.values(state.challenges);
+  getChallenge: (state) => (challengeId) => {
+    return state.challenges.find((stateChallenge) => stateChallenge.challengeId === challengeId)
   },
 };
 

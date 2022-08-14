@@ -18,6 +18,11 @@ const mutations = {
     state.userProfile = info;
   },
 
+  updateUserProfileXP: (state, claimedChallenge) => {
+    state.userProfile.totalExperience += claimedChallenge.reward;
+    state.userProfile.currentWeekStats.experience += claimedChallenge.reward;
+  },
+
   setLabels: (state, labels) => {
     state.labels = labels;
   },
@@ -86,7 +91,9 @@ const mutations = {
     const index = state.challenges.findIndex(
       (storedChallenge) => storedChallenge.challengeId === challenge.challengeId,
     );
-    state.challenges = state.challenges.splice(index, 1, challenge);
+    console.log(index);
+    console.log(state.challenges[index]);
+    state.challenges.splice(index, 1, challenge);
   },
 };
 

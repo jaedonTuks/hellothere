@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface UserChallengeRepository : JpaRepository<UserChallenge, UserChallengeId> {
-    fun findAllByIdAppUserAndChallengeStatCategory(userId: String, statCategory: StatCategory): List<UserChallenge>
+    fun findAllByIdAppUserAndChallengeStatCategoryOrderByChallengeId(userId: String, statCategory: StatCategory): List<UserChallenge>
 
-    fun findAllByIdAppUser(userId: String): List<UserChallenge>
+    fun findAllByIdAppUserOrderByChallengeId(userId: String): List<UserChallenge>
 
     fun findFirstById(userChallengeId: UserChallengeId): UserChallenge?
 }

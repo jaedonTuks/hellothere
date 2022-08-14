@@ -11,7 +11,7 @@
           cols="4"
         >
           <ChallengeCard
-            :challenge="challenge"
+            :challenge-id="challenge.challengeId"
           />
         </v-col>
       </v-row>

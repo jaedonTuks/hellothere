@@ -125,6 +125,7 @@ const actions = {
   claimUserChallengeReward: ({ commit }, challengeId) => axios.get(`/api/challenge/claim-reward/${challengeId}`)
     .then((response) => {
       commit('setUserChallengesById', response.data);
+      commit('updateUserProfileXP', response.data);
     })
     .catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);

@@ -39,7 +39,7 @@ class ChallengeService(
     @Transactional
     fun updateUserChallenges(username: String, statCategory: StatCategory) {
         // todo deactivate this calculation for first week using ff4j feature switch
-        val userChallenges = userChallengeRepository.findAllByIdAppUserAndChallengeStatCategory(username, statCategory)
+        val userChallenges = userChallengeRepository.findAllByIdAppUserAndChallengeStatCategoryOrderByChallengeId(username, statCategory)
             .filterNot { it.isComplete() }
 
         userChallenges.forEach { it.currentProgress++ }
@@ -47,24 +47,31 @@ class ChallengeService(
     }
 
     @Transactional
-    fun claimUserChallengeRewardAndReturnXP(claimChallengeRewardRequest: ClaimChallengeRewardRequest): UserChallenge? {
+    fun markUserChallengeAsClaimed(claimChallengeRewardRequest: ClaimChallengeRewardRequest): UserChallenge? {
         val userChallenge = userChallengeRepository.findFirstById(
             UserChallengeId(
                 claimChallengeRewardRequest.challengeId,
                 claimChallengeRewardRequest.username
             )
         )
+
         if (userChallenge?.challenge == null) {
-            LOGGER.error("Unable to find user challenge and mark as complete with username ${claimChallengeRewardRequest.username} and challenge id ${claimChallengeRewardRequest.username}")
+            LOGGER.error("Unable to find user challenge and mark as complete with username ${claimChallengeRewardRequest.username} and challenge id ${claimChallengeRewardRequest.challengeId}")
             return null
         }
+
+        if (userChallenge.isRewardClaimed) {
+            LOGGER.error("Reward already claimed for username ${claimChallengeRewardRequest.username} and challenge id ${claimChallengeRewardRequest.challengeId}")
+            return null
+        }
+
         userChallenge.isRewardClaimed = true
         return userChallengeRepository.save(userChallenge)
     }
 
     @Transactional
     fun getUserChallengesDTO(username: String): List<UserChallengeDTO> {
-        val userChallenges = userChallengeRepository.findAllByIdAppUser(username)
+        val userChallenges = userChallengeRepository.findAllByIdAppUserOrderByChallengeId(username)
         return userChallenges.mapNotNull {
             buildUserChallengeDTO(it)
         }

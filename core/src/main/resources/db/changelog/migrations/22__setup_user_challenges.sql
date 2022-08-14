@@ -26,22 +26,28 @@ CREATE TABLE user_challenge
 );
 
 insert into challenge(name, description, stat_category, goal, reward)
-values ('Beginner Reader',
-        'Read to a specific amount of emails to complete',
+values ('Rookie Reader',
+        'Read 20 emails to complete this challenge and claim your prize!',
         'READ',
         20,
         20);
 
 insert into challenge(name, description, stat_category, goal, reward)
-values ('Beginner Label',
-        'Label to a specific amount of emails to complete',
+values ('Rookie Labeler',
+        'Label 10 emails and climb the leaderboards!',
         'LABEL',
         10,
         20);
 
 insert into challenge(name, description, stat_category, goal, reward)
 values ('Beginner Reply',
-        'Reply to a specific amount of emails to complete',
+        'Reply to your emails and gain more XP!',
         'REPLY',
         10,
         20);
+
+alter table user_week_stats add column challenge_week_stat_id bigint;
+alter table user_week_stats add constraint ws_read_stat_fk foreign key (read_week_stat_id) references week_stats_category(id);
+alter table user_week_stats add constraint ws_label_stat_fk foreign key (label_week_stat_id) references week_stats_category(id);
+alter table user_week_stats add constraint ws_reply_stat_fk foreign key (reply_week_stat_id) references week_stats_category(id);
+alter table user_week_stats add constraint ws_challenge_stat_fk foreign key (challenge_week_stat_id) references week_stats_category(id);

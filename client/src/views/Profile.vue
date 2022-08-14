@@ -50,7 +50,7 @@
       <StatsCard
         title="Weekly experience overview"
         type="bar"
-        :series="getExperienceSeries()"
+        :series="experienceSeries"
       />
       <StatsCard
         title="Emails Overview"
@@ -61,7 +61,7 @@
       <StatsCard
         title="Challenges Completed"
         type="radialBarPercentage"
-        :series="getChallengesCompletedPercentageSeries()"
+        :series="challengesCompletedPercentageSeries"
       />
     </v-row>
   </div>
@@ -118,6 +118,22 @@ export default {
     challengesCount() {
       return this.challenges.length;
     },
+
+    challengesCompletedPercentageSeries() {
+      return [this.getPercentage(this.challengesCompleted, this.challengesCount)];
+    },
+
+    experienceSeries() {
+      const xpArray = [];
+
+      this.profileInfo.orderedWeekStats.forEach((stat, index) => {
+        xpArray.push({
+          x: `Week ${index + 1} xp`,
+          y: `${stat.experience} xp`,
+        });
+      });
+      return [{ data: xpArray }];
+    },
   },
 
   methods: {
@@ -132,11 +148,6 @@ export default {
         return this.profileInfo.badges;
       }
       return 'Complete challenges to earn badges';
-    },
-
-    getChallengesCompletedPercentageSeries() {
-      // todo implement correctly
-      return [this.getPercentage(this.challengesCompleted, this.challengesCount)];
     },
 
     getTotalsRadialSeries() {
@@ -156,18 +167,6 @@ export default {
         `Labeled ${this.totalLabeled}%`,
         `Replied ${this.totalReplied}%`,
       ];
-    },
-
-    getExperienceSeries() {
-      const xpArray = [];
-
-      this.profileInfo.orderedWeekStats.forEach((stat, index) => {
-        xpArray.push({
-          x: `Week ${index + 1} xp`,
-          y: `${stat.experience} xp`,
-        });
-      });
-      return [{ data: xpArray }];
     },
 
     toggleEditUsername() {
