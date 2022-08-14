@@ -2,45 +2,6 @@
   <v-row align="center" justify="center">
     <ComposeEmailDialog/>
     <v-col style="margin-bottom: 60px;" class="mt-5">
-      <v-row align-content="start">
-        <v-col
-          class="pb-0 pt-0 pa-lg-4"
-          cols="12"
-          lg="6"
-        >
-          <v-text-field
-            dark
-            dense
-            v-model="searchString"
-            label="Search"
-            append-icon="mdi-magnify"
-            :loading="searchingEmails"
-            :disabled="filteringEmails || searchingEmails"
-            @keyup.enter="search(true)"
-          />
-        </v-col>
-        <v-col
-          class="mt-1 pb-0 pt-0 pa-lg-4"
-          cols="12"
-          lg="6"
-        >
-          <v-autocomplete
-            v-model="selectedLabels"
-            dark
-            dense
-            chips
-            deletable-chips
-            multiple
-            height="20px"
-            append-icon="mdi-filter"
-            label="Filter by labels"
-            :items="labels"
-            :loading="filteringEmails"
-            :disabled="filteringEmails || searchingEmails"
-            @change="search(false)"
-          />
-        </v-col>
-      </v-row>
       <v-toolbar
         short
         outlined
@@ -61,115 +22,153 @@
           <v-col cols="1" class="pt-4 selectedIndicator">
             {{ selectedEmailIds.length }} selected
           </v-col>
-          <v-slide-x-transition>
-            <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
-              <v-menu
-                v-model="isLabelMenuOpen"
-                bottom
-                style="overflow-y: hidden"
-                transition="slide-y-transition"
-                ref="labelMenu"
-                :close-on-content-click="false"
-                @click="isLabelMenuOpen=true"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    dark
-                    small
-                    class="mt-0"
-                    color="background"
-                    elevation="0"
-                    v-bind="attrs"
-                    v-on="on"
+          <v-col cols="4">
+            <v-row>
+              <v-slide-x-transition>
+                <v-col v-show="selectedEmailIds.length > 0" cols="2">
+                  <v-menu
+                    v-model="isLabelMenuOpen"
+                    bottom
+                    style="overflow-y: hidden"
+                    transition="slide-y-transition"
+                    ref="labelMenu"
+                    :close-on-content-click="false"
+                    @click="isLabelMenuOpen=true"
                   >
-                    <v-icon>mdi-label</v-icon>
-                  </v-btn>
-                </template>
-                <v-list
-                  style="max-height: 500px; padding: 10px"
-                  class="overflow-y-auto backgroundDark"
-                >
-                  <v-list-item-title class="borderBottom">
-                    <v-icon medium class="mr-2">mdi-label</v-icon>
-                    Manage label
-                  </v-list-item-title>
-                  <v-list-item
-                    v-for="(label, index) in labels"
-                    :key="index"
-                  >
-                    <v-list-item-action>
-                      <v-checkbox
-                        v-model="labelCheckboxSelected[index]"
-                        @change="newLabelSelected($event, label)"
-                      />
-                    </v-list-item-action>
-                    <v-list-item-title>{{ label }}</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-                <v-row justify="end" class="backgroundDark pa-3">
-                  <v-col class="borderTop" cols="12">
-                    <v-btn
-                      color="secondary"
-                      class="float-end"
-                      :disabled="addLabels.length === 0"
-                      :loading="labelChangeLoading"
-                      @click="sendAddLabelsRequest"
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        dark
+                        small
+                        class="mt-0"
+                        color="background"
+                        elevation="0"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon>mdi-label</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list
+                      style="max-height: 500px; padding: 10px"
+                      class="overflow-y-auto backgroundDark"
                     >
-                      Add labels
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-menu>
-            </v-col>
-          </v-slide-x-transition>
-
-          <v-slide-x-transition>
-            <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    dark
-                    small
-                    class="mt-0"
-                    color="background"
-                    elevation="0"
-                    v-bind="attrs"
-                    v-on="on"
-                    :loading="isMarkAsSpamLoading"
-                    @click="markAsSpam"
-                  >
-                    <v-icon>mdi-email-off-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Mark as spam</span>
-              </v-tooltip>
-            </v-col>
-          </v-slide-x-transition>
-          <v-slide-x-transition>
-            <v-col v-show="selectedEmailIds.length > 0" :cols="isLabelMenuOpen ? 4 : 1">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    dark
-                    small
-                    class="mt-0"
-                    color="background"
-                    elevation="0"
-                    v-bind="attrs"
-                    v-on="on"
-                    :loading="isMarkAsTrashLoading"
-                    @click="markAsTrash"
-                  >
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                </template>
-                <span>Delete</span>
-              </v-tooltip>
-            </v-col>
-          </v-slide-x-transition>
+                      <v-list-item-title class="borderBottom">
+                        <v-icon medium class="mr-2">mdi-label</v-icon>
+                        Manage label
+                      </v-list-item-title>
+                      <v-list-item
+                        v-for="(label, index) in labels"
+                        :key="index"
+                      >
+                        <v-list-item-action>
+                          <v-checkbox
+                            v-model="labelCheckboxSelected[index]"
+                            @change="newLabelSelected($event, label)"
+                          />
+                        </v-list-item-action>
+                        <v-list-item-title>{{ label }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                    <v-row justify="end" class="backgroundDark pa-3">
+                      <v-col class="borderTop" cols="12">
+                        <v-btn
+                          color="secondary"
+                          class="float-end"
+                          :disabled="addLabels.length === 0"
+                          :loading="labelChangeLoading"
+                          @click="sendAddLabelsRequest"
+                        >
+                          Add labels
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-menu>
+                </v-col>
+              </v-slide-x-transition>
+              <v-slide-x-transition>
+                <v-col v-show="selectedEmailIds.length > 0" cols="2">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        dark
+                        small
+                        class="mt-0"
+                        color="background"
+                        elevation="0"
+                        v-bind="attrs"
+                        v-on="on"
+                        :loading="isMarkAsSpamLoading"
+                        @click="markAsSpam"
+                      >
+                        <v-icon>mdi-email-off-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Mark as spam</span>
+                  </v-tooltip>
+                </v-col>
+              </v-slide-x-transition>
+              <v-slide-x-transition>
+                <v-col v-show="selectedEmailIds.length > 0" cols="2">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        dark
+                        small
+                        class="mt-0"
+                        color="background"
+                        elevation="0"
+                        v-bind="attrs"
+                        v-on="on"
+                        :loading="isMarkAsTrashLoading"
+                        @click="markAsTrash"
+                      >
+                        <v-icon>mdi-delete</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Delete</span>
+                  </v-tooltip>
+                </v-col>
+              </v-slide-x-transition>
+            </v-row>
+          </v-col>
+          <v-col
+            class="pb-0 pt-0 pa-lg-4"
+            cols="12"
+            lg="6"
+          >
+            <v-text-field
+              dark
+              dense
+              v-model="searchString"
+              label="Search"
+              append-icon="mdi-magnify"
+              :loading="searchingEmails"
+              :disabled="filteringEmails || searchingEmails"
+              @keyup.enter="search(true)"
+            />
+          </v-col>
         </v-row>
       </v-toolbar>
       <div class="mb-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
+      <v-tabs
+        v-model="selectedLabel"
+        centered
+        center-active
+        background-color="background"
+        class="mb-4"
+        @change="changeLabelView()"
+      >
+        <v-tab>
+          <v-icon class="mr-2">mdi-label</v-icon> All
+        </v-tab>
+        <v-tab
+          v-for="label in labels"
+          :key="label"
+          class="mdi-format-text-wrapping-overflow"
+        >
+          <v-icon class="mr-2">mdi-label</v-icon> {{label}}
+        </v-tab>
+      </v-tabs>
       <v-expansion-panels dark class="expansionPanels">
         <v-expansion-panel
           v-for="emailThread in emailThreads"
@@ -219,15 +218,16 @@ export default {
       allSelected: false,
       isMarkAsSpamLoading: false,
       isMarkAsTrashLoading: false,
-      ownUsername: null,
-      labels: [],
-      emailThreads: [],
-      searchString: '',
       searchingEmails: false,
       filteringEmails: false,
+      ownUsername: null,
       labelChangeLoading: false,
-      reply: '',
       loadingEmailThread: false,
+      selectedLabel: 0,
+      searchString: '',
+      reply: '',
+      labels: [],
+      emailThreads: [],
       selectedLabels: [],
       selectedEmailIds: [],
       addLabels: [],
@@ -242,11 +242,20 @@ export default {
     toolbarActionsDisabled() {
       return this.selectedEmailIds.length === 0;
     },
+
+    selectedLabelView() {
+      if (this.selectedLabel === 0) {
+        return '';
+      }
+      const selectedLabelIndex = this.selectedLabel - 1;
+      return this.labels[selectedLabelIndex];
+    },
   },
 
   methods: {
     ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'fetchLabels', 'searchEmails', 'updateLabels']),
 
+    // general methods
     updateEmails() {
       this.emailThreads = this.getEmailThreads().sort((a, b) => b.instantSent - a.instantSent);
     },
@@ -269,6 +278,31 @@ export default {
         });
     },
 
+    // searching and view updates
+    search(isSearchLoading) {
+      this.searchingEmails = isSearchLoading;
+      this.filteringEmails = !isSearchLoading;
+
+      const payload = {
+        searchString: this.searchString,
+        labels: this.selectedLabelView,
+      };
+
+      this.searchEmails(payload)
+        .then(() => {
+          this.emailThreads = this.getEmailThreads();
+        })
+        .finally(() => {
+          this.searchingEmails = false;
+          this.filteringEmails = false;
+        });
+    },
+
+    changeLabelView() {
+      this.search(false);
+    },
+
+    // email modifications
     updateEmailLabels(emailThread) {
       try {
         const refKey = `${emailThread.id}-header`;
@@ -323,23 +357,6 @@ export default {
       this.removeLabels = [];
       this.isLabelMenuOpen = false;
       this.labelCheckboxSelected = [];
-    },
-
-    search(isSearchLoading) {
-      this.searchingEmails = isSearchLoading;
-      this.filteringEmails = !isSearchLoading;
-      const payload = {
-        searchString: this.searchString,
-        labels: this.selectedLabels.join(','),
-      };
-      this.searchEmails(payload)
-        .then(() => {
-          this.emailThreads = this.getEmailThreads();
-        })
-        .finally(() => {
-          this.searchingEmails = false;
-          this.filteringEmails = false;
-        });
     },
 
     addSelectedEmail(newId) {
