@@ -47,6 +47,26 @@ const actions = {
       console.error(e);
     }),
 
+  updateLabelVisibility: ({ commit }, payload) => axios.post('/api/label/is-viewable/update', payload)
+    .then((response) => {
+      commit('updateLabel', response.data);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
+  updateLabelColor: ({ commit }, payload) => axios.post('/api/label/color/update', payload)
+    .then((response) => {
+      commit('updateLabel', response.data);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
   updateLabels: ({ commit }, payload) => axios.post('/api/label/update', payload)
     .then((response) => {
       console.log(response);

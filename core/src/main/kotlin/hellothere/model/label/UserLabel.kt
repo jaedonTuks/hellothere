@@ -13,13 +13,16 @@ class UserLabel(
     val name: String,
 
     @Column(name = "color")
-    val color: String = "#FFF",
+    var color: String = "#FFF",
 
     @Column(name = "unread_threads")
     val unreadThreads: Int,
 
     @Column(name = "is_manageable")
     val isManageable: Boolean,
+
+    @Column(name = "is_viewable")
+    var isViewable: Boolean,
 
     @ManyToOne
     @MapsId("app_user")

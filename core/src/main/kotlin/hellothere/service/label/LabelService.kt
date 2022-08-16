@@ -1,6 +1,5 @@
 package hellothere.service.label
 
-import com.google.api.client.googleapis.batch.json.JsonBatchCallback
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.BatchModifyMessagesRequest
 import com.google.api.services.gmail.model.Label
@@ -14,7 +13,9 @@ import hellothere.model.stats.category.StatCategory
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
-import hellothere.requests.label.UpdateLabelsRequest
+import hellothere.requests.label.UpdateEmailLabelsRequest
+import hellothere.requests.label.UpdateLabelColorRequest
+import hellothere.requests.label.UpdateLabelViewableRequest
 import hellothere.service.google.BatchCallbacks.LabelBatchCallback
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
@@ -81,10 +82,11 @@ class LabelService(
         val labelsToSave = labels.map {
             UserLabel(
                 UserLabelId(it.id, user.id),
-                it.name.replace("CATEGORY_",""),
+                it.name.replace("CATEGORY_", ""),
                 it.color?.backgroundColor ?: "#FFF",
                 it.threadsUnread,
                 isManageableId(it.id),
+                true,
                 user
             )
         }
@@ -118,7 +120,8 @@ class LabelService(
             label.name,
             label.unreadThreads,
             label.color,
-            label.isManageable
+            label.isManageable,
+            label.isViewable
         )
     }
 
@@ -173,6 +176,29 @@ class LabelService(
         )
     }
 
+    @Transactional
+    fun updateLabelIsViewable(
+        username: String,
+        updateLabelRequest: UpdateLabelViewableRequest
+    ): LabelDto? {
+        val label = userLabelRepository.findByIdOrNull(UserLabelId(updateLabelRequest.labelId, username))
+
+        label?.isViewable = updateLabelRequest.isViewable
+
+        return label?.let { buildLabelDto(userLabelRepository.save(it)) }
+    }
+    @Transactional
+    fun updateLabelColor(
+        username: String,
+        updateLabelRequest: UpdateLabelColorRequest
+    ): LabelDto? {
+        val label = userLabelRepository.findByIdOrNull(UserLabelId(updateLabelRequest.labelId, username))
+
+        label?.color = updateLabelRequest.color
+
+        return label?.let { buildLabelDto(userLabelRepository.save(it)) }
+    }
+
     fun updateLabels(
         username: String,
         client: Gmail,
@@ -192,7 +218,7 @@ class LabelService(
     fun updateLabels(
         username: String,
         client: Gmail,
-        updateLabelRequest: UpdateLabelsRequest
+        updateLabelRequest: UpdateEmailLabelsRequest
     ): LabelUpdateDto? {
         return batchUpdateLabels(
             username,

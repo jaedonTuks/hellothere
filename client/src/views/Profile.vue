@@ -1,20 +1,8 @@
 <template>
   <div v-if="profileInfo" class="about">
     <v-row dense class="mt-3">
-      <v-col cols="2">
-        <v-text-field
-          v-model="newUserName"
-          flat
-          background-color="background"
-          ref="usernameField"
-          style="font-size: 2em; margin: 0"
-          hide-details="auto"
-          class="pl-0 ml-0"
-          :solo="!editingUsername"
-          :append-icon="editingUsername ? 'mdi-check' : 'mdi-pencil' "
-          :readonly="!editingUsername"
-          @click:append="toggleEditUsername"
-        />
+      <v-col cols="12">
+        <h1 class="mt-4 mt-lg-1"> {{ profileInfo.leaderboardUsername }}</h1>
       </v-col>
       <v-col cols="12">
         <h3 class="mt-4 mt-lg-1">Email: {{ profileInfo.email }}</h3>
@@ -36,34 +24,66 @@
 
     <v-btn class="mt-4  mr-2" color="secondary" @click="logout">Logout</v-btn>
     <div class="mb-4 mt-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
-    <ChallengesOverview/>
-    <div class="mt-5 mb-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
+    <v-tabs
+      v-model="selectedProfileViewIndex"
+      centered
+      center-active
+      fixed-tabs
+      background-color="background"
+      class="mb-4"
+    >
+      <v-tab>
+        <v-icon class="mr-2">mdi-chart-line</v-icon>
+        Personal Stats
+      </v-tab>
+      <v-tab>
+        <v-icon class="mr-2">mdi-checkbox-marked-circle-plus-outline</v-icon>
+        Challenges
+      </v-tab>
+      <v-tab>
+        <v-icon class="mr-2">mdi-cog</v-icon>
+        Settings
+      </v-tab>
+    </v-tabs>
 
-    <v-row class="pa-3">
-      <h2>Weekly stats</h2>
-    </v-row>
-    <v-row>
-      <v-col cols="12 mb-0">
-        <span class="mr-2">Total Emails:</span>
-        <span>{{ profileInfo.messageTotalsSummary.totalEmails }}</span>
-      </v-col>
-      <StatsCard
-        title="Weekly experience overview"
-        type="bar"
-        :series="experienceSeries"
-      />
-      <StatsCard
-        title="Emails Overview"
-        type="radialBar"
-        :series="getTotalsRadialSeries()"
-        :labels="getTotalsLabels()"
-      />
-      <StatsCard
-        title="Challenges Completed"
-        type="radialBarPercentage"
-        :series="challengesCompletedPercentageSeries"
-      />
-    </v-row>
+    <v-tabs-items
+      v-model="selectedProfileViewIndex"
+    >
+      <v-tab-item style="background-color: #343E59">
+        <v-row class="pa-3">
+          <h2>Weekly stats</h2>
+        </v-row>
+        <v-row>
+          <v-col cols="12 mb-0">
+            <span class="mr-2">Total Emails:</span>
+            <span>{{ profileInfo.messageTotalsSummary.totalEmails }}</span>
+          </v-col>
+          <StatsCard
+            title="Weekly experience overview"
+            type="bar"
+            :series="experienceSeries"
+          />
+          <StatsCard
+            title="Emails Overview"
+            type="radialBar"
+            :series="getTotalsRadialSeries()"
+            :labels="getTotalsLabels()"
+          />
+          <StatsCard
+            title="Challenges Completed"
+            type="radialBarPercentage"
+            :series="challengesCompletedPercentageSeries"
+          />
+        </v-row>
+      </v-tab-item>
+      <v-tab-item style="background-color: #343E59">
+        <ChallengesOverview/>
+      </v-tab-item>
+      <v-tab-item style="background-color: #343E59">
+        <Settings/>
+      </v-tab-item>
+    </v-tabs-items>
+
   </div>
 </template>
 
@@ -73,10 +93,11 @@ import ChallengesOverview from '@/components/challenge/ChallengesOverview.vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import ScreenSizeMixin from '@/mixins/screenSizeMixin';
 import calculationsMixin from '@/mixins/calculationsMixin';
+import Settings from '@/components/Settings.vue';
 
 export default {
   name: 'Profile',
-  components: { StatsCard, ChallengesOverview },
+  components: { StatsCard, ChallengesOverview, Settings },
   mixins: [ScreenSizeMixin, calculationsMixin],
 
   data() {
@@ -84,6 +105,7 @@ export default {
       profileInfo: null,
       editingUsername: false,
       newUserName: '',
+      selectedProfileViewIndex: 0,
     };
   },
 

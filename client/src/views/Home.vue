@@ -153,6 +153,7 @@
               dense
               v-model="searchString"
               label="Search"
+              type="text"
               append-icon="mdi-magnify"
               :disabled="filteringEmails || searchingEmails"
               @keyup.enter="search(true)"
@@ -162,6 +163,7 @@
       </v-toolbar>
       <div class="mb-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
       <v-tabs
+        v-if="viewableLabels.length > 0"
         v-model="selectedLabelViewIndex"
         centered
         center-active
@@ -175,7 +177,7 @@
           All
         </v-tab>
         <v-tab
-          v-for="label in labels"
+          v-for="label in viewableLabels"
           :key="label.name"
           class="mdi-format-text-wrapping-overflow"
         >
@@ -191,7 +193,7 @@
           class="expansionPanels"
         >
           <v-progress-linear
-            v-show="filteringEmails || this.searchingEmails"
+            v-show="filteringEmails || searchingEmails"
             indeterminate
             color="primary"
           />
@@ -275,6 +277,10 @@ export default {
 
     manageableLabels() {
       return this.labels.filter((label) => label.isManageable);
+    },
+
+    viewableLabels() {
+      return this.labels.filter((label) => label.isViewable);
     },
 
     selectedLabelData() {

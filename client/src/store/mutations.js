@@ -27,6 +27,13 @@ const mutations = {
     state.labels = labels;
   },
 
+  updateLabel: (state, label) => {
+    const labelIndex = state.labels.findIndex((stateLabel) => stateLabel.id === label.id);
+    if (labelIndex !== -1) {
+      state.labels[labelIndex] = label;
+    }
+  },
+
   setThreadsById: (state, emailThreads) => {
     const threadsObj = state.threadsById;
 

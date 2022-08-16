@@ -9,7 +9,8 @@ data class LabelDto(
     @JsonIgnore val name: String,
     val unreadThreads: Int = 0,
     val color: String = "#FFF",
-    val isManageable: Boolean
+    val isManageable: Boolean,
+    val isViewable: Boolean
 ) {
     @JsonProperty("name")
     fun getFormattedName(): String {
