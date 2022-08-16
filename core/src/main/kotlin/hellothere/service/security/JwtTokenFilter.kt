@@ -7,6 +7,7 @@ import javax.servlet.FilterChain
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 class JwtTokenFilter(
     private val jwtTokenService: JwtTokenService
@@ -17,6 +18,9 @@ class JwtTokenFilter(
                 val token = jwtTokenService.getTokenFromRequest(request)
                 if (jwtTokenService.isTokenValid(token)) {
                     filterChain?.doFilter(request, response)
+                } else if (response is HttpServletResponse) {
+                    response.setHeader("Set-Cookie", "${SecurityService.JWT_TOKEN_COOKIE_NAME}=''; Path=/; Max-Age=-1; HttpOnly;")
+                    response.sendRedirect("/login")
                 }
             } else {
                 throw Exception("Invalid servlet request. Expected type of httpServletRequest")

@@ -72,13 +72,23 @@
                       </v-list-item>
                     </v-list>
                     <v-row justify="end" class="backgroundDark pa-3">
-                      <v-col class="borderTop" cols="12">
+                      <v-col class="borderTop" cols="6">
+                        <v-btn
+                          color="secondary"
+                          :disabled="selectedLabels.length === 0"
+                          :loading="labelRemoveLoading"
+                          @click="sendUpdateLabelsRequest(true)"
+                        >
+                          Remove labels
+                        </v-btn>
+                      </v-col>
+                      <v-col class="borderTop" cols="6">
                         <v-btn
                           color="secondary"
                           class="float-end"
-                          :disabled="addLabels.length === 0"
-                          :loading="labelChangeLoading"
-                          @click="sendAddLabelsRequest"
+                          :disabled="selectedLabels.length === 0"
+                          :loading="labelAddLoading"
+                          @click="sendUpdateLabelsRequest(false)"
                         >
                           Add labels
                         </v-btn>
@@ -152,7 +162,7 @@
       </v-toolbar>
       <div class="mb-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
       <v-tabs
-        v-model="selectedLabel"
+        v-model="selectedLabelViewIndex"
         centered
         center-active
         background-color="background"
@@ -173,35 +183,39 @@
           {{ label.name }}
         </v-tab>
       </v-tabs>
-      <v-expansion-panels
-        dark
-        class="expansionPanels"
-      >
-        <v-progress-linear
-          v-show="filteringEmails || this.searchingEmails"
-          indeterminate
-          color="primary"
-        />
-        <v-expansion-panel
-          v-for="emailThread in emailThreads"
-          class="expansionPanel"
-          color="accent"
-          :key="emailThread.id"
-          @change="getFullEmailThread(emailThread)"
+      <NoEmailsCard :email-threads="emailThreads" :filtering-emails="filteringEmails"/>
+      <v-dialog-transition>
+        <v-expansion-panels
+          v-show="emailThreads.length > 0"
+          dark
+          class="expansionPanels"
         >
-          <emailHeader
-            :ref="`${emailThread.id}-header`"
-            :emailThread="emailThread"
-            @selected="addSelectedEmail"
-            @deselected="removeSelectedEmail"
+          <v-progress-linear
+            v-show="filteringEmails || this.searchingEmails"
+            indeterminate
+            color="primary"
           />
-          <employeeBodyContent
-            :emailThread="emailThread"
-            :own-user-name="ownUsername"
-            :loading="loadingEmailThread"
-          />
-        </v-expansion-panel>
-      </v-expansion-panels>
+          <v-expansion-panel
+            v-for="emailThread in emailThreads"
+            class="expansionPanel"
+            color="accent"
+            :key="emailThread.id"
+            @change="getFullEmailThread(emailThread)"
+          >
+            <emailHeader
+              :ref="`${emailThread.id}-header`"
+              :emailThread="emailThread"
+              @selected="addSelectedEmail"
+              @deselected="removeSelectedEmail"
+            />
+            <employeeBodyContent
+              :emailThread="emailThread"
+              :own-user-name="ownUsername"
+              :loading="loadingEmailThread"
+            />
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-dialog-transition>
     </v-col>
     <SendActionButton/>
   </v-row>
@@ -214,13 +228,18 @@ import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
 import SendActionButton from '@/components/SendActionButton.vue';
 import EmailHeader from '@/views/EmailHeader.vue';
 import ComposeEmailDialog from '@/components/ComposeEmailDialog.vue';
+import NoEmailsCard from '@/components/NoEmailsCard.vue';
 // eslint-disable-next-line import/no-cycle
 import { EventBus } from '@/main';
 
 export default {
   name: 'Home',
   components: {
-    EmailHeader, EmployeeBodyContent, SendActionButton, ComposeEmailDialog,
+    NoEmailsCard,
+    EmailHeader,
+    EmployeeBodyContent,
+    SendActionButton,
+    ComposeEmailDialog,
   },
   mixins: [loadingMixin],
 
@@ -232,18 +251,17 @@ export default {
       isMarkAsTrashLoading: false,
       searchingEmails: false,
       filteringEmails: false,
-      ownUsername: null,
-      labelChangeLoading: false,
+      labelAddLoading: false,
+      labelRemoveLoading: false,
       loadingEmailThread: false,
-      selectedLabel: 0,
+      selectedLabelViewIndex: 0,
+      ownUsername: null,
       searchString: '',
       reply: '',
       labels: [],
       emailThreads: [],
       selectedLabels: [],
       selectedEmailIds: [],
-      addLabels: [],
-      removeLabels: [],
       labelCheckboxSelected: [],
     };
   },
@@ -260,13 +278,13 @@ export default {
     },
 
     selectedLabelData() {
-      if (this.selectedLabel === 0) {
+      if (this.selectedLabelViewIndex === 0) {
         return {
           name: '',
           color: '#FFF',
         };
       }
-      const selectedLabelIndex = this.selectedLabel - 1;
+      const selectedLabelIndex = this.selectedLabelViewIndex - 1;
       return this.labels[selectedLabelIndex];
     },
   },
@@ -333,22 +351,31 @@ export default {
 
     markAsSpam() {
       this.isMarkAsSpamLoading = true;
-      this.addLabels = ['SPAM'];
-      this.sendAddLabelsRequest();
+      this.selectedLabels = ['SPAM'];
+      this.sendUpdateLabelsRequest();
     },
 
     markAsTrash() {
       this.isMarkAsTrashLoading = true;
-      this.addLabels = ['TRASH'];
-      this.sendAddLabelsRequest();
+      this.selectedLabels = ['TRASH'];
+      this.sendUpdateLabelsRequest();
     },
 
-    sendAddLabelsRequest() {
-      this.labelChangeLoading = true;
+    sendUpdateLabelsRequest(isRemoving = false) {
+      this.labelAddLoading = !isRemoving;
+      this.labelRemoveLoading = isRemoving;
+
+      let addLabels = this.selectedLabels;
+      let removeLabels = [];
+      if (isRemoving) {
+        addLabels = [];
+        removeLabels = this.selectedLabels;
+      }
+
       const payload = {
         threadIds: this.selectedEmailIds,
-        addLabels: this.addLabels,
-        removeLabels: this.removeLabels,
+        addLabels,
+        removeLabels,
       };
 
       this.updateLabels(payload)
@@ -356,7 +383,8 @@ export default {
           this.updateAllEmailHeaders();
         }).finally(() => {
           this.resetLabelSelections();
-          this.labelChangeLoading = false;
+          this.labelAddLoading = false;
+          this.labelRemoveLoading = false;
           this.isMarkAsSpamLoading = false;
           this.isMarkAsTrashLoading = false;
         });
@@ -372,8 +400,7 @@ export default {
 
     resetLabelSelections() {
       this.selectedEmailIds = [];
-      this.addLabels = [];
-      this.removeLabels = [];
+      this.selectedLabels = [];
       this.isLabelMenuOpen = false;
       this.labelCheckboxSelected = [];
     },
@@ -401,9 +428,9 @@ export default {
 
     newLabelSelected(selected, label) {
       if (selected) {
-        this.addLabels.push(label.id);
+        this.selectedLabels.push(label.id);
       } else {
-        this.addLabels = this.addLabels.filter(
+        this.selectedLabels = this.selectedLabels.filter(
           (selectedLabelId) => selectedLabelId !== label.id,
         );
       }
@@ -483,4 +510,5 @@ export default {
   color: red !important;
   display: block !important;
 }
+
 </style>

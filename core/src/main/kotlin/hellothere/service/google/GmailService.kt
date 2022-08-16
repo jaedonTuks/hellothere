@@ -92,8 +92,14 @@ class GmailService(
             messageList.labelIds = labelIds
         }
 
-        return messageList
+        val result = messageList
             .execute()
+
+        if (result.resultSizeEstimate == 0L) {
+            return listOf()
+        }
+
+        return result
             .threads.map { it.id }
     }
 
@@ -183,6 +189,11 @@ class GmailService(
         format: EmailFormat,
         client: Gmail
     ): MutableList<Message> {
+        if (ids.isEmpty()) {
+            LOGGER.warn("Empty ids unable to fetch data")
+            return mutableListOf()
+        }
+
         val messageList = mutableListOf<Message>()
         val batchRequest = client.batch()
         val callback = MessageBatchCallback(messageList)
@@ -205,6 +216,10 @@ class GmailService(
         format: EmailFormat,
         client: Gmail
     ): MutableList<com.google.api.services.gmail.model.Thread> {
+        if (ids.isEmpty()) {
+            LOGGER.warn("Empty ids unable to fetch data")
+            return mutableListOf()
+        }
         val threadList = mutableListOf<com.google.api.services.gmail.model.Thread>()
         val batchRequest = client.batch()
         val callback = ThreadBatchCallback(threadList)

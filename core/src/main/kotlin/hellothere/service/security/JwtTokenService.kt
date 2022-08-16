@@ -25,7 +25,7 @@ class JwtTokenService(
 
         val claims = createClaimsFromUser(user)
         val issuedAt = Date.from(Instant.now())
-        val expiration = Date.from(issuedAt.toInstant().plusMillis(TOKEN_LIFE_TIME))
+        val expiration = Date.from(issuedAt.toInstant().plusSeconds(TOKEN_LIFE_TIME))
         return Jwts
             .builder()
             .setClaims(claims)
@@ -72,6 +72,6 @@ class JwtTokenService(
 
     companion object {
         val LOGGER: Logger = org.slf4j.LoggerFactory.getLogger(JwtTokenService::class.java)
-        const val TOKEN_LIFE_TIME = 86400000L
+        const val TOKEN_LIFE_TIME = 3600000L
     }
 }
