@@ -3,10 +3,13 @@ package hellothere.controller
 import hellothere.config.RestUrl.LABEL
 import hellothere.dto.label.LabelDto
 import hellothere.dto.label.LabelUpdateDto
-import hellothere.requests.label.UpdateLabelsRequest
+import hellothere.requests.label.UpdateEmailLabelsRequest
+import hellothere.requests.label.UpdateLabelColorRequest
+import hellothere.requests.label.UpdateLabelViewableRequest
 import hellothere.service.google.GmailService
 import hellothere.service.label.LabelService
 import hellothere.service.security.SecurityService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -32,14 +35,40 @@ class LabelController(
     }
 
     @PostMapping("/update")
-    fun updateLabels(
+    fun updateEmailLabels(
         request: HttpServletRequest,
-        @RequestBody updateLabelRequest: UpdateLabelsRequest
+        @RequestBody updateLabelRequest: UpdateEmailLabelsRequest
     ): ResponseEntity<LabelUpdateDto> {
         val (username, client) = getUsernameAndClientFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         return labelService.updateLabels(username, client, updateLabelRequest)?.let {
+            ResponseEntity.ok(it)
+        } ?: ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+    }
+
+    @PostMapping("/is-viewable/update")
+    fun updateLabelIsViewable(
+        request: HttpServletRequest,
+        @RequestBody updateLabelRequest: UpdateLabelViewableRequest
+    ): ResponseEntity<LabelDto> {
+        val username = getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        return labelService.updateLabelIsViewable(username, updateLabelRequest)?.let {
+            ResponseEntity.ok(it)
+        } ?: ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+    }
+
+    @PostMapping("/color/update")
+    fun updateLabelColor(
+        request: HttpServletRequest,
+        @RequestBody updateLabelRequest: UpdateLabelColorRequest
+    ): ResponseEntity<LabelDto> {
+        val username = getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        return labelService.updateLabelColor(username, updateLabelRequest)?.let {
             ResponseEntity.ok(it)
         } ?: ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
     }

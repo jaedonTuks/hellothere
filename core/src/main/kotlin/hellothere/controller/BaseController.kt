@@ -18,4 +18,8 @@ abstract class BaseController(
 
         return Pair(username, client)
     }
+
+    protected fun getUsernameFromRequest(request: HttpServletRequest): String? {
+        return securityService.getUsernameFromRequest(request)
+    }
 }

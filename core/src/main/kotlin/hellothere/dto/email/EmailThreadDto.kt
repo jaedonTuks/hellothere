@@ -13,7 +13,7 @@ data class EmailThreadDto(
     val from: String,
     val latestDate: LocalDateTime?,
     val originalLabelIds: List<String>,
-    val emails: List<EmailDto>,
+    val emails: List<EmailDto>
 ) {
 
     @JsonProperty("labelIds")
@@ -24,6 +24,10 @@ data class EmailThreadDto(
         if (from.contains("no") && from.contains("reply")) {
             enrichedLabelIds.add(EnrichedLabel.NO_REPLY.value)
         }
+
+        // todo come back later
+        enrichedLabelIds.filter { !it.lowercase().contains("category_") }
+
         return enrichedLabelIds
     }
 

@@ -27,14 +27,22 @@ const mutations = {
     state.labels = labels;
   },
 
-  setThreadsById: (state, emailThreads) => {
+  updateLabel: (state, label) => {
+    const labelIndex = state.labels.findIndex((stateLabel) => stateLabel.id === label.id);
+    if (labelIndex !== -1) {
+      state.labels[labelIndex] = label;
+    }
+  },
+
+  setThreadsById: (state, emailContainer) => {
+    const { emailThreads, nextPageToken } = emailContainer;
     const threadsObj = state.threadsById;
 
     emailThreads.forEach((emailThread) => {
       threadsObj[emailThread.id] = emailThread;
     });
-
     state.threadsById = threadsObj;
+    state.nextPageToken = nextPageToken;
   },
 
   setEmailsById: (state, emails) => {
@@ -66,9 +74,11 @@ const mutations = {
     emailThread.emails.push(payload.newEmail);
   },
 
-  resetAndSetCurrentThreadIds: (state, emailThreads) => {
-    state.currentThreadIds = [];
-    state.currentThreadIds = emailThreads.map((email) => email.id);
+  resetAndSetCurrentThreadIds: (state, emailContainer) => {
+    if (emailContainer.shouldResetEmails) {
+      state.currentThreadIds = [];
+    }
+    emailContainer.emailThreads.forEach((email) => state.currentThreadIds.push(email.id));
   },
 
   prependToCurrentThreadIds: (state, newId) => {

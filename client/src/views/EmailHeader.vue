@@ -14,17 +14,25 @@
       <v-col class="ml-0 pl-0" cols="8">
          <span class="emailText">
            <span class="ma-0 dateAndFrom">
-                    {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
+             {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
            </span>
            <span class="ml-2 subject">{{ emailThread.subject }}</span>
           </span>
       </v-col>
       <v-col cols="3">
         <span
-          v-if="isNotMobile"
+          v-for="label in filterLabels"
+          :key="label"
           class="float-end label"
         >
-          {{ filterLabels }}
+           <v-icon
+             size="20"
+             class="headerLabelIcon ml-1"
+             :color="getLabelColor(label)"
+           >
+             mdi-label
+           </v-icon>
+          {{label}}
         </span>
       </v-col>
     </v-row>
@@ -51,14 +59,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getThreadLabels']),
+    ...mapGetters(['getThreadLabels', 'getLabelByName']),
 
     filterLabels() {
       const removedCategory = this.labels.filter((label) => !label.includes('CATEGORY'));
       const removedInbox = removedCategory.filter((label) => label !== 'INBOX');
       return removedInbox
-        .map((label) => label.toLowerCase())
-        .join(',');
+        .map((label) => label.toLowerCase());
     },
   },
 
@@ -85,6 +92,14 @@ export default {
         this.$emit('deselected', this.emailThread.id);
       }
     },
+
+    getLabelColor(label) {
+      const storedLabel = this.getLabelByName(label);
+      if (storedLabel) {
+        return storedLabel.color;
+      }
+      return '#FFF';
+    },
   },
 
   created() {
@@ -93,6 +108,11 @@ export default {
 };
 </script>
 <style scoped>
+
+.headerLabelIcon {
+  transform: rotate(90deg);
+}
+
 .hover:hover {
   filter: brightness(150%);
 }
@@ -112,7 +132,8 @@ export default {
 }
 
 .label {
-  color: var(--v-info-darken4) !important;
+  color: var(--v-info-darken3) !important;
+  font-size: 0.9em;
 }
 
 .dateAndFrom {

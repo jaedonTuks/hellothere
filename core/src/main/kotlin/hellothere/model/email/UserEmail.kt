@@ -65,7 +65,7 @@ class UserEmail(
     }
 
     fun getLabelList(): List<String> {
-        return emailLabels.map { it.id.gmailId }
+        return emailLabels.map { it.name }
     }
 
     fun hasHadCategoryXpAllocated(statCategory: StatCategory): Boolean {

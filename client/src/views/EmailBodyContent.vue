@@ -1,10 +1,11 @@
 <template>
   <v-expansion-panel-content>
+
     <v-progress-linear
       v-show="loading"
       indeterminate
       color="purpleAccent"
-    ></v-progress-linear>
+    />
     <v-container v-show="!loading" class="emailBody">
       <v-row
         v-for="email in emailThread.emails"

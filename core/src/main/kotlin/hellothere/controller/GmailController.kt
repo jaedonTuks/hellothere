@@ -3,12 +3,14 @@ package hellothere.controller
 import hellothere.config.RestUrl.GMAIL
 import hellothere.dto.email.EmailDto
 import hellothere.dto.email.EmailThreadDto
+import hellothere.dto.email.EmailsContainerDTO
 import hellothere.requests.email.ReplyRequest
 import hellothere.requests.email.SendRequest
 import hellothere.service.google.GmailService
 import hellothere.service.google.GoogleAuthenticationService
 import hellothere.service.security.SecurityService
 import hellothere.service.user.UserService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -72,28 +74,24 @@ class GmailController(
     }
 
     @GetMapping("/emails")
-    fun getEmails(request: HttpServletRequest): ResponseEntity<List<EmailThreadDto>> {
-        val (username, client) = getUsernameAndClientFromRequest(request)
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-
-        val emails = gmailService.getThreadsBaseData(client, username).sortedByDescending { it.latestDate }
-
-        return ResponseEntity.ok(emails)
-    }
-
-    @GetMapping("/search")
-    fun searchEmails(
+    fun getEmails(
         request: HttpServletRequest,
-        @RequestParam searchString: String,
-        @RequestParam labels: List<String> = listOf()
-    ): ResponseEntity<List<EmailThreadDto>> {
+        @RequestParam pageToken: String? = null,
+        @RequestParam searchString: String? = null,
+        @RequestParam labels: List<String>? = listOf()
+    ): ResponseEntity<EmailsContainerDTO> {
         val (username, client) = getUsernameAndClientFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
-        val emails =
-            gmailService.getThreadsBaseData(client, username, searchString, labels).sortedByDescending { it.latestDate }
-
-        return ResponseEntity.ok(emails)
+        return ResponseEntity.ok(
+            gmailService.getThreadsBaseData(
+                client,
+                username,
+                searchString,
+                labels ?: listOf(),
+                pageToken
+            )
+        )
     }
 
     @PostMapping("/send")

@@ -2,18 +2,24 @@ package hellothere.service.label
 
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.BatchModifyMessagesRequest
+import com.google.api.services.gmail.model.Label
 import hellothere.dto.label.LabelDto
 import hellothere.dto.label.LabelUpdateDto
 import hellothere.model.email.UserEmail
 import hellothere.model.label.UserLabel
+import hellothere.model.label.UserLabel.Companion.isManageableId
 import hellothere.model.label.UserLabelId
 import hellothere.model.stats.category.StatCategory
 import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.label.UserLabelRepository
 import hellothere.repository.user.UserRepository
-import hellothere.requests.label.UpdateLabelsRequest
+import hellothere.requests.label.UpdateEmailLabelsRequest
+import hellothere.requests.label.UpdateLabelColorRequest
+import hellothere.requests.label.UpdateLabelViewableRequest
+import hellothere.service.google.BatchCallbacks.LabelBatchCallback
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -24,7 +30,7 @@ class LabelService(
     private val userRepository: UserRepository,
     private val userLabelRepository: UserLabelRepository,
     private val userEmailRepository: UserEmailRepository,
-    private val userStatsService: UserStatsService,
+    private val userStatsService: UserStatsService
 ) {
 
     @Transactional
@@ -39,12 +45,12 @@ class LabelService(
         val cachedLabels = getCachedLabels(labelIds, username)
 
         val labelIdsToFetch = labelIds.filter { labelId ->
-            cachedLabels.none { cachedLabel -> labelId != cachedLabel.id.gmailId }
+            cachedLabels.none { cachedLabel -> labelId == cachedLabel.id.gmailId }
         }
 
         val newLabels = fetchAndCacheLabels(labelIdsToFetch, client, username)
-
-        return (newLabels + cachedLabels).map {
+        // todo find a way to add categories back in
+        return (newLabels + cachedLabels).sortedBy { it.name }.filter { !it.name.contains("CATEGORY_") }.map {
             buildLabelDto(it)
         }
     }
@@ -60,19 +66,27 @@ class LabelService(
             LOGGER.warn("No user found for username $username. ")
             return listOf()
         }
+        val labels = mutableListOf<Label>()
 
-        val labels = labelIds.map {
+        val batchRequest = client.batch()
+        val callback = LabelBatchCallback(labels)
+
+        labelIds.forEach { labelId ->
             client.users()
                 .Labels()
-                .get(USER_SELF_ACCESS, it)
-                .execute()
+                .get(USER_SELF_ACCESS, labelId)
+                .queue(batchRequest, callback)
         }
+        batchRequest.execute()
 
         val labelsToSave = labels.map {
             UserLabel(
                 UserLabelId(it.id, user.id),
-                it.name,
+                it.name.replace("CATEGORY_", ""),
+                it.color?.backgroundColor ?: "#FFF",
                 it.threadsUnread,
+                isManageableId(it.id),
+                true,
                 user
             )
         }
@@ -102,8 +116,12 @@ class LabelService(
 
     fun buildLabelDto(label: UserLabel): LabelDto {
         return LabelDto(
+            label.id.gmailId,
             label.name,
-            label.unreadThreads
+            label.unreadThreads,
+            label.color,
+            label.isManageable,
+            label.isViewable
         )
     }
 
@@ -158,6 +176,29 @@ class LabelService(
         )
     }
 
+    @Transactional
+    fun updateLabelIsViewable(
+        username: String,
+        updateLabelRequest: UpdateLabelViewableRequest
+    ): LabelDto? {
+        val label = userLabelRepository.findByIdOrNull(UserLabelId(updateLabelRequest.labelId, username))
+
+        label?.isViewable = updateLabelRequest.isViewable
+
+        return label?.let { buildLabelDto(userLabelRepository.save(it)) }
+    }
+    @Transactional
+    fun updateLabelColor(
+        username: String,
+        updateLabelRequest: UpdateLabelColorRequest
+    ): LabelDto? {
+        val label = userLabelRepository.findByIdOrNull(UserLabelId(updateLabelRequest.labelId, username))
+
+        label?.color = updateLabelRequest.color
+
+        return label?.let { buildLabelDto(userLabelRepository.save(it)) }
+    }
+
     fun updateLabels(
         username: String,
         client: Gmail,
@@ -177,7 +218,7 @@ class LabelService(
     fun updateLabels(
         username: String,
         client: Gmail,
-        updateLabelRequest: UpdateLabelsRequest
+        updateLabelRequest: UpdateEmailLabelsRequest
     ): LabelUpdateDto? {
         return batchUpdateLabels(
             username,
@@ -208,8 +249,8 @@ class LabelService(
         labelsToRemove: List<String>,
         username: String
     ): Pair<List<UserLabel>, List<UserLabel>>? {
-        val cachedAddLabels = getCachedLabelsByNameAndUser(labelsToAdd, username)
-        val cachedRemoveLabels = getCachedLabelsByNameAndUser(labelsToRemove, username)
+        val cachedAddLabels = getCachedLabelsByIdAndUser(labelsToAdd, username)
+        val cachedRemoveLabels = getCachedLabelsByIdAndUser(labelsToRemove, username)
 
         if (cachedAddLabels.isEmpty()) {
             LOGGER.info("Skipping adding labels to thread")
@@ -228,6 +269,10 @@ class LabelService(
 
     private fun getCachedLabelsByNameAndUser(labelNames: List<String>, username: String): List<UserLabel> {
         return userLabelRepository.findAllByUserIdAndNameInIgnoreCase(username, labelNames)
+    }
+
+    private fun getCachedLabelsByIdAndUser(labelIds: List<String>, username: String): List<UserLabel> {
+        return userLabelRepository.findAllByUserIdAndIdGmailIdInIgnoreCase(username, labelIds)
     }
 
     companion object {
