@@ -26,18 +26,27 @@
                 label="Is Quick Filter Visible"
                 @change="updateViewable(label)"
               />
-              <v-color-picker
-                v-model="colors[index]"
-                hide-mode-switch
-                mode="hexa"
-              />
-              <v-btn
-                width="100%"
-                class="mt-2"
-                @click="updateColor(index)"
-              >
-                Save Label Color
-              </v-btn>
+              <v-expansion-panels>
+                <v-expansion-panel>
+                  <v-expansion-panel-header>Manage Color</v-expansion-panel-header>
+                  <v-expansion-panel-content>
+                    <v-color-picker
+                      v-model="colors[index]"
+                      hide-mode-switch
+                      mode="hexa"
+                    />
+                    <v-btn
+                      width="100%"
+                      class="mt-2"
+                      color="secondary"
+                      :loading="loading[index]"
+                      @click="updateColor(index)"
+                    >
+                      Save Label Color
+                    </v-btn>
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
             </v-col>
           </v-row>
         </v-col>
@@ -59,6 +68,7 @@ export default {
       loadingLabels: true,
       labels: [],
       colors: [],
+      loading: [],
     };
   },
 
