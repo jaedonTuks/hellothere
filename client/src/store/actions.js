@@ -26,7 +26,18 @@ const actions = {
 
   fetchFullLeaderboard: () => axios.get('/api/leaderboard/full-leaderboard'),
 
-  fetchEmails: ({ commit }) => axios.get('/api/gmail/emails')
+  fetchEmails: ({ commit }, pageToken) => axios.get(`/api/gmail/emails?pageToken=${pageToken || ''}`)
+    .then((response) => {
+      commit('setThreadsById', response.data);
+      commit('resetAndSetCurrentThreadIds', response.data);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
+  searchEmails: ({ commit }, payload) => axios.get(`/api/gmail/emails?searchString=${payload.searchString}&labels=${payload.labels}&pageToken=${payload.pageToken || ''}`)
     .then((response) => {
       commit('setThreadsById', response.data);
       commit('resetAndSetCurrentThreadIds', response.data);
@@ -72,17 +83,6 @@ const actions = {
       console.log(response);
       commit('setLabels', response.data.allLabels);
       commit('updateEmailThreadLabels', response.data.threadLabelMap);
-    })
-    .catch((e) => {
-      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
-      commit('setIsLoggedIn', newLoggedIn);
-      console.error(e);
-    }),
-
-  searchEmails: ({ commit }, payload) => axios.get(`/api/gmail/search?searchString=${payload.searchString}&labels=${payload.labels}`)
-    .then((response) => {
-      commit('setThreadsById', response.data);
-      commit('resetAndSetCurrentThreadIds', response.data);
     })
     .catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);

@@ -50,3 +50,5 @@ stats:
         penalty: 5
         cutOffPenalty: 8
         leniencyMinutes: 60
+
+max-emails: 5

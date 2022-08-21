@@ -151,11 +151,13 @@
             <v-text-field
               dark
               dense
+              clearable
               v-model="searchString"
               label="Search"
               type="text"
               append-icon="mdi-magnify"
-              :disabled="filteringEmails || searchingEmails"
+              :disabled="isFetchingMoreEmails || searchingEmails"
+              @click:clear="clearSearch"
               @keyup.enter="search(true)"
             />
           </v-col>
@@ -185,7 +187,7 @@
           {{ label.name }}
         </v-tab>
       </v-tabs>
-      <NoEmailsCard :email-threads="emailThreads" :filtering-emails="filteringEmails"/>
+      <NoEmailsCard :email-threads="emailThreads" :filtering-emails="isFetchingMoreEmails"/>
       <v-dialog-transition>
         <v-expansion-panels
           v-show="emailThreads.length > 0"
@@ -193,7 +195,7 @@
           class="expansionPanels"
         >
           <v-progress-linear
-            v-show="filteringEmails || searchingEmails"
+            v-show="isFetchingMoreEmails || searchingEmails"
             indeterminate
             color="primary"
           />
@@ -218,13 +220,22 @@
           </v-expansion-panel>
         </v-expansion-panels>
       </v-dialog-transition>
+      <v-row class="mt-5" justify="center">
+        <v-btn
+          v-show="hasNextPage"
+          :loading="isFetchingMoreEmails"
+          @click="getNextPage"
+        >
+          Load more
+        </v-btn>
+      </v-row>
     </v-col>
     <SendActionButton/>
   </v-row>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import loadingMixin from '@/mixins/loadingMixin';
 import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
 import SendActionButton from '@/components/SendActionButton.vue';
@@ -252,7 +263,7 @@ export default {
       isMarkAsSpamLoading: false,
       isMarkAsTrashLoading: false,
       searchingEmails: false,
-      filteringEmails: false,
+      isFetchingMoreEmails: false,
       labelAddLoading: false,
       labelRemoveLoading: false,
       loadingEmailThread: false,
@@ -269,7 +280,17 @@ export default {
   },
 
   computed: {
+    ...mapState(['nextPageToken']),
     ...mapGetters(['getProfile', 'getEmailThread', 'getEmailThreads', 'getLabels', 'getLabelNames']),
+
+    hasNextPage() {
+      return this.nextPageToken && this.nextPageToken.length > 1;
+    },
+
+    isSearchResult() {
+      return (this.searchString && this.searchString.length > 1)
+        || (this.selectedLabelData.name && this.selectedLabelData.name.length > 1);
+    },
 
     toolbarActionsDisabled() {
       return this.selectedEmailIds.length === 0;
@@ -291,7 +312,7 @@ export default {
         };
       }
       const selectedLabelIndex = this.selectedLabelViewIndex - 1;
-      return this.labels[selectedLabelIndex];
+      return this.viewableLabels[selectedLabelIndex];
     },
   },
 
@@ -324,21 +345,31 @@ export default {
     // searching and view updates
     search(isSearchLoading) {
       this.searchingEmails = isSearchLoading;
-      this.filteringEmails = !isSearchLoading;
+      this.isFetchingMoreEmails = !isSearchLoading;
 
       const payload = {
         searchString: this.searchString,
         labels: this.selectedLabelData.name,
+        pageToken: null,
       };
 
+      this.searchWithPayload(payload);
+    },
+
+    searchWithPayload(payload) {
       this.searchEmails(payload)
         .then(() => {
           this.emailThreads = this.getEmailThreads();
         })
         .finally(() => {
           this.searchingEmails = false;
-          this.filteringEmails = false;
+          this.isFetchingMoreEmails = false;
         });
+    },
+
+    clearSearch() {
+      this.searchString = '';
+      this.search(true);
     },
 
     changeLabelView() {
@@ -448,6 +479,25 @@ export default {
         color: `#${label.color}`,
       };
     },
+
+    getNextPage() {
+      this.isFetchingMoreEmails = true;
+      if (this.isSearchResult) {
+        const payload = {
+          searchString: this.searchString,
+          labels: this.selectedLabelData.name,
+          pageToken: this.nextPageToken,
+        };
+
+        this.searchWithPayload(payload);
+      } else {
+        this.fetchEmails(this.nextPageToken)
+          .finally(() => {
+            this.emailThreads = this.getEmailThreads();
+            this.isFetchingMoreEmails = false;
+          });
+      }
+    },
   },
 
   created() {
@@ -455,7 +505,7 @@ export default {
     this.fetchLabels().then(() => {
       this.labels = this.getLabels();
     });
-    this.fetchEmails()
+    this.fetchEmails(null)
       .finally(() => {
         this.emailThreads = this.getEmailThreads();
         this.setLoading(false);

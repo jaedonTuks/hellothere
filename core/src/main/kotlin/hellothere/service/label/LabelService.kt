@@ -30,7 +30,7 @@ class LabelService(
     private val userRepository: UserRepository,
     private val userLabelRepository: UserLabelRepository,
     private val userEmailRepository: UserEmailRepository,
-    private val userStatsService: UserStatsService,
+    private val userStatsService: UserStatsService
 ) {
 
     @Transactional
@@ -45,12 +45,12 @@ class LabelService(
         val cachedLabels = getCachedLabels(labelIds, username)
 
         val labelIdsToFetch = labelIds.filter { labelId ->
-            cachedLabels.none { cachedLabel -> labelId != cachedLabel.id.gmailId }
+            cachedLabels.none { cachedLabel -> labelId == cachedLabel.id.gmailId }
         }
 
         val newLabels = fetchAndCacheLabels(labelIdsToFetch, client, username)
         // todo find a way to add categories back in
-        return (newLabels + cachedLabels).filter { !it.name.contains("CATEGORY_") }.map {
+        return (newLabels + cachedLabels).sortedBy { it.name }.filter { !it.name.contains("CATEGORY_") }.map {
             buildLabelDto(it)
         }
     }

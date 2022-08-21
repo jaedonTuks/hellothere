@@ -22,7 +22,7 @@
       </v-col>
     </v-row>
 
-    <v-btn class="mt-4  mr-2" color="secondary" @click="logout">Logout</v-btn>
+    <v-btn class="mt-4  mr-2" @click="logout">Logout</v-btn>
     <div class="mb-4 mt-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
     <v-tabs
       v-model="selectedProfileViewIndex"

@@ -10,7 +10,7 @@
         elevation="0"
     >
       <v-progress-linear
-          v-show="filteringEmails || this.searchingEmails"
+          v-show="filteringEmails"
           indeterminate
           color="primary"
       />

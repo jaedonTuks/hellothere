@@ -13,7 +13,7 @@ data class EmailThreadDto(
     val from: String,
     val latestDate: LocalDateTime?,
     val originalLabelIds: List<String>,
-    val emails: List<EmailDto>,
+    val emails: List<EmailDto>
 ) {
 
     @JsonProperty("labelIds")
