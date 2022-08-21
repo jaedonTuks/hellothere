@@ -62,10 +62,16 @@ databaseChangeLog:
         - sqlFile:
             path: db/changelog/migrations/22__setup_user_challenges.sql
 
-
   - changeSet:
       id: 24__label_improvements.sql
       author: Jaedon Heger
       changes:
         - sqlFile:
             path: db/changelog/migrations/24__label_improvements.sql
+
+  - changeSet:
+      id: 25__email_id_refactor.sql
+      author: Jaedon Heger
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/25__email_id_refactor.sql

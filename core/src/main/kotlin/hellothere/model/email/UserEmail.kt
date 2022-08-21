@@ -2,15 +2,16 @@ package hellothere.model.email
 
 import hellothere.model.label.UserLabel
 import hellothere.model.stats.category.StatCategory
-import liquibase.pro.packaged.it
 import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
 @Table(name = "user_email_summary")
 class UserEmail(
-    // todo not unique combine with maybe mime message id or use mime message id
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    val id: Long? = null,
+
     @Column(name = "gmail_id")
     val gmailId: String,
 
@@ -24,8 +25,11 @@ class UserEmail(
     val dateSent: LocalDateTime,
 
     @ManyToOne
-    @JoinColumn(name = "thread_id")
-    var thread: EmailThread? = null,
+    @JoinColumns(
+        JoinColumn(name = "thread_id", referencedColumnName = "thread_id"),
+        JoinColumn(name = "app_user", referencedColumnName = "app_user")
+    )
+    var thread: EmailThread? = null
 ) {
     @Column(name = "has_had_read_xp_allocated")
     var readXpAllocatedDate: LocalDateTime? = null
@@ -36,29 +40,21 @@ class UserEmail(
     @Column(name = "has_had_reply_xp_allocated")
     var replyXPAllocatedDate: LocalDateTime? = null
 
-    // todo maybe investigate here https://www.baeldung.com/jpa-many-to-many
     @OneToMany
     @JoinTable(
         name = "email_labels",
         joinColumns = [JoinColumn(name = "email_id")],
         inverseJoinColumns = [
             JoinColumn(name = "app_user"),
-            JoinColumn(name = "gmail_id")
+            JoinColumn(name = "label_id")
         ]
     )
     val emailLabels: MutableSet<UserLabel> = mutableSetOf()
-
-    fun addLabel(newLabel: UserLabel) {
-        emailLabels.add(newLabel)
-    }
 
     fun addAllLabels(newLabels: List<UserLabel>) {
         emailLabels.addAll(newLabels)
     }
 
-    fun removeLabel(oldLabel: UserLabel) {
-        emailLabels.remove(oldLabel)
-    }
 
     fun removeAllLabels(oldLabels: List<UserLabel>) {
         emailLabels.removeAll(oldLabels)

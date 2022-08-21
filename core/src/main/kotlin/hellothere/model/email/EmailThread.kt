@@ -1,6 +1,7 @@
 package hellothere.model.email
 
 import hellothere.config.JPA
+import hellothere.model.email.ids.EmailThreadId
 import hellothere.model.user.User
 import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.Fetch
@@ -10,20 +11,20 @@ import javax.persistence.*
 @Entity
 @Table(name = "user_thread")
 class EmailThread(
-    @Id
-    @Column(name = "thread_id")
-    val threadId: String,
+    @EmbeddedId
+    val id: EmailThreadId,
 
     @Column(name = "subject")
     val subject: String,
 
     @ManyToOne
+    @MapsId("app_user")
     @JoinColumn(name = "app_user")
-    var user: User? = null,
+    val user: User? = null,
 
     @OneToMany(
         mappedBy = "thread",
-        fetch = FetchType.LAZY,
+        fetch = FetchType.LAZY
     )
     @Fetch(FetchMode.SUBSELECT)
     @BatchSize(size = JPA.BATCH_SIZE)

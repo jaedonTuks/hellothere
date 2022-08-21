@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping(LABEL)
@@ -26,8 +27,11 @@ class LabelController(
 ) : BaseController(gmailService, securityService) {
 
     @GetMapping
-    fun getLabels(request: HttpServletRequest): ResponseEntity<List<LabelDto>> {
-        val (username, client) = getUsernameAndClientFromRequest(request)
+    fun getLabels(
+        request: HttpServletRequest,
+        response: HttpServletResponse
+    ): ResponseEntity<List<LabelDto>> {
+        val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val labels = labelService.getLabels(client, username)
@@ -37,9 +41,10 @@ class LabelController(
     @PostMapping("/update")
     fun updateEmailLabels(
         request: HttpServletRequest,
+        response: HttpServletResponse,
         @RequestBody updateLabelRequest: UpdateEmailLabelsRequest
     ): ResponseEntity<LabelUpdateDto> {
-        val (username, client) = getUsernameAndClientFromRequest(request)
+        val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         return labelService.updateLabels(username, client, updateLabelRequest)?.let {
@@ -50,9 +55,10 @@ class LabelController(
     @PostMapping("/is-viewable/update")
     fun updateLabelIsViewable(
         request: HttpServletRequest,
+        response: HttpServletResponse,
         @RequestBody updateLabelRequest: UpdateLabelViewableRequest
     ): ResponseEntity<LabelDto> {
-        val username = getUsernameFromRequest(request)
+        val username = getUsernameFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         return labelService.updateLabelIsViewable(username, updateLabelRequest)?.let {
@@ -63,9 +69,10 @@ class LabelController(
     @PostMapping("/color/update")
     fun updateLabelColor(
         request: HttpServletRequest,
+        response: HttpServletResponse,
         @RequestBody updateLabelRequest: UpdateLabelColorRequest
     ): ResponseEntity<LabelDto> {
-        val username = getUsernameFromRequest(request)
+        val username = getUsernameFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         return labelService.updateLabelColor(username, updateLabelRequest)?.let {

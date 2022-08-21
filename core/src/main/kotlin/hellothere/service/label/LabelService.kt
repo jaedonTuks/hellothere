@@ -19,7 +19,6 @@ import hellothere.requests.label.UpdateLabelViewableRequest
 import hellothere.service.google.BatchCallbacks.LabelBatchCallback
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -136,7 +135,7 @@ class LabelService(
         val (cachedAddLabels, cachedRemoveLabels) = getCachedLabels(labelsToAdd, labelsToRemove, username)
             ?: return null
 
-        val messagesToModify = userEmailRepository.findAllByThreadThreadIdInAndThreadUserIdOrderByDateSent(
+        val messagesToModify = userEmailRepository.findAllByThreadIdThreadIdInAndThreadUserIdOrderByDateSent(
             threadIds,
             username
         )
@@ -164,8 +163,8 @@ class LabelService(
         LOGGER.info("Finished adding labels $labelsToAdd and removing $labelsToRemove for threads: $threadIds - user: $username")
 
         val labelsPerThread = updatedMessages
-            .filter { it.thread?.threadId != null }
-            .groupBy { it.thread!!.threadId }
+            .filter { it.thread?.id?.threadId != null }
+            .groupBy { it.thread!!.id.threadId }
             .mapValues { mapEntry -> mapEntry.value.flatMap { it.getLabelList() }.toSet() }
 
         val allUserLabels = userLabelRepository.findAllByUserId(username)

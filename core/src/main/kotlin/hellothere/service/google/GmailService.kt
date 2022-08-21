@@ -11,6 +11,7 @@ import hellothere.model.email.EmailFormat
 import hellothere.model.email.EmailHeaderName
 import hellothere.model.email.EmailThread
 import hellothere.model.email.UserEmail
+import hellothere.model.email.ids.EmailThreadId
 import hellothere.model.stats.category.StatCategory
 import hellothere.model.user.UserAccessToken
 import hellothere.repository.email.EmailThreadRepository
@@ -23,7 +24,6 @@ import hellothere.service.google.BatchCallbacks.ThreadBatchCallback
 import hellothere.service.label.LabelService
 import hellothere.service.user.UserService
 import hellothere.service.user.UserStatsService
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -50,7 +50,7 @@ class GmailService(
     private val userService: UserService,
     private val userStatsService: UserStatsService,
     private val conversionService: ConversionService,
-    private val labelService: LabelService,
+    private val labelService: LabelService
 ) {
     fun getGmailClientFromCredentials(credentials: Credential): Gmail {
         return Gmail.Builder(
@@ -137,7 +137,7 @@ class GmailService(
             labelService.updateLabels(username, client, it.id, listOf(), listOf("Unread"))
         }
 
-        return threads.mapNotNull { buildEmailThreadDto(it) }
+        return threads.mapNotNull { buildEmailThreadDto(it, username) }
     }
 
     fun getThreadsBaseData(client: Gmail, gmailIds: List<String>, username: String): List<EmailThread> {
@@ -263,7 +263,7 @@ class GmailService(
 
         val threadsToSave = threads.map {
             EmailThread(
-                it.id,
+                EmailThreadId(it.id, user.id),
                 getEmailHeader(it.messages.first(), EmailHeaderName.SUBJECT),
                 user
             )
@@ -271,10 +271,10 @@ class GmailService(
 
         val savedThreads = emailThreadRepository.saveAll(threadsToSave)
         val savedEmails = saveNewEmailsFromGmail(threads.flatMap { it.messages }, username)
-            .groupBy { it.thread?.threadId }
+            .groupBy { it.thread?.id?.threadId }
 
         threads.forEach { thread ->
-            val savedThread = savedThreads.firstOrNull { it.threadId == thread.id }
+            val savedThread = savedThreads.firstOrNull { it?.id?.threadId == thread.id }
             savedEmails[thread.id]?.let {
                 savedThread?.addAllEmails(it)
             }
@@ -300,13 +300,14 @@ class GmailService(
             return listOf()
         }
         val threadIds = emails.map { it.threadId }
-        val cachedThreads = emailThreadRepository.findAllByUserIdAndThreadIdIn(username, threadIds)
+        val cachedThreads = emailThreadRepository.findAllByUserIdAndIdThreadIdIn(username, threadIds)
         val allUserLabels = labelService.getAllUserLabels(username).associateBy { it.id.gmailId }
 
         val emailsToSave = emails.map { message ->
-            val savedThread = cachedThreads.firstOrNull { it.threadId == message.threadId }
+            val savedThread = cachedThreads.firstOrNull { it.id.threadId == message.threadId }
             val lastSavedMessage = savedThread?.emails?.lastOrNull()
             val email = UserEmail(
+                null,
                 message.id,
                 getEmailHeader(message, EmailHeaderName.MESSAGE_ID),
                 getEmailHeader(message, EmailHeaderName.FROM),
@@ -346,7 +347,7 @@ class GmailService(
                 return null
             }
             // todo investigate if it can be included in send request
-            labelService.updateLabels(username, client, thread.threadId, sendRequest.labels)
+            labelService.updateLabels(username, client, thread.id.threadId, sendRequest.labels)
             buildEmailThreadDto(thread)
         } catch (e: GoogleJsonResponseException) {
             LOGGER.error("Unable to send message: " + e.details)
@@ -356,7 +357,7 @@ class GmailService(
 
     fun sendReply(username: String, client: Gmail, replyRequest: ReplyRequest): EmailDto? {
         val lastEmailInThread = userEmailRepository
-            .findAllByThreadThreadIdInAndThreadUserIdOrderByDateSent(
+            .findAllByThreadIdThreadIdInAndThreadUserIdOrderByDateSent(
                 listOf(replyRequest.threadId),
                 username
             ).lastOrNull()
@@ -481,10 +482,10 @@ class GmailService(
     fun isValidEmailAddress(emailAddress: String): Boolean {
         return try {
             InternetAddress(emailAddress).validate()
-            return true
+            true
         } catch (exception: AddressException) {
             LOGGER.info("invalid email address $emailAddress")
-            return false
+            false
         }
     }
 
@@ -500,7 +501,7 @@ class GmailService(
 
     fun buildEmailThreadDto(emailThread: EmailThread): EmailThreadDto {
         return EmailThreadDto(
-            emailThread.threadId,
+            emailThread.id.threadId,
             emailThread.subject,
             emailThread.getLastFromEmail(),
             emailThread.emails.maxOfOrNull { it.dateSent },
@@ -510,10 +511,12 @@ class GmailService(
     }
 
     fun buildEmailThreadDto(
-        emailThread: com.google.api.services.gmail.model.Thread
+        emailThread: com.google.api.services.gmail.model.Thread,
+        username: String
     ): EmailThreadDto? {
-        val cachedEmailThread = emailThreadRepository.findFirstByThreadId(emailThread.id)
-            ?: return null
+        val cachedEmailThread = emailThreadRepository.findFirstById(
+            EmailThreadId(emailThread.id, username)
+        ) ?: return null
 
         return EmailThreadDto(
             emailThread.id,
@@ -538,7 +541,7 @@ class GmailService(
     fun buildEmailDto(userEmail: UserEmail): EmailDto {
         return EmailDto(
             userEmail.gmailId,
-            userEmail.thread?.threadId ?: userEmail.gmailId,
+            userEmail.thread?.id?.threadId ?: userEmail.gmailId,
             userEmail.fromEmail,
             userEmail.dateSent,
             null
