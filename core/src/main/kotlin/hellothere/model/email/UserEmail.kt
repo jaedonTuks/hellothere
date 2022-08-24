@@ -21,6 +21,9 @@ class UserEmail(
     @Column(name = "from_email")
     val fromEmail: String,
 
+    @Column(name = "email_to")
+    val toEmail: String,
+
     @Column(name = "date_sent")
     val dateSent: LocalDateTime,
 
@@ -54,8 +57,6 @@ class UserEmail(
     fun addAllLabels(newLabels: List<UserLabel>) {
         emailLabels.addAll(newLabels)
     }
-
-
     fun removeAllLabels(oldLabels: List<UserLabel>) {
         emailLabels.removeAll(oldLabels)
     }

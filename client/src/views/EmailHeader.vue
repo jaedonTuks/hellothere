@@ -14,7 +14,7 @@
       <v-col class="ml-0 pl-0" cols="8">
          <span class="emailText">
            <span class="ma-0 dateAndFrom">
-             {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
+             {{ emailThread.formattedDate }}  - {{ fromName(emailThread) }}
            </span>
            <span class="ml-2 subject">{{ emailThread.subject }}</span>
           </span>
@@ -70,11 +70,22 @@ export default {
   },
 
   methods: {
-    fromName(emailFrom) {
-      const startEmail = emailFrom.indexOf('<');
-      const charsToRemove = emailFrom.length - startEmail;
+    fromName(emailThread) {
+      let participants = this.getUsernameOrEmailAddressFromString(emailThread.from);
+      if (emailThread.numberOfParticipants > 2) {
+        participants += ` - ${emailThread.numberOfParticipants - 1}`;
+      }
+      return participants;
+    },
 
-      return emailFrom.slice(0, -charsToRemove);
+    getUsernameOrEmailAddressFromString(emailAddress) {
+      const startEmail = emailAddress.indexOf('<');
+      if (startEmail !== -1) {
+        const charsToRemove = emailAddress.length - startEmail;
+        return emailAddress.slice(0, -charsToRemove);
+      }
+
+      return emailAddress;
     },
 
     updateLabels() {
@@ -139,6 +150,18 @@ export default {
 .dateAndFrom {
   display: inline-block;
   text-overflow: ellipsis;
+}
+
+.dateAndFrom {
+  font-size: 0.9em !important;
+}
+
+.subject {
+  font-size: 0.8em !important;
+}
+
+.label {
+  font-size: 0.8em !important;
 }
 
 @media only screen and (max-width: 1264px) {

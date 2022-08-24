@@ -5,5 +5,6 @@ enum class EmailHeaderName(val value: String) {
     FROM("from"),
     MESSAGE_ID("Message-Id"),
     REFERENCE("Reference"),
+    EMAIL_TO("To"),
     IN_REPLY_TO("In-Reply-To");
 }

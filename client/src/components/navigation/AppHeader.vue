@@ -7,7 +7,7 @@
     <div class="d-flex align-center">
       <h1
         class="logo"
-        @click="$router.push({name: 'Home'})"
+        @click="$router.push({name: 'Inbox'})"
       >
         Hello There!
       </h1>

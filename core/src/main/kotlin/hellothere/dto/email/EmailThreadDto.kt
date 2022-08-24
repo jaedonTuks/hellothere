@@ -16,6 +16,23 @@ data class EmailThreadDto(
     val emails: List<EmailDto>
 ) {
 
+    @JsonProperty("to")
+    fun getToEmails(): Set<String> {
+        return emails.flatMap { it.to }.toSet()
+    }
+
+    @JsonProperty("isLastSentSelf")
+    fun isLastSentSelf(): Boolean {
+        return emails.lastOrNull()?.displayTo ?: false
+    }
+
+    @JsonProperty("numberOfParticipants")
+    fun getNumberOfParticipants(): Int {
+        val allEmails = getToEmails().toMutableSet()
+        allEmails.add(from)
+        return allEmails.size
+    }
+
     @JsonProperty("labelIds")
     fun getEnrichedLabelIds(): List<String> {
         val enrichedLabelIds = mutableListOf<String>()

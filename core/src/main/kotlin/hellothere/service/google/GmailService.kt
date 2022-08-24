@@ -311,6 +311,7 @@ class GmailService(
                 message.id,
                 getEmailHeader(message, EmailHeaderName.MESSAGE_ID),
                 getEmailHeader(message, EmailHeaderName.FROM),
+                getEmailHeader(message, EmailHeaderName.EMAIL_TO),
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(message.internalDate), ZoneId.systemDefault()),
                 savedThread
             )
@@ -533,6 +534,8 @@ class GmailService(
             message.id,
             message.threadId,
             getEmailHeader(message, EmailHeaderName.FROM),
+            getEmailHeader(message, EmailHeaderName.EMAIL_TO).split(","),
+            message.labelIds.contains("SENT"),
             LocalDateTime.ofEpochSecond(message.internalDate, 0, ZoneOffset.UTC),
             getFullBodyFromMessage(message)
         )
@@ -543,8 +546,9 @@ class GmailService(
             userEmail.gmailId,
             userEmail.thread?.id?.threadId ?: userEmail.gmailId,
             userEmail.fromEmail,
-            userEmail.dateSent,
-            null
+            userEmail.toEmail.split(","),
+            userEmail.getLabelList().contains("SENT"),
+            userEmail.dateSent
         )
     }
 

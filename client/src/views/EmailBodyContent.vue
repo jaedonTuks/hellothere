@@ -9,27 +9,27 @@
     <v-container v-show="!loading" class="emailBody">
       <v-row
         v-for="email in emailThread.emails"
-        :class="{
-          'mt-5': true
-        }"
-        :justify="getJustify(email)"
+        justify="center"
+        class="mb-2"
         :key="`${emailThread.id} - ${email.id}`"
       >
-        <div style="overflow-x: scroll" v-if="isMobile" v-html="email.body"/>
+        <div v-if="isMobile" v-html="email.body"/>
         <v-col
           v-else
-          cols="5"
+          cols="12"
           :class="{
-            'pa-6': true,
+              'pa-3': true,
             'emailMessage': true,
             'ownMessage': isOwnEmail(email),
             'noReply': isNoReplyEmail(email)
           }"
         >
-          <v-row style="margin-bottom: 1px;">
-            <h4>{{email.from}}</h4>
+          <v-row class="borderBottom">
+            <v-col cols="6"><h4>From: {{email.from}}</h4></v-col>
+            <v-col cols="6"> <span class="float-right">{{email.fullDateTime}}</span> </v-col>
+            <v-col cols="12"> To: {{ email.to.join(", ") }} </v-col>
           </v-row>
-          <v-row v-html="email.body"/>
+          <v-row class="pa-3" v-html="email.body"/>
         </v-col>
       </v-row>
     </v-container>
@@ -115,7 +115,7 @@ export default {
 
 .emailMessage {
   background-color: var(--v-accent-darken1);
-  border-radius: 10px 10px 10px 0;
+  border-radius: 5px;
 }
 
 .ownMessage {
