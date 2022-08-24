@@ -1,10 +1,11 @@
 package hellothere.model.email
 
 enum class EmailHeaderName(val value: String) {
-    SUBJECT("subject"),
+    CC("CC"),
+    EMAIL_TO("To"),
     FROM("from"),
+    IN_REPLY_TO("In-Reply-To"),
     MESSAGE_ID("Message-Id"),
     REFERENCE("Reference"),
-    EMAIL_TO("To"),
-    IN_REPLY_TO("In-Reply-To");
+    SUBJECT("subject");
 }

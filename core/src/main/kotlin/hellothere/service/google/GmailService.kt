@@ -312,6 +312,7 @@ class GmailService(
                 getEmailHeader(message, EmailHeaderName.MESSAGE_ID),
                 getEmailHeader(message, EmailHeaderName.FROM),
                 getEmailHeader(message, EmailHeaderName.EMAIL_TO),
+                extractEmailFromHeaderString(getEmailHeader(message, EmailHeaderName.CC)),
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(message.internalDate), ZoneId.systemDefault()),
                 savedThread
             )
@@ -322,6 +323,20 @@ class GmailService(
         }
 
         return userEmailRepository.saveAll(emailsToSave)
+    }
+
+    private fun extractEmailFromHeaderString(emailString: String): String? {
+        if (emailString.isBlank()) {
+            return null
+        }
+
+        return emailString.split(",").map {
+            if (it.contains("<")) {
+                it.substringAfter("<").substringBefore(">")
+            } else {
+                it
+            }
+        }.joinToString(",")
     }
 
     fun getEmailHeader(message: Message, headerName: EmailHeaderName): String {
@@ -535,6 +550,9 @@ class GmailService(
             message.threadId,
             getEmailHeader(message, EmailHeaderName.FROM),
             getEmailHeader(message, EmailHeaderName.EMAIL_TO).split(","),
+            extractEmailFromHeaderString(
+                getEmailHeader(message, EmailHeaderName.CC)
+            ) ?.split(",") ?: listOf(),
             message.labelIds.contains("SENT"),
             LocalDateTime.ofEpochSecond(message.internalDate, 0, ZoneOffset.UTC),
             getFullBodyFromMessage(message)
@@ -547,6 +565,7 @@ class GmailService(
             userEmail.thread?.id?.threadId ?: userEmail.gmailId,
             userEmail.fromEmail,
             userEmail.toEmail.split(","),
+            userEmail.cc?.split(",") ?: listOf(),
             userEmail.getLabelList().contains("SENT"),
             userEmail.dateSent
         )

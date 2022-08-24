@@ -16,6 +16,8 @@ alter table user_email_summary
     add column id bigserial;
 alter table user_email_summary
     add column email_to VARCHAR(1023);
+alter table user_email_summary
+    add column cc VARCHAR(1023);
 
 alter table user_email_summary
     drop constraint user_email_summary_pkey;

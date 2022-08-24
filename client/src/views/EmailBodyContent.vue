@@ -28,6 +28,7 @@
             <v-col cols="6"><h4>From: {{email.from}}</h4></v-col>
             <v-col cols="6"> <span class="float-right">{{email.fullDateTime}}</span> </v-col>
             <v-col cols="12"> To: {{ email.to.join(", ") }} </v-col>
+            <v-col v-if="email.cc.length > 0" cols="12"> CC: {{ email.cc.join(", ") }} </v-col>
           </v-row>
           <v-row class="pa-3" v-html="email.body"/>
         </v-col>

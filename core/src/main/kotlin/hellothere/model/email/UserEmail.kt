@@ -24,6 +24,9 @@ class UserEmail(
     @Column(name = "email_to")
     val toEmail: String,
 
+    @Column(name = "cc")
+    val cc: String?,
+
     @Column(name = "date_sent")
     val dateSent: LocalDateTime,
 
