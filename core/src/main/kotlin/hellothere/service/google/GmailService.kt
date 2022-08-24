@@ -410,6 +410,7 @@ class GmailService(
         return buildMessage(
             username,
             sendRequest.to,
+            sendRequest.cc,
             sendRequest.subject,
             sendRequest.body
         )
@@ -430,9 +431,15 @@ class GmailService(
         replyHeaders[EmailHeaderName.REFERENCE.value] = replyThread.getAllEmailMimeIds()
         replyHeaders[EmailHeaderName.IN_REPLY_TO.value] = replyThread.getLastSentEmailMimeId()
 
+        val cc = replyThread.emails.mapNotNull { it.cc }
+            .flatMap { it.lowercase().split(",") }
+            .toSet()
+            .toList()
+
         return buildMessage(
             username,
             listOf(to),
+            cc,
             subject,
             replyRequest.reply,
             replyHeaders
@@ -442,11 +449,12 @@ class GmailService(
     fun buildMimeMessage(
         from: String,
         to: List<String>,
+        cc: List<String>,
         subject: String,
         body: String,
         additionalHeaders: Map<String, String> = mapOf()
     ): MimeMessage? {
-        if (hasInvalidEmailAddresses(to + from)) {
+        if (hasInvalidEmailAddresses(to + from + cc)) {
             LOGGER.info("Stopping mime message build. invalid email addresses")
             return null
         }
@@ -458,6 +466,7 @@ class GmailService(
 
         mimeMessageHelper.setFrom(from)
         mimeMessageHelper.setTo(to.toTypedArray())
+        mimeMessageHelper.setCc(cc.toTypedArray())
         mimeMessageHelper.setSubject(subject)
         mimeMessageHelper.setText(body)
 
@@ -481,11 +490,12 @@ class GmailService(
     fun buildMessage(
         from: String,
         to: List<String>,
+        cc: List<String>,
         subject: String,
         body: String,
         additionalHeaders: Map<String, String> = mapOf()
     ): Message? {
-        val mimeMessage = buildMimeMessage(from, to, subject, body, additionalHeaders)
+        val mimeMessage = buildMimeMessage(from, to, cc, subject, body, additionalHeaders)
             ?: return null
         val base64String = conversionService.convertMimeMessageToBase64String(mimeMessage)
             ?: return null
