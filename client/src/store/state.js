@@ -1,9 +1,11 @@
 export function getDefaultState() {
   return {
     composingEmail: false,
+    displaySnackBar: true,
     isLoggedIn: true,
     loading: false,
     nextPageToken: null,
+    snackBarColor: 'error',
     challenges: [],
     userProfile: {
       leaderboardUsername: '',

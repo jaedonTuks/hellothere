@@ -11,12 +11,13 @@
         right: () => swipe(true),
       }"
     >
-        <Loader/>
-        <v-container style="width:100%">
-          <v-slide-y-transition mode="out-in">
-            <router-view/>
-          </v-slide-y-transition>
-        </v-container>
+      <snackBar/>
+      <Loader/>
+      <v-container style="width:100%">
+        <v-slide-y-transition mode="out-in">
+          <router-view/>
+        </v-slide-y-transition>
+      </v-container>
     </v-main>
     <AppBottomNav
       v-if="shouldDisplayHeader && isMobile"
@@ -29,13 +30,17 @@
 import AppHeader from '@/components/navigation/AppHeader.vue';
 import AppBottomNav from '@/components/navigation/AppBottomNav.vue';
 import Loader from '@/components/Loader.vue';
+import SnackBar from '@/SnackBar.vue';
 import { mapMutations, mapState } from 'vuex';
 import screenSizeMixin from '@/mixins/screenSizeMixin';
 
 export default {
   name: 'App',
   components: {
-    AppHeader, AppBottomNav, Loader,
+    SnackBar,
+    AppHeader,
+    AppBottomNav,
+    Loader,
   },
   mixins: [screenSizeMixin],
 
@@ -82,7 +87,8 @@ export default {
           this.handleSwipeNav(isSwipeRight, 'Leaderboards', null);
           break;
         }
-        default: break;
+        default:
+          break;
       }
     },
 
@@ -112,5 +118,7 @@ div {
   overflow-x: hidden;
 }
 
-html { overflow-y: auto }
+html {
+  overflow-y: auto
+}
 </style>

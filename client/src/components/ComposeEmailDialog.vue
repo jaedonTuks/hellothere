@@ -100,6 +100,8 @@
                 name="input-7-4"
                 label="Message"
                 append-icon="mdi-send"
+                :disabled="loading"
+                :loading="loading"
                 @click:append="sendComposedEmail"
                 @keyup.ctrl.enter="sendComposedEmail"
               />
@@ -121,6 +123,7 @@ export default {
   name: 'ComposeEmailDialog',
   data() {
     return {
+      loading: false,
       labels: [],
       to: [],
       cc: [],
@@ -148,6 +151,7 @@ export default {
     },
 
     sendComposedEmail() {
+      this.loading = true;
       const payload = {
         to: this.to,
         cc: this.cc,
@@ -161,6 +165,8 @@ export default {
           this.resetFields();
           EventBus.$emit('newEmail');
           this.setComposingEmail(false);
+        }).finally(() => {
+          this.loading = false;
         });
     },
   },

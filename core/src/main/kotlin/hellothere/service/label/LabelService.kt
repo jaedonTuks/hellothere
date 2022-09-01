@@ -48,7 +48,6 @@ class LabelService(
         }
 
         val newLabels = fetchAndCacheLabels(labelIdsToFetch, client, username)
-        // todo find a way to add categories back in
         return (newLabels + cachedLabels).sortedBy { it.name }.filter { !it.name.contains("CATEGORY_") }.map {
             buildLabelDto(it)
         }
@@ -107,6 +106,16 @@ class LabelService(
             .execute()
 
         return labelResponse.labels.map { it.id }
+    }
+
+    fun getUnreadMessageCount(client: Gmail, username: String): Int {
+        val unreadLabelResponse = client
+            .users()
+            .Labels()
+            .get(USER_SELF_ACCESS, "INBOX")
+            .execute()
+
+        return unreadLabelResponse.messagesUnread
     }
 
     fun getCachedLabels(labelIds: List<String>, username: String): List<UserLabel> {

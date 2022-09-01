@@ -42,6 +42,7 @@
         name="input-7-4"
         label="Reply"
         append-icon="mdi-send"
+        :loading="sendingReply"
         :disabled = "sendingReply || isNoReplyEmail(emailThread.emails[0])"
         @click:append="sendReply"
         @keyup.ctrl.enter="sendReply"
@@ -86,6 +87,7 @@ export default {
       this.replyToEmail(payload)
         .finally(() => {
           this.sendingReply = false;
+          this.reply = '';
         });
     },
 
