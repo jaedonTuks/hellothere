@@ -160,6 +160,26 @@ class GmailService(
         return cachedEmailThreads + newEmailThreads
     }
 
+    fun hasNewMessageInInbox(
+        client: Gmail,
+        username: String
+    ): Boolean {
+        val newMessageResponse = client
+            .users()
+            .messages()
+            .list(USER_SELF_ACCESS)
+            .setMaxResults(1)
+            .execute()
+        val latestMessage = newMessageResponse.messages.firstOrNull()
+
+        if (latestMessage != null) {
+            val cachedCount = userEmailRepository.countByGmailIdAndThreadUserId(latestMessage.id, username)
+            return cachedCount == 0
+        }
+
+        return false
+    }
+
     fun getEmailBaseData(
         client: Gmail,
         gmailIds: List<String>,
@@ -515,7 +535,11 @@ class GmailService(
         }
     }
 
-    fun buildEmailContainerDto(usedPageToken: Boolean, nextPageToken: String?, emailThreads: List<EmailThread>): EmailsContainerDTO {
+    fun buildEmailContainerDto(
+        usedPageToken: Boolean,
+        nextPageToken: String?,
+        emailThreads: List<EmailThread>
+    ): EmailsContainerDTO {
         val emailThreadDto = emailThreads.map { buildEmailThreadDto(it) }
 
         return EmailsContainerDTO(
@@ -562,7 +586,7 @@ class GmailService(
             getEmailHeader(message, EmailHeaderName.EMAIL_TO).split(","),
             extractEmailFromHeaderString(
                 getEmailHeader(message, EmailHeaderName.CC)
-            ) ?.split(",") ?: listOf(),
+            )?.split(",") ?: listOf(),
             message.labelIds.contains("SENT"),
             LocalDateTime.ofEpochSecond(message.internalDate, 0, ZoneOffset.UTC),
             getFullBodyFromMessage(message)

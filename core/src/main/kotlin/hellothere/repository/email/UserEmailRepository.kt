@@ -11,6 +11,8 @@ interface UserEmailRepository : JpaRepository<UserEmail, Long> {
     fun countDistinctByThreadUserId(username: String): Int
     fun countByThreadUserId(username: String): Int
 
+    fun countByGmailIdAndThreadUserId(gmailId: String, threadUserId: String): Int
+
     fun countByThreadUserIdAndLabelXPAllocatedDateNotNull(username: String): Int
     fun countByThreadUserIdAndReadXpAllocatedDateNotNull(username: String): Int
     fun countByThreadUserIdAndReplyXPAllocatedDateNotNull(username: String): Int

@@ -96,14 +96,13 @@ class UserController(
         return ResponseEntity.ok(true)
     }
 
-    // todo descope eventually
     @GetMapping("/sendTestMessage")
     fun sendTest(
         request: HttpServletRequest,
         @RequestParam username: String
     ): ResponseEntity<Boolean> {
 
-        notificationService.sendNotification(username)
+        notificationService.checkForNewEmails()
 
         return ResponseEntity.ok(true)
     }
