@@ -75,3 +75,10 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: db/changelog/migrations/25__email_id_refactor.sql
+
+  - changeSet:
+      id: 15__push_notifications.sql
+      author: Jaedon Heger
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/15__push_notifications.sql

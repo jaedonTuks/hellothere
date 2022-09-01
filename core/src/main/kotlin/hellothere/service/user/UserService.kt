@@ -2,6 +2,7 @@ package hellothere.service.user
 
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Profile
+import com.google.firebase.auth.FirebaseAuth
 import hellothere.dto.user.UserDto
 import hellothere.model.user.User
 import hellothere.model.user.UserAccessToken
@@ -64,6 +65,7 @@ class UserService(
         val newUser = User(
             newUserId,
             newUserId,
+            null
         )
         userRepository.save(newUser)
         userStatsService.createNewWeekStatsForUser(newUser)
@@ -104,6 +106,19 @@ class UserService(
 
         user.leaderboardUsername = updateUsernameRequest.newUsername
         return userRepository.save(user)
+    }
+
+    @Transactional
+    fun updateNotificationToken(username: String, token: String) {
+        val user = userRepository.findByIdOrNull(username)
+
+        if (user == null) {
+            LOGGER.error("User does not exist with username $username")
+            return
+        }
+
+        user.firebaseToken = token
+        userRepository.save(user)
     }
 
     companion object {

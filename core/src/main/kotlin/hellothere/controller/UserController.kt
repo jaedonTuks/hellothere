@@ -3,12 +3,14 @@ package hellothere.controller
 import hellothere.annotation.RequiresFeatureAspect
 import hellothere.config.RestUrl.USER
 import hellothere.dto.UserChallengeDTO
+import hellothere.dto.user.NotificationTokenDTO
 import hellothere.dto.user.UserDto
+import hellothere.requests.user.UpdateNotificationToken
 import hellothere.requests.user.UpdateUsernameRequest
+import hellothere.service.NotificationService
 import hellothere.service.challenge.ChallengeService
 import hellothere.service.security.SecurityService
 import hellothere.service.user.UserService
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -21,7 +23,8 @@ import javax.servlet.http.HttpServletRequest
 class UserController(
     private val userService: UserService,
     private val challengeService: ChallengeService,
-    private val securityService: SecurityService
+    private val securityService: SecurityService,
+    private val notificationService: NotificationService
 ) {
     @GetMapping
     fun getUser(
@@ -66,8 +69,43 @@ class UserController(
         request: HttpServletRequest
     ): ResponseEntity<Boolean> {
         val username = securityService.getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         return ResponseEntity.ok(username != null)
+    }
+
+    @GetMapping("/get-notification-token")
+    fun getNotificationServiceKey(
+        request: HttpServletRequest
+    ): ResponseEntity<NotificationTokenDTO?> {
+        val username = securityService.getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        LOGGER.info("Updating $username firebase token")
+        return ResponseEntity.ok(notificationService.getUserNotificationToken(username))
+    }
+
+    @PostMapping("/update-notification-token")
+    fun updateMessageToken(
+        request: HttpServletRequest,
+        @RequestBody updateNotificationToken: UpdateNotificationToken
+    ): ResponseEntity<Boolean> {
+        val username = securityService.getUsernameFromRequest(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        userService.updateNotificationToken(username, updateNotificationToken.token)
+        return ResponseEntity.ok(true)
+    }
+
+    // todo descope eventually
+    @GetMapping("/sendTestMessage")
+    fun sendTest(
+        request: HttpServletRequest,
+        @RequestParam username: String
+    ): ResponseEntity<Boolean> {
+
+        notificationService.sendNotification(username)
+
+        return ResponseEntity.ok(true)
     }
 
     companion object {

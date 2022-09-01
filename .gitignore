@@ -34,3 +34,5 @@ pnpm-debug.log*
 /core/.mvn/wrapper/maven-wrapper.properties
 /client/node_modules/
 /pom.xml
+
+/core/src/main/resources/firebaseconfig/config.json

@@ -26,13 +26,16 @@
 </template>
 
 <script>
-
 import AppHeader from '@/components/navigation/AppHeader.vue';
 import AppBottomNav from '@/components/navigation/AppBottomNav.vue';
 import Loader from '@/components/Loader.vue';
 import SnackBar from '@/SnackBar.vue';
-import { mapMutations, mapState } from 'vuex';
+import { mapActions, mapMutations, mapState } from 'vuex';
 import screenSizeMixin from '@/mixins/screenSizeMixin';
+
+// eslint-disable-next-line no-unused-vars
+import { getAuth, signInAnonymously, signInWithEmailAndPassword } from 'firebase/auth';
+import { getToken } from 'firebase/messaging';
 
 export default {
   name: 'App',
@@ -63,6 +66,7 @@ export default {
   },
 
   methods: {
+    ...mapActions(['sendUpdateNotificationToken', 'fetchNotificationKey']),
     ...mapMutations(['setIsLoggedIn']),
 
     isLoggedInFromPreviousSession() {
@@ -99,10 +103,35 @@ export default {
         }
       } else if (rightName) this.$router.push({ name: rightName });
     },
+
+    async signIntoFirebase() {
+      const auth = getAuth();
+      if (!auth.currentUser) {
+        console.log(auth.currentUser);
+        const keyResponse = await this.fetchNotificationKey();
+        // eslint-disable-next-line max-len
+        const result = await signInWithEmailAndPassword(auth, keyResponse.data.username, keyResponse.data.pass);
+        console.log(result);
+        await this.getAndPostToken(keyResponse.data.vapidKey);
+      }
+    },
+
+    async getAndPostToken(key) {
+      console.log(key);
+      const token = await getToken(this.$messaging, { vapidKey: key });
+      const payload = {
+        token,
+      };
+      await this.sendUpdateNotificationToken(payload);
+    },
   },
 
   created() {
     document.title = 'Hello There!';
+
+    if (this.isLoggedIn) {
+      this.signIntoFirebase();
+    }
   },
 };
 </script>

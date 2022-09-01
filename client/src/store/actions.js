@@ -153,10 +153,25 @@ const actions = {
       console.error(e);
     }),
 
+  fetchNotificationKey: ({ commit }) => axios.get('/api/user/get-notification-token')
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
   sendUpdateUsernameRequest: ({ commit }, payload) => axios.post('/api/user/edit-username', payload)
     .then((response) => {
       commit('setProfileLeaderboardUsername', response.data);
     }).catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+      throw e;
+    }),
+
+  sendUpdateNotificationToken: ({ commit }, payload) => axios.post('/api/user/update-notification-token', payload)
+    .catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
       commit('setIsLoggedIn', newLoggedIn);
       console.error(e);

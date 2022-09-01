@@ -17,9 +17,12 @@ class User(
     @Column(name = "leaderboard_username")
     var leaderboardUsername: String,
 
+    @Column(name = "firebase_token")
+    var firebaseToken: String?,
+
     @OneToMany(
         mappedBy = "user",
-        fetch = FetchType.LAZY,
+        fetch = FetchType.LAZY
     )
     @Fetch(FetchMode.SUBSELECT)
     @BatchSize(size = BATCH_SIZE)

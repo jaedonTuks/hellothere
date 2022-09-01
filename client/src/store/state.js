@@ -1,7 +1,7 @@
 export function getDefaultState() {
   return {
     composingEmail: false,
-    displaySnackBar: true,
+    displaySnackBar: false,
     isLoggedIn: true,
     loading: false,
     nextPageToken: null,
