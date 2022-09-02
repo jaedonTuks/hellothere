@@ -107,17 +107,14 @@ export default {
     async signIntoFirebase() {
       const auth = getAuth();
       if (!auth.currentUser) {
-        console.log(auth.currentUser);
         const keyResponse = await this.fetchNotificationKey();
         // eslint-disable-next-line max-len
-        const result = await signInWithEmailAndPassword(auth, keyResponse.data.username, keyResponse.data.pass);
-        console.log(result);
+        await signInWithEmailAndPassword(auth, keyResponse.data.username, keyResponse.data.pass);
         await this.getAndPostToken(keyResponse.data.vapidKey);
       }
     },
 
     async getAndPostToken(key) {
-      console.log(key);
       const token = await getToken(this.$messaging, { vapidKey: key });
       const payload = {
         token,

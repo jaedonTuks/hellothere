@@ -93,8 +93,8 @@ class NotificationService(
 
     private fun buildNewEmailNotification(username: String): WebpushNotification {
         return WebpushNotification.builder()
-            .setTitle(username)
-            .setBody("You have new emails in your inbox! Open hello there to check them out")
+            .setTitle("Hello there $username!")
+            .setBody("You have new emails in your inbox!")
             .build()
     }
 

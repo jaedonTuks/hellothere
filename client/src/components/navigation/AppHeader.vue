@@ -17,7 +17,7 @@
     <template v-if="isNotMobile">
       <MenuOption
         route-name="Inbox"
-        icon-name="home"
+        icon-name="email"
         :notification-count="notificationCount"
       />
       <MenuOption

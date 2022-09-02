@@ -101,9 +101,7 @@ class UserController(
         request: HttpServletRequest,
         @RequestParam username: String
     ): ResponseEntity<Boolean> {
-
-        notificationService.checkForNewEmails()
-
+        notificationService.sendNotification(username)
         return ResponseEntity.ok(true)
     }
 
