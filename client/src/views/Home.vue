@@ -5,12 +5,12 @@
       <v-toolbar
         short
         outlined
-        class="mb-1 toolbar"
+        class="mt-1 mb-1 mt-md-0 toolbar"
         color="background"
         elevation="0"
       >
         <v-row class="mt-4" align-content="start">
-          <v-col cols="1">
+          <v-col cols="6" md="1">
             <v-checkbox
               v-model="allSelected"
               class="align-center"
@@ -19,13 +19,13 @@
               @change="updateSelectAll"
             />
           </v-col>
-          <v-col cols="1" class="pt-4 selectedIndicator">
+          <v-col cols="6" md="1" class="pt-4 selectedIndicator">
             {{ selectedEmailIds.length }} selected
           </v-col>
-          <v-col cols="4">
-            <v-row>
+          <v-col cols="12" md="4">
+            <v-row style="min-height: 52px;">
               <v-slide-x-transition>
-                <v-col v-show="selectedEmailIds.length > 0" cols="2">
+                <v-col v-show="selectedEmailIds.length > 0" cols="4" md="2">
                   <v-menu
                     v-model="isLabelMenuOpen"
                     bottom
@@ -98,7 +98,7 @@
                 </v-col>
               </v-slide-x-transition>
               <v-slide-x-transition>
-                <v-col v-show="selectedEmailIds.length > 0" cols="2">
+                <v-col v-show="selectedEmailIds.length > 0" cols="4" md="2">
                   <v-tooltip bottom>
                     <template v-slot:activator="{ on, attrs }">
                       <v-btn
@@ -120,7 +120,7 @@
                 </v-col>
               </v-slide-x-transition>
               <v-slide-x-transition>
-                <v-col v-show="selectedEmailIds.length > 0" cols="2">
+                <v-col v-show="selectedEmailIds.length > 0" cols="4" md="2">
                   <v-tooltip bottom>
                     <template v-slot:activator="{ on, attrs }">
                       <v-btn
@@ -163,14 +163,16 @@
           </v-col>
         </v-row>
       </v-toolbar>
-      <div class="mb-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
+      <div
+        class="mt-15 mt-md-0 mb-md-10 mb-md-4 gradiantBorderBottom gradiantBorderBottomFullWidth"
+      />
       <v-tabs
         v-if="viewableLabels.length > 0"
         v-model="selectedLabelViewIndex"
         centered
         center-active
         background-color="background"
-        class="mb-4"
+        class="mb-4 ml-0 pl-0"
         :slider-color="selectedLabelData.color"
         @change="changeLabelView()"
       >
@@ -566,5 +568,7 @@ export default {
   color: red !important;
   display: block !important;
 }
-
+.v-slide-group__prev v-slide-group__prev--disabled {
+  display: none!important;
+}
 </style>

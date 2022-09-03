@@ -5,12 +5,7 @@
       v-if="shouldDisplayHeader"
       :is-mobile="isMobile"
     />
-    <v-main
-      v-touch="{
-        left: () => swipe(false),
-        right: () => swipe(true),
-      }"
-    >
+    <v-main>
       <snackBar/>
       <Loader/>
       <v-container style="width:100%">

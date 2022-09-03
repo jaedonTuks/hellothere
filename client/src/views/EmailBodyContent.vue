@@ -1,6 +1,5 @@
 <template>
   <v-expansion-panel-content>
-
     <v-progress-linear
       v-show="loading"
       indeterminate
@@ -13,24 +12,29 @@
         class="mb-2"
         :key="`${emailThread.id} - ${email.id}`"
       >
-        <div v-if="isMobile" v-html="email.body"/>
         <v-col
-          v-else
           cols="12"
           :class="{
-              'pa-3': true,
+            'pa-3': true,
             'emailMessage': true,
             'ownMessage': isOwnEmail(email),
             'noReply': isNoReplyEmail(email)
           }"
         >
           <v-row class="borderBottom">
-            <v-col cols="6"><h4>From: {{email.from}}</h4></v-col>
-            <v-col cols="6"> <span class="float-right">{{email.fullDateTime}}</span> </v-col>
+            <v-col cols="12" md="6"><h4>From: {{email.from}}</h4></v-col>
+            <v-col cols="12" md="6">
+              <span :class="{
+                  'float-right': !isMobile
+                }"
+              >
+                {{email.fullDateTime}}
+              </span>
+            </v-col>
             <v-col cols="12"> To: {{ email.to.join(", ") }} </v-col>
             <v-col v-if="email.cc.length > 0" cols="12"> CC: {{ email.cc.join(", ") }} </v-col>
           </v-row>
-          <v-row class="pa-3" v-html="email.body"/>
+          <v-row class="pa-3 emailHtml" v-html="email.body"/>
         </v-col>
       </v-row>
     </v-container>
@@ -127,6 +131,12 @@ export default {
 
 .noReply {
   background-color: var(--v-accent-base);
+}
+
+@media only screen and (max-width: 1264px) {
+  .emailHtml {
+      overflow: auto;
+  }
 }
 
 </style>

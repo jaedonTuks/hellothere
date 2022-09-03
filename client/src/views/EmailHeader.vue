@@ -11,19 +11,22 @@
           @input="updatingCheckbox"
         />
       </v-col>
-      <v-col class="ml-0 pl-0" cols="8">
-         <span class="emailText">
+      <v-col class="ml-0 pl-0" cols="10" md="8">
+         <div class="emailText">
            <span class="ma-0 dateAndFrom">
              {{ emailThread.formattedDate }}  - {{ fromName(emailThread) }}
            </span>
            <span class="ml-2 subject">{{ emailThread.subject }}</span>
-          </span>
+          </div>
       </v-col>
-      <v-col cols="3">
+      <v-col cols="12" md="3">
         <span
           v-for="label in filterLabels"
           :key="label"
-          class="float-end label"
+          :class="{
+            'label': true,
+            'float-end': !isMobile
+          }"
         >
            <v-icon
              size="20"
@@ -135,11 +138,10 @@ export default {
 .subject {
   display: inline-block;
   border-left: 2px solid var(--v-secondary-base) !important;
-  padding-left: 10px
-}
-
-.subject {
+  padding-left: 10px;
   color: var(--v-info-darken2) !important;
+  text-overflow: ellipsis!important;
+  white-space: nowrap;
 }
 
 .label {
@@ -149,10 +151,6 @@ export default {
 
 .dateAndFrom {
   display: inline-block;
-  text-overflow: ellipsis;
-}
-
-.dateAndFrom {
   font-size: 0.9em !important;
 }
 
@@ -166,19 +164,26 @@ export default {
 
 @media only screen and (max-width: 1264px) {
   .emailText {
-    width: 100%;
+    width: 50%;
+    display: block;
+    text-align: start;
+    text-overflow: ellipsis!important;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   .dateAndFrom {
     font-size: 0.8em !important;
+    display: block;
   }
 
   .subject {
     font-size: 0.9em !important;
+    display: block;
   }
 
   .label {
-    font-size: 0.5em !important;
+    font-size: 0.7em !important;
   }
 
 }
