@@ -191,22 +191,24 @@
       </v-tabs>
       <NoEmailsCard :email-threads="emailThreads" :filtering-emails="isFetchingMoreEmails"/>
       <v-dialog-transition>
-        <v-expansion-panels
+        <v-container
           v-show="emailThreads.length > 0"
           dark
-          class="expansionPanels"
         >
-          <v-progress-linear
-            v-show="isFetchingMoreEmails || searchingEmails"
-            indeterminate
-            color="primary"
-          />
-          <v-expansion-panel
+          <v-row>
+            <v-progress-linear
+              v-show="isFetchingMoreEmails || searchingEmails"
+              indeterminate
+              color="primary"
+              class="mb-0"
+            />
+          </v-row>
+          <v-row
             v-for="emailThread in emailThreads"
             class="expansionPanel"
             color="accent"
             :key="emailThread.id"
-            @change="getFullEmailThread(emailThread)"
+            @click="navigateToEmail(emailThread)"
           >
             <emailHeader
               :ref="`${emailThread.id}-header`"
@@ -214,13 +216,8 @@
               @selected="addSelectedEmail"
               @deselected="removeSelectedEmail"
             />
-            <employeeBodyContent
-              :emailThread="emailThread"
-              :own-user-name="ownUsername"
-              :loading="loadingEmailThread"
-            />
-          </v-expansion-panel>
-        </v-expansion-panels>
+          </v-row>
+        </v-container>
       </v-dialog-transition>
       <v-row class="mt-5" justify="center">
         <v-btn
@@ -237,9 +234,10 @@
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {
+  mapActions, mapGetters, mapMutations, mapState,
+} from 'vuex';
 import loadingMixin from '@/mixins/loadingMixin';
-import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
 import SendActionButton from '@/components/SendActionButton.vue';
 import EmailHeader from '@/views/EmailHeader.vue';
 import ComposeEmailDialog from '@/components/ComposeEmailDialog.vue';
@@ -252,7 +250,6 @@ export default {
   components: {
     NoEmailsCard,
     EmailHeader,
-    EmployeeBodyContent,
     SendActionButton,
     ComposeEmailDialog,
   },
@@ -319,29 +316,17 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'fetchLabels', 'searchEmails', 'updateLabels']),
+    ...mapActions(['fetchUserInfo', 'fetchEmails', 'fetchLabels', 'searchEmails', 'updateLabels']),
+    ...mapMutations(['setViewingEmail']),
 
     // general methods
     updateEmails() {
       this.emailThreads = this.getEmailThreads().sort((a, b) => b.instantSent - a.instantSent);
     },
 
-    getFullEmailThread(emailThread) {
-      if (emailThread.emails.every((email) => email.body != null)) {
-        return;
-      }
-      this.loadingEmailThread = true;
-      this.fetchFullEmail(emailThread.id)
-        .then(() => {
-          const fullEmailThread = this.getEmailThread(emailThread.id);
-          const outdatedEmailThread = this.emailThreads
-            .find((searchingEmailThread) => searchingEmailThread.id === emailThread.id);
-          outdatedEmailThread.emails = fullEmailThread.emails;
-          this.updateEmailLabels(emailThread);
-        })
-        .finally(() => {
-          this.loadingEmailThread = false;
-        });
+    navigateToEmail(emailThread) {
+      this.setViewingEmail(emailThread);
+      this.$router.push({ name: 'Email' });
     },
 
     // searching and view updates

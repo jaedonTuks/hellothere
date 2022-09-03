@@ -15,6 +15,7 @@ export function getDefaultState() {
     labels: [],
     emailsById: {},
     threadsById: {},
+    viewingEmail: {},
     currentThreadIds: [],
   };
 }
