@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import VueApexCharts from 'vue-apexcharts';
-import VueSafeIframe from 'vue-safe-iframe';
 import App from './App.vue';
 import './registerServiceWorker';
 import router from './router';
@@ -10,7 +9,6 @@ import './assets/styles/border.css';
 import Messaging from './firebase';
 
 Vue.use(VueApexCharts);
-Vue.use(VueSafeIframe);
 
 Vue.component('apexchart', VueApexCharts);
 

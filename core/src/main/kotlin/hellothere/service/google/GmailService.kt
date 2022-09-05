@@ -607,7 +607,7 @@ class GmailService(
 
     private fun getFullBodyFromMessage(message: Message): String? {
         if (message.payload?.parts == null || message.payload.parts.isEmpty()) {
-            return message.snippet
+            return conversionService.getDefaultStyledDiv(message.snippet)
         }
         var fullBody = ""
 
@@ -616,7 +616,7 @@ class GmailService(
         }
 
         return if (fullBody.isBlank()) {
-            message.snippet
+            conversionService.getDefaultStyledDiv(message.snippet)
         } else {
             conversionService.getHtmlBody(fullBody)
         }

@@ -31,11 +31,12 @@
     <v-container v-show="!loading" class="emailBody">
       <div
         v-for="email in fullEmail.emails"
+        class="mb-7 pl-5 pr-5"
         :key="`${emailThread.id} - ${email.id}`"
       >
         <v-row
           justify="center"
-          class="mb-2"
+          class="mb-2 pa-3 emailMessage"
         >
           <v-col
             cols="12"
@@ -60,10 +61,7 @@
               <v-col v-if="email.cc.length > 0" cols="12"> CC: {{ email.cc.join(", ") }}</v-col>
             </v-row>
           </v-col>
-          <VueSafeIframe
-            class="emailHtml"
-            :html="email.body"
-          />
+          <EmailHtml :email="email"/>
         </v-row>
       </div>
     </v-container>
@@ -86,10 +84,11 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import LabelsList from '@/views/LabelsList.vue';
 import screenSizeMixin from '@/mixins/screenSizeMixin';
+import EmailHtml from '@/views/EmailHtml.vue';
 
 export default {
   name: 'employeeBodyContent',
-  components: { LabelsList },
+  components: { EmailHtml, LabelsList },
   mixins: [screenSizeMixin],
 
   data() {
@@ -180,12 +179,6 @@ html {
   margin: 0 !important;
 }
 
-.emailHtml {
-  width: 100%;
-  border: none;
-  height: 400px;
-}
-
 .emailMessage {
   background-color: var(--v-accent-darken1);
   border-radius: 5px;
@@ -210,4 +203,7 @@ html {
   }
 }
 
+.testIframeClass {
+  color: green!important;
+}
 </style>
