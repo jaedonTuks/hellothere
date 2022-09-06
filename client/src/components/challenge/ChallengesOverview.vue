@@ -1,9 +1,6 @@
 <template>
   <v-row class="mt-4 pa-3">
     <v-col cols="12">
-      <h2 class="mt-5">Challenges</h2>
-    </v-col>
-    <v-col cols="12">
       <v-row>
         <v-col
           v-for="(challenge, index) in challenges"

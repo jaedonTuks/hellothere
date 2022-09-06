@@ -1,7 +1,7 @@
 <template>
   <v-card
     color="accent"
-    min-height="320"
+    min-height="290"
     :class="{
       'pa-5': true,
       'claimed': challenge.isRewardClaimed
@@ -9,7 +9,7 @@
   >
     <v-card-title class="borderBottom pb-4">
       <v-row>
-        <h3>{{ challenge.name }}</h3>
+        <h2>{{ challenge.name }}</h2>
       </v-row>
       <v-progress-circular
         class="float-end progress"
@@ -23,14 +23,14 @@
     </v-card-title>
     <v-card-text class="mt-2 pa-2">
       <v-row v-if="challenge.isRewardClaimed" class="pa-4">
-        <span class="mb-3 mr-4 pr-4">Completed</span>
+        <h3 class="mb-3 mr-4 pr-4">Completed</h3>
       </v-row>
       <v-row v-else class="pa-4">
-        <span class="mb-3 mr-4 pr-4">Current: {{ challenge.progress }}</span>
-        <span class="mb-5">Goal: {{ challenge.goal }}</span>
+        <h3 class="mb-3 mr-4 pr-4">Current: {{ challenge.progress }}</h3>
+        <h3 class="mb-5">Goal: {{ challenge.goal }}</h3>
       </v-row>
-      <div class="mb-5">{{ challenge.description }}</div>
-      <div class="mb-3"> Rewards: {{ challenge.reward }} xp</div>
+      <div class="mb-5 pl-4">{{ challenge.description }}</div>
+      <h3 class="mb-3"> Rewards: {{ challenge.reward }} xp</h3>
     </v-card-text>
     <v-card-actions>
       <v-btn

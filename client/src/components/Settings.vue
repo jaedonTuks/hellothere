@@ -1,29 +1,30 @@
 <template>
   <v-row class="mt-4 pa-3">
     <v-col cols="12">
-      <h2 class="mt-5">Label Settings</h2>
-    </v-col>
-    <v-col cols="12">
       <v-row
         align="center"
         justify="center"
       >
         <v-col
           v-for="(label, index) in labels"
-          class="ma-2 pa-3 borderTop"
+          class="ma-2 pa-3"
           cols="2"
           :key="`label-${index}`"
         >
-          <v-row>
-            <v-col cols="12">
-              <v-icon :color="label.color">mdi-label</v-icon>
+          <v-card
+            class="pa-3"
+            color="accent darken-1"
+          >
+            <v-card-title class="borderBottom">
+              <v-icon :color="label.color" class="mr-3">mdi-label</v-icon>
               {{ label.name }}
-            </v-col>
-            <v-col cols="12">
+            </v-card-title>
+            <v-card-text>
               <v-checkbox
                 v-model="label.isViewable"
                 class="mr-2"
                 label="Is Quick Filter Visible"
+                color="secondary"
                 @change="updateViewable(label)"
               />
               <v-expansion-panels>
@@ -47,8 +48,8 @@
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
-            </v-col>
-          </v-row>
+            </v-card-text>
+          </v-card>
         </v-col>
       </v-row>
 

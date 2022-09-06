@@ -171,6 +171,8 @@
         v-model="selectedLabelViewIndex"
         centered
         center-active
+        show-arrows
+        grow
         background-color="background"
         class="mb-4 ml-0 pl-0"
         :slider-color="selectedLabelData.color"

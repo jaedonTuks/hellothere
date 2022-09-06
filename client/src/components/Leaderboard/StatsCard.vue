@@ -1,46 +1,44 @@
 <template>
-  <v-col v-if="chartOptions && series" cols="12" lg="4" class="mt-5">
-    <v-card color="accent" class="pa-5">
-      <v-card-title>{{ title }}</v-card-title>
+  <v-col
+    v-if="chartOptions && series"
+    cols="12"
+    lg="4"
+    class="mt-5"
+  >
+    <v-card
+      color="accent"
+      class="pa-5"
+      elevation="4"
+      :min-height="isMobile ? 200 : 520"
+    >
+      <v-card-title class="mb-3"><h2>{{ title }}</h2></v-card-title>
+      <v-card-subtitle>
+        <h3>
+          <slot/>
+        </h3>
+      </v-card-subtitle>
       <v-card-text>
-        <apexchart
-          :type="apexChartType"
-          :options="chartOptions"
-          :series="series"
-        />
+          <apexchart
+            :type="apexChartType"
+            :options="chartOptions"
+            :series="series"
+            style="margin: 0 auto"
+          />
       </v-card-text>
     </v-card>
   </v-col>
 </template>
 <script type="module">
+import screenSizeMixin from '@/mixins/screenSizeMixin';
+
 export default {
   name: 'StatsCard',
+
+  mixins: [screenSizeMixin],
 
   data() {
     return {
       chartHeight: 350,
-      chartWidth: 380,
-      radialDataLabels: {
-        name: {
-          fontSize: '30px',
-          show: true,
-        },
-        value: {
-          color: '#FFF',
-          fontSize: '20px',
-          show: true,
-        },
-      },
-      legend: {
-        horizontalAlign: 'center',
-        show: true,
-        floating: true,
-        position: 'bottom',
-        fontSize: '20px',
-        labels: {
-          colors: ['#FFF'],
-        },
-      },
     };
   },
 
@@ -83,6 +81,37 @@ export default {
         default:
           return 'bar';
       }
+    },
+
+    chartWidth() {
+      return 350;
+    },
+
+    legend() {
+      return {
+        horizontalAlign: 'center',
+        show: true,
+        floating: true,
+        position: 'bottom',
+        fontSize: this.isMobile ? '15px' : '20px',
+        labels: {
+          colors: ['#FFF'],
+        },
+      };
+    },
+
+    radialDataLabels() {
+      return {
+        name: {
+          fontSize: this.isMobile ? '15px' : '30px',
+          show: true,
+        },
+        value: {
+          color: '#FFF',
+          fontSize: '20px',
+          show: true,
+        },
+      };
     },
   },
 
@@ -140,6 +169,9 @@ export default {
         legend: {
           show: false,
         },
+        tooltip: {
+          enabled: false,
+        },
         xaxis: {
           tooltip: {
             enabled: false,
@@ -166,6 +198,10 @@ export default {
     },
 
     getGenericRadialBarProgressOptions() {
+      let label = 'Challenges Completed';
+      if (this.isMobile) {
+        label = '';
+      }
       return {
         chart: {
           height: 280,
@@ -231,10 +267,16 @@ export default {
         stroke: {
           lineCap: 'round',
         },
-        labels: ['Challenges Completion'],
+        labels: [label],
       };
     },
 
   },
 };
 </script>
+
+<style scoped>
+h2 {
+  word-break: break-word;
+}
+</style>

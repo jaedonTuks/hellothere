@@ -10,7 +10,7 @@
             :ripple="false"
             @input="updatingCheckbox"
           />
-        <span v-if="!isMobile">{{ emailThread.formattedDate }}-</span>  {{ fromName(emailThread) }}
+        <span v-if="!isMobile">{{ emailThread.formattedDate }} -</span> {{ fromName(emailThread) }}
       </v-col>
       <v-col cols="8" md="6" class="subject">
         {{ emailThread.subject }}
