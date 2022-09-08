@@ -14,6 +14,7 @@ import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.view.RedirectView
@@ -75,6 +76,24 @@ class GmailController(
         val emailThread = gmailService.getFullEmailThreadData(client, username, id)
 
         return ResponseEntity.ok(emailThread)
+    }
+
+    @GetMapping("/attachment")
+    fun getAndDownloadAttachment(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        @RequestParam attachmentId: String,
+        @RequestParam emailId: String
+    ): ResponseEntity<ByteArray> {
+        val (username, client) = getUsernameAndClientFromRequest(request, response)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val attachment = gmailService.getAttachment(client, username, attachmentId, emailId)
+
+        return ResponseEntity
+            .ok()
+            .contentType(MediaType.IMAGE_JPEG)
+            .body(attachment)
     }
 
     @GetMapping("/emails")

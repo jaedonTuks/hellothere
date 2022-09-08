@@ -4,6 +4,7 @@ import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Message
+import hellothere.dto.email.AttachmentDTO
 import hellothere.dto.email.EmailDto
 import hellothere.dto.email.EmailThreadDto
 import hellothere.dto.email.EmailsContainerDTO
@@ -589,7 +590,8 @@ class GmailService(
             )?.split(",") ?: listOf(),
             message.labelIds.contains("SENT"),
             LocalDateTime.ofEpochSecond(message.internalDate, 0, ZoneOffset.UTC),
-            getFullBodyFromMessage(message)
+            getFullBodyFromMessage(message),
+            getAttachmentNames(message)
         )
     }
 
@@ -620,6 +622,26 @@ class GmailService(
         } else {
             conversionService.getHtmlBody(fullBody)
         }
+    }
+
+    fun getAttachmentNames(message: Message): List<AttachmentDTO> {
+        return message.payload.parts
+            .filter { !it.filename.isNullOrBlank() }
+            .map { AttachmentDTO(it.body.attachmentId, it.filename) }
+    }
+
+    fun getAttachment(
+        client: Gmail,
+        username: String,
+        attachmentId: String,
+        emailId: String
+    ): ByteArray? {
+        val attachmentBody = client.users()
+            .messages()
+            .attachments()
+            .get(USER_SELF_ACCESS, emailId, attachmentId)
+            .execute()
+        return conversionService.convertBase64ToByteArray(attachmentBody.data)
     }
 
     companion object {

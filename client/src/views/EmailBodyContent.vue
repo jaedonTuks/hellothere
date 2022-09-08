@@ -62,6 +62,19 @@
             </v-row>
           </v-col>
           <EmailHtml :email="email"/>
+          <v-col cols="12">
+            <h3 style="font-weight: normal">Attachments</h3>
+            <v-chip-group>
+                <v-chip
+                  v-for="attachment in email.attachments"
+                  :key="attachment.fileName"
+                  color="secondary"
+                  @click="downloadAttachment(attachment, email.id)"
+                >
+                  <h3 style="font-weight: normal">{{attachment.fileName}}</h3>
+                </v-chip>
+            </v-chip-group>
+          </v-col>
         </v-row>
       </div>
     </v-container>
@@ -120,7 +133,12 @@ export default {
   },
 
   methods: {
-    ...mapActions(['replyToEmail', 'fetchFullEmail']),
+    ...mapActions(['replyToEmail', 'fetchFullEmail', 'fetchAndDownloadAttachment']),
+
+    downloadAttachment(attachment, emailId) {
+      console.log({ id: attachment.id, emailId });
+      this.fetchAndDownloadAttachment({ id: attachment.id, name: attachment.fileName, emailId });
+    },
 
     sendReply() {
       this.sendingReply = true;

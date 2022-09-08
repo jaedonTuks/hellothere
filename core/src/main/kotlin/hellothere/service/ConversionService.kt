@@ -55,6 +55,17 @@ class ConversionService {
         }
     }
 
+    fun convertBase64ToByteArray(base64String: String): ByteArray? {
+        return try {
+            val decoder = Base64.getDecoder()
+            decoder.decode(base64String.replace('-', '+').replace('_', '/'))
+        } catch (e: Exception) {
+            LOGGER.error("Unable ro build string")
+            LOGGER.error(e.stackTraceToString())
+            return null
+        }
+    }
+
     fun getHtmlBody(fullBody: String): String {
         val bodyOfHtmlDoc = StringUtils.substringBetween(fullBody, "<body", "</body>")
 
