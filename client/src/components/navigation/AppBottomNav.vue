@@ -10,6 +10,7 @@
       :notification-count="notificationCount"
     />
     <MenuOption
+      v-if="isGamificationEnabled"
       route-name="Leaderboards"
       icon-name="first-place"
     />
@@ -22,10 +23,13 @@
 
 <script>
 import MenuOption from '@/components/navigation/MenuOption.vue';
+import featureFlags from '@/mixins/featureFlags';
 
 export default {
   name: 'AppHeader',
   components: { MenuOption },
+
+  mixins: [featureFlags],
 
   data() {
     return {

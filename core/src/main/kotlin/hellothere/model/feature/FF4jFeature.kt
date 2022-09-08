@@ -1,5 +1,9 @@
 package hellothere.model.feature
 
 enum class FF4jFeature {
-    LEADERBOARDS;
+    PERSONAL_STATS,
+    CHALLENGES,
+    LEADERBOARDS,
+    CUSTOMISATION,
+    GAMIFICATION_VIEWS;
 }

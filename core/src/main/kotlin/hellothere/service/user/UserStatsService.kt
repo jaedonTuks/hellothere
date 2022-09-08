@@ -5,6 +5,7 @@ import hellothere.dto.UserChallengeDTO
 import hellothere.dto.stats.MessageTotalsSummaryDTO
 import hellothere.dto.user.WeekStatsDto
 import hellothere.model.email.UserEmail
+import hellothere.model.feature.FF4jFeature
 import hellothere.model.stats.WeekStats
 import hellothere.model.stats.category.*
 import hellothere.model.user.User
@@ -12,6 +13,7 @@ import hellothere.repository.email.UserEmailRepository
 import hellothere.repository.user.UserRepository
 import hellothere.repository.user.WeekStatsRepository
 import hellothere.requests.challenge.ClaimChallengeRewardRequest
+import hellothere.service.FeatureService
 import hellothere.service.challenge.ChallengeService
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
@@ -29,6 +31,7 @@ class UserStatsService(
     private val userEmailRepository: UserEmailRepository,
     private val weekStatsRepository: WeekStatsRepository,
     private val challengeService: ChallengeService,
+    private val featureService: FeatureService,
     private val statsConfig: StatsConfig
 ) {
     @Transactional
@@ -85,6 +88,10 @@ class UserStatsService(
 
     @Transactional
     fun claimChallengeRewards(claimChallengeRewardRequest: ClaimChallengeRewardRequest): UserChallengeDTO? {
+        if (featureService.isDisabled(FF4jFeature.CHALLENGES)) {
+            return null
+        }
+
         val userChallengeClaimed = challengeService.markUserChallengeAsClaimed(claimChallengeRewardRequest)
             ?: return null
 
@@ -117,7 +124,6 @@ class UserStatsService(
 
     @Transactional
     fun getOrCreateThisWeeksStats(username: String): WeekStats? {
-        // todo what happens if the user interacted last 2 weeks ago
         val weekStats = weekStatsRepository.findFirstByUserIdAndDateBetween(username, LocalDate.now())
 
         if (weekStats != null) {

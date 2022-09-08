@@ -7,7 +7,6 @@ import hellothere.model.feature.FF4jFeature
 import hellothere.model.stats.WeekStats
 import hellothere.model.user.User
 import hellothere.repository.user.WeekStatsRepository
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -49,10 +48,10 @@ class LeaderboardsService(
 
         val allCurrentStats = weekStatsRepository.findAllByDateBetween(LocalDate.now())
 
-        return allCurrentStats.mapIndexedNotNull { index, it -> buildUserLeadboardGeneralDTO(it, index + 1) }
+        return allCurrentStats.mapIndexedNotNull { index, it -> buildUserLeaderboardGeneralDTO(it, index + 1) }
     }
 
-    private fun buildUserLeadboardGeneralDTO(weekStats: WeekStats, rank: Int): UserLeaderBoardGeneralDTO? {
+    private fun buildUserLeaderboardGeneralDTO(weekStats: WeekStats, rank: Int): UserLeaderBoardGeneralDTO? {
         return weekStats.user?.leaderboardUsername?.let {
             UserLeaderBoardGeneralDTO(
                 rank,

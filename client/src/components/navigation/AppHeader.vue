@@ -21,6 +21,7 @@
         :notification-count="notificationCount"
       />
       <MenuOption
+        v-if="isGamificationEnabled"
         route-name="Leaderboards"
         icon-name="first-place"
       />
@@ -35,11 +36,12 @@
 <script>
 import MenuOption from '@/components/navigation/MenuOption.vue';
 import screenSizeMixin from '@/mixins/screenSizeMixin';
+import featureFlags from '@/mixins/featureFlags';
 
 export default {
   name: 'AppHeader',
   components: { MenuOption },
-  mixins: [screenSizeMixin],
+  mixins: [screenSizeMixin, featureFlags],
 
   data() {
     return {

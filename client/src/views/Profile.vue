@@ -7,10 +7,10 @@
       <v-col cols="12">
         <h3 class="mt-4 mt-lg-1 normalWeight">Email: {{ profileInfo.email }}</h3>
       </v-col>
-      <v-col cols="12">
+      <v-col v-if="isGamificationEnabled" cols="12">
         <h2 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h2>
       </v-col>
-      <v-col cols="12">
+      <v-col v-if="isGamificationEnabled" cols="12">
         <h2 class="level">Level: {{ Math.floor(profileInfo.totalExperience / 50) }}</h2>
         <h3 class="level normalWeight">
           XP Until next level: {{50 - (profileInfo.totalExperience % 50) }}
@@ -21,6 +21,7 @@
     <v-btn class="mt-4  mr-2" @click="logout">Logout</v-btn>
     <div class="mb-4 mt-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
     <v-tabs
+      v-if="isGamificationEnabled"
       v-model="selectedProfileViewIndex"
       centered
       center-active
@@ -44,6 +45,7 @@
     </v-tabs>
 
     <v-tabs-items
+      v-if="isGamificationEnabled"
       v-model="selectedProfileViewIndex"
     >
       <v-tab-item style="background-color: #343E59">
@@ -78,6 +80,13 @@
       </v-tab-item>
     </v-tabs-items>
 
+    <v-row v-if="!isGamificationEnabled" justify="center" align="center">
+      <v-col cols="12">
+        <h1 style="text-align: center">
+          Keep your eyes peeled. Challenges stats and more will be available here next week!
+        </h1>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -88,11 +97,12 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import ScreenSizeMixin from '@/mixins/screenSizeMixin';
 import calculationsMixin from '@/mixins/calculationsMixin';
 import Settings from '@/components/Settings.vue';
+import featureFlags from '@/mixins/featureFlags';
 
 export default {
   name: 'Profile',
   components: { StatsCard, ChallengesOverview, Settings },
-  mixins: [ScreenSizeMixin, calculationsMixin],
+  mixins: [ScreenSizeMixin, calculationsMixin, featureFlags],
 
   data() {
     return {

@@ -2,13 +2,14 @@ package hellothere.service.user
 
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Profile
-import com.google.firebase.auth.FirebaseAuth
 import hellothere.dto.user.UserDto
+import hellothere.model.feature.FF4jFeature
 import hellothere.model.user.User
 import hellothere.model.user.UserAccessToken
 import hellothere.repository.user.UserAccessTokenRepository
 import hellothere.repository.user.UserRepository
 import hellothere.requests.user.UpdateUsernameRequest
+import hellothere.service.FeatureService
 import hellothere.service.LeaderboardsService
 import hellothere.service.challenge.ChallengeService
 import hellothere.service.google.GmailService
@@ -27,6 +28,7 @@ class UserService(
     private val leaderboardsService: LeaderboardsService,
     private val challengeService: ChallengeService,
     private val userAccessTokenRepository: UserAccessTokenRepository,
+    private val featureService: FeatureService
 ) {
     fun getUserById(username: String): User? {
         return userRepository.findByIdOrNull(username)
@@ -41,12 +43,22 @@ class UserService(
     fun buildUserDto(user: User?): UserDto? {
         return user?.let {
             val currentWeekStats = it.getCurrentWeeksStats()
+            val isStatsEnabled = featureService.isEnabled(FF4jFeature.PERSONAL_STATS)
+
             UserDto(
                 it.id,
                 it.leaderboardUsername,
                 leaderboardsService.getCurrentPlaceOnLeaderboards(currentWeekStats?.getTotalExperience() ?: 0),
-                userStatsService.buildWeekStatsDto(currentWeekStats),
-                userStatsService.buildWeekStatsDtos(it.weeklyStats),
+                if (isStatsEnabled) {
+                    userStatsService.buildWeekStatsDto(currentWeekStats)
+                } else {
+                    null
+                },
+                if (isStatsEnabled) {
+                    userStatsService.buildWeekStatsDtos(it.weeklyStats)
+                } else {
+                    listOf()
+                },
                 userStatsService.getMessageTotalsSummary(user.id),
                 it.getTotalExperience()
             )

@@ -34,7 +34,7 @@ class ChallengeController(
     }
 
     @GetMapping("/claim-reward/{id}")
-    fun sendEmail(
+    fun claimChallengeReward(
         request: HttpServletRequest,
         @PathVariable id: Long
     ): ResponseEntity<UserChallengeDTO> {
