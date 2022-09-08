@@ -24,13 +24,13 @@ class SecurityService(
         val user = userService.loginOrSignup(client)
         val userDto = userService.buildUserDto(user)
         val token = jwtTokenService.createUserToken(userDto)
-        response.setHeader("Set-Cookie", "$JWT_TOKEN_COOKIE_NAME=$token; Path=/; Max-Age=$TOKEN_LIFE_TIME; HttpOnly;")
+        response.setHeader("Set-Cookie", "$JWT_TOKEN_COOKIE_NAME=$token; Path=/; Max-Age=$TOKEN_LIFE_TIME;")
 
         return user
     }
 
     fun logout(response: HttpServletResponse) {
-        response.setHeader("Set-Cookie", "$JWT_TOKEN_COOKIE_NAME=''; Path=/; Max-Age=-1; HttpOnly;")
+        response.setHeader("Set-Cookie", "$JWT_TOKEN_COOKIE_NAME=''; Path=/; Max-Age=-1;")
     }
 
     companion object {

@@ -5,12 +5,12 @@
       <v-toolbar
         short
         outlined
-        class="mb-1 toolbar"
+        class="mt-1 mb-1 mt-md-0 toolbar"
         color="background"
         elevation="0"
       >
         <v-row class="mt-4" align-content="start">
-          <v-col cols="1">
+          <v-col cols="6" md="1">
             <v-checkbox
               v-model="allSelected"
               class="align-center"
@@ -19,13 +19,13 @@
               @change="updateSelectAll"
             />
           </v-col>
-          <v-col cols="1" class="pt-4 selectedIndicator">
+          <v-col cols="6" md="1" class="pt-4 selectedIndicator">
             {{ selectedEmailIds.length }} selected
           </v-col>
-          <v-col cols="4">
-            <v-row>
+          <v-col cols="12" md="4">
+            <v-row style="min-height: 52px;">
               <v-slide-x-transition>
-                <v-col v-show="selectedEmailIds.length > 0" cols="2">
+                <v-col v-show="selectedEmailIds.length > 0" cols="4" md="2">
                   <v-menu
                     v-model="isLabelMenuOpen"
                     bottom
@@ -98,7 +98,7 @@
                 </v-col>
               </v-slide-x-transition>
               <v-slide-x-transition>
-                <v-col v-show="selectedEmailIds.length > 0" cols="2">
+                <v-col v-show="selectedEmailIds.length > 0" cols="4" md="2">
                   <v-tooltip bottom>
                     <template v-slot:activator="{ on, attrs }">
                       <v-btn
@@ -120,7 +120,7 @@
                 </v-col>
               </v-slide-x-transition>
               <v-slide-x-transition>
-                <v-col v-show="selectedEmailIds.length > 0" cols="2">
+                <v-col v-show="selectedEmailIds.length > 0" cols="4" md="2">
                   <v-tooltip bottom>
                     <template v-slot:activator="{ on, attrs }">
                       <v-btn
@@ -163,14 +163,18 @@
           </v-col>
         </v-row>
       </v-toolbar>
-      <div class="mb-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
+      <div
+        class="mt-15 mt-md-0 mb-md-10 mb-md-4 gradiantBorderBottom gradiantBorderBottomFullWidth"
+      />
       <v-tabs
         v-if="viewableLabels.length > 0"
         v-model="selectedLabelViewIndex"
         centered
         center-active
+        show-arrows
+        grow
         background-color="background"
-        class="mb-4"
+        class="mb-4 ml-0 pl-0"
         :slider-color="selectedLabelData.color"
         @change="changeLabelView()"
       >
@@ -189,22 +193,24 @@
       </v-tabs>
       <NoEmailsCard :email-threads="emailThreads" :filtering-emails="isFetchingMoreEmails"/>
       <v-dialog-transition>
-        <v-expansion-panels
+        <v-container
           v-show="emailThreads.length > 0"
           dark
-          class="expansionPanels"
         >
-          <v-progress-linear
-            v-show="isFetchingMoreEmails || searchingEmails"
-            indeterminate
-            color="primary"
-          />
-          <v-expansion-panel
+          <v-row>
+            <v-progress-linear
+              v-show="isFetchingMoreEmails || searchingEmails"
+              indeterminate
+              color="primary"
+              class="mb-0"
+            />
+          </v-row>
+          <v-row
             v-for="emailThread in emailThreads"
             class="expansionPanel"
             color="accent"
             :key="emailThread.id"
-            @change="getFullEmailThread(emailThread)"
+            @click="navigateToEmail(emailThread)"
           >
             <emailHeader
               :ref="`${emailThread.id}-header`"
@@ -212,13 +218,8 @@
               @selected="addSelectedEmail"
               @deselected="removeSelectedEmail"
             />
-            <employeeBodyContent
-              :emailThread="emailThread"
-              :own-user-name="ownUsername"
-              :loading="loadingEmailThread"
-            />
-          </v-expansion-panel>
-        </v-expansion-panels>
+          </v-row>
+        </v-container>
       </v-dialog-transition>
       <v-row class="mt-5" justify="center">
         <v-btn
@@ -235,9 +236,10 @@
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {
+  mapActions, mapGetters, mapMutations, mapState,
+} from 'vuex';
 import loadingMixin from '@/mixins/loadingMixin';
-import EmployeeBodyContent from '@/views/EmailBodyContent.vue';
 import SendActionButton from '@/components/SendActionButton.vue';
 import EmailHeader from '@/views/EmailHeader.vue';
 import ComposeEmailDialog from '@/components/ComposeEmailDialog.vue';
@@ -250,7 +252,6 @@ export default {
   components: {
     NoEmailsCard,
     EmailHeader,
-    EmployeeBodyContent,
     SendActionButton,
     ComposeEmailDialog,
   },
@@ -317,29 +318,17 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchUserInfo', 'fetchFullEmail', 'fetchEmails', 'fetchLabels', 'searchEmails', 'updateLabels']),
+    ...mapActions(['fetchUserInfo', 'fetchEmails', 'fetchLabels', 'searchEmails', 'updateLabels']),
+    ...mapMutations(['setViewingEmail']),
 
     // general methods
     updateEmails() {
       this.emailThreads = this.getEmailThreads().sort((a, b) => b.instantSent - a.instantSent);
     },
 
-    getFullEmailThread(emailThread) {
-      if (emailThread.emails.every((email) => email.body != null)) {
-        return;
-      }
-      this.loadingEmailThread = true;
-      this.fetchFullEmail(emailThread.id)
-        .then(() => {
-          const fullEmailThread = this.getEmailThread(emailThread.id);
-          const outdatedEmailThread = this.emailThreads
-            .find((searchingEmailThread) => searchingEmailThread.id === emailThread.id);
-          outdatedEmailThread.emails = fullEmailThread.emails;
-          this.updateEmailLabels(emailThread);
-        })
-        .finally(() => {
-          this.loadingEmailThread = false;
-        });
+    navigateToEmail(emailThread) {
+      this.setViewingEmail(emailThread);
+      this.$router.push({ name: 'Email' });
     },
 
     // searching and view updates
@@ -566,5 +555,7 @@ export default {
   color: red !important;
   display: block !important;
 }
-
+.v-slide-group__prev v-slide-group__prev--disabled {
+  display: none!important;
+}
 </style>

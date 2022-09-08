@@ -1,50 +1,36 @@
 <template>
-  <v-expansion-panel-header
-    class="text-h6 hover"
-  >
-    <v-row align="center">
-      <v-col cols="auto">
-        <v-simple-checkbox
-          v-model="isChecked"
-          class="ma-0 mt-1"
-          :ripple="false"
-          @input="updatingCheckbox"
-        />
+    <v-row
+      class="pl-4 pr-4 hover headerRow"
+      align="center"
+    >
+      <v-col class="ml-0 dateAndFrom" cols="4" md="3">
+          <v-simple-checkbox
+            v-model="isChecked"
+            class="ma-0 pa-1 mt-1 text-h6 checkbox"
+            :ripple="false"
+            @input="updatingCheckbox"
+          />
+        <span v-if="!isMobile">{{ emailThread.formattedDate }} -</span> {{ fromName(emailThread) }}
       </v-col>
-      <v-col class="ml-0 pl-0" cols="8">
-         <span class="emailText">
-           <span class="ma-0 dateAndFrom">
-             {{ emailThread.formattedDate }}  - {{ fromName(emailThread.from) }}
-           </span>
-           <span class="ml-2 subject">{{ emailThread.subject }}</span>
-          </span>
+      <v-col cols="8" md="6" class="subject">
+        {{ emailThread.subject }}
       </v-col>
-      <v-col cols="3">
-        <span
-          v-for="label in filterLabels"
-          :key="label"
-          class="float-end label"
-        >
-           <v-icon
-             size="20"
-             class="headerLabelIcon ml-1"
-             :color="getLabelColor(label)"
-           >
-             mdi-label
-           </v-icon>
-          {{label}}
-        </span>
-      </v-col>
+      <LabelsList
+        v-if="!isMobile"
+        cols="12"
+        md="3"
+        :filter-labels="filterLabels"
+      />
     </v-row>
-
-  </v-expansion-panel-header>
 </template>
 <script>
 import screenSizeMixin from '@/mixins/screenSizeMixin';
 import { mapGetters } from 'vuex';
+import LabelsList from '@/views/LabelsList.vue';
 
 export default {
   name: 'emailHeader',
+  components: { LabelsList },
   mixins: [screenSizeMixin],
 
   props: {
@@ -59,7 +45,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getThreadLabels', 'getLabelByName']),
+    ...mapGetters(['getThreadLabels']),
 
     filterLabels() {
       const removedCategory = this.labels.filter((label) => !label.includes('CATEGORY'));
@@ -70,11 +56,22 @@ export default {
   },
 
   methods: {
-    fromName(emailFrom) {
-      const startEmail = emailFrom.indexOf('<');
-      const charsToRemove = emailFrom.length - startEmail;
+    fromName(emailThread) {
+      let participants = this.getUsernameOrEmailAddressFromString(emailThread.from);
+      if (emailThread.numberOfParticipants > 2) {
+        participants += ` - ${emailThread.numberOfParticipants - 1}`;
+      }
+      return participants;
+    },
 
-      return emailFrom.slice(0, -charsToRemove);
+    getUsernameOrEmailAddressFromString(emailAddress) {
+      const startEmail = emailAddress.indexOf('<');
+      if (startEmail !== -1) {
+        const charsToRemove = emailAddress.length - startEmail;
+        return emailAddress.slice(0, -charsToRemove);
+      }
+
+      return emailAddress;
     },
 
     updateLabels() {
@@ -92,14 +89,6 @@ export default {
         this.$emit('deselected', this.emailThread.id);
       }
     },
-
-    getLabelColor(label) {
-      const storedLabel = this.getLabelByName(label);
-      if (storedLabel) {
-        return storedLabel.color;
-      }
-      return '#FFF';
-    },
   },
 
   created() {
@@ -108,44 +97,42 @@ export default {
 };
 </script>
 <style scoped>
-
-.headerLabelIcon {
-  transform: rotate(90deg);
+.checkbox {
+  display: inline-block;
 }
 
-.hover:hover {
+.headerRow:hover {
   filter: brightness(150%);
+  cursor: pointer;
 }
 
-.emailText {
-  text-align: start;
+.subject::before {
+  content:'';
+  height: 110%;
+  margin-right: 10px;
+  border-left: 2px solid var(--v-secondary-base) !important;
 }
 
 .subject {
   display: inline-block;
-  border-left: 2px solid var(--v-secondary-base) !important;
-  padding-left: 10px
-}
-
-.subject {
   color: var(--v-info-darken2) !important;
-}
-
-.label {
-  color: var(--v-info-darken3) !important;
-  font-size: 0.9em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.2em !important;
+  text-align: start;
 }
 
 .dateAndFrom {
   display: inline-block;
+  white-space: nowrap;
+  font-size: 1.2em !important;
+  text-align: start;
   text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 @media only screen and (max-width: 1264px) {
-  .emailText {
-    width: 100%;
-  }
-
   .dateAndFrom {
     font-size: 0.8em !important;
   }
@@ -154,10 +141,9 @@ export default {
     font-size: 0.9em !important;
   }
 
-  .label {
-    font-size: 0.5em !important;
+  .headerRow {
+    overflow: hidden;
   }
-
 }
 
 </style>

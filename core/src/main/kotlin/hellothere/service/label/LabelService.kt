@@ -19,7 +19,6 @@ import hellothere.requests.label.UpdateLabelViewableRequest
 import hellothere.service.google.BatchCallbacks.LabelBatchCallback
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -49,7 +48,6 @@ class LabelService(
         }
 
         val newLabels = fetchAndCacheLabels(labelIdsToFetch, client, username)
-        // todo find a way to add categories back in
         return (newLabels + cachedLabels).sortedBy { it.name }.filter { !it.name.contains("CATEGORY_") }.map {
             buildLabelDto(it)
         }
@@ -110,6 +108,16 @@ class LabelService(
         return labelResponse.labels.map { it.id }
     }
 
+    fun getUnreadMessageCount(client: Gmail, username: String): Int {
+        val unreadLabelResponse = client
+            .users()
+            .Labels()
+            .get(USER_SELF_ACCESS, "INBOX")
+            .execute()
+
+        return unreadLabelResponse.messagesUnread
+    }
+
     fun getCachedLabels(labelIds: List<String>, username: String): List<UserLabel> {
         return userLabelRepository.findAllByIdIn(labelIds.map { UserLabelId(it, username) })
     }
@@ -136,7 +144,7 @@ class LabelService(
         val (cachedAddLabels, cachedRemoveLabels) = getCachedLabels(labelsToAdd, labelsToRemove, username)
             ?: return null
 
-        val messagesToModify = userEmailRepository.findAllByThreadThreadIdInAndThreadUserIdOrderByDateSent(
+        val messagesToModify = userEmailRepository.findAllByThreadIdThreadIdInAndThreadUserIdOrderByDateSent(
             threadIds,
             username
         )
@@ -164,8 +172,8 @@ class LabelService(
         LOGGER.info("Finished adding labels $labelsToAdd and removing $labelsToRemove for threads: $threadIds - user: $username")
 
         val labelsPerThread = updatedMessages
-            .filter { it.thread?.threadId != null }
-            .groupBy { it.thread!!.threadId }
+            .filter { it.thread?.id?.threadId != null }
+            .groupBy { it.thread!!.id.threadId }
             .mapValues { mapEntry -> mapEntry.value.flatMap { it.getLabelList() }.toSet() }
 
         val allUserLabels = userLabelRepository.findAllByUserId(username)

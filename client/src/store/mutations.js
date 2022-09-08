@@ -10,6 +10,10 @@ const mutations = {
     state.loading = isLoading;
   },
 
+  setViewingEmail: (state, viewingEmail) => {
+    state.viewingEmail = viewingEmail;
+  },
+
   setComposingEmail: (state, isComposing) => {
     state.composingEmail = isComposing;
   },

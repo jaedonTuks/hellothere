@@ -5,6 +5,7 @@ import store from '@/store';
 import Home from '../views/Home.vue';
 import Profile from '../views/Profile.vue';
 import Leaderboards from '../views/Leaderboards.vue';
+import EmailBodyContent from '../views/EmailBodyContent.vue';
 
 Vue.use(VueRouter);
 
@@ -28,6 +29,11 @@ const routes = [
     path: '/inbox',
     name: 'Inbox',
     component: Home,
+  },
+  {
+    path: '/email',
+    name: 'Email',
+    component: EmailBodyContent,
   },
 ];
 

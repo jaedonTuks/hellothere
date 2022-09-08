@@ -5,20 +5,16 @@
         <h1 class="mt-4 mt-lg-1"> {{ profileInfo.leaderboardUsername }}</h1>
       </v-col>
       <v-col cols="12">
-        <h3 class="mt-4 mt-lg-1">Email: {{ profileInfo.email }}</h3>
+        <h3 class="mt-4 mt-lg-1 normalWeight">Email: {{ profileInfo.email }}</h3>
       </v-col>
       <v-col cols="12">
-        <h3 class="mt-4 mt-lg-1">Total XP: {{ profileInfo.totalExperience }}</h3>
+        <h2 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h2>
       </v-col>
       <v-col cols="12">
-        <h3 class="mt-4 mt-lg-1">This weeks XP: {{ currentWeekXP }}</h3>
-      </v-col>
-      <v-col cols="12">
-        <h3 class="mt-4 mt-lg-2">Rank on leaderboard: {{ profileInfo.rank }}</h3>
-      </v-col>
-      <v-col cols="12" lg="6">
-        <h2 class="mt-5">Badges</h2>
-        <div>{{ getBadges() }}</div>
+        <h2 class="level">Level: {{ Math.floor(profileInfo.totalExperience / 50) }}</h2>
+        <h3 class="level normalWeight">
+          XP Until next level: {{50 - (profileInfo.totalExperience % 50) }}
+        </h3>
       </v-col>
     </v-row>
 
@@ -28,7 +24,8 @@
       v-model="selectedProfileViewIndex"
       centered
       center-active
-      fixed-tabs
+      grow
+      show-arrows
       background-color="background"
       class="mb-4"
     >
@@ -50,25 +47,22 @@
       v-model="selectedProfileViewIndex"
     >
       <v-tab-item style="background-color: #343E59">
-        <v-row class="pa-3">
-          <h2>Weekly stats</h2>
-        </v-row>
-        <v-row>
-          <v-col cols="12 mb-0">
-            <span class="mr-2">Total Emails:</span>
-            <span>{{ profileInfo.messageTotalsSummary.totalEmails }}</span>
-          </v-col>
+        <v-row align="center" align-content="center">
           <StatsCard
-            title="Weekly experience overview"
+            title="Experience overview"
             type="bar"
             :series="experienceSeries"
-          />
+          >
+            Total XP: {{ profileInfo.totalExperience }}
+          </StatsCard>
           <StatsCard
             title="Emails Overview"
             type="radialBar"
             :series="getTotalsRadialSeries()"
             :labels="getTotalsLabels()"
-          />
+          >
+            Total Emails: {{ profileInfo.messageTotalsSummary.totalEmails }}
+          </StatsCard>
           <StatsCard
             title="Challenges Completed"
             type="radialBarPercentage"
@@ -224,6 +218,16 @@ export default {
 <style scoped>
 .borderTop {
   border-top: solid 2px white;
+}
+
+.normalWeight {
+  font-weight: normal;
+  opacity: 0.85;
+}
+
+h2 {
+  font-size: 1.4em;
+  opacity: 0.9;
 }
 
 @media only screen and (max-width: 1264px) {

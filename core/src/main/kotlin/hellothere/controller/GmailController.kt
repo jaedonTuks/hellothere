@@ -64,8 +64,12 @@ class GmailController(
     }
 
     @GetMapping("/email/{id}")
-    fun getFullEmailFromId(request: HttpServletRequest, @PathVariable id: String): ResponseEntity<EmailThreadDto> {
-        val (username, client) = getUsernameAndClientFromRequest(request)
+    fun getFullEmailFromId(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        @PathVariable id: String
+    ): ResponseEntity<EmailThreadDto> {
+        val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val emailThread = gmailService.getFullEmailThreadData(client, username, id)
@@ -76,11 +80,12 @@ class GmailController(
     @GetMapping("/emails")
     fun getEmails(
         request: HttpServletRequest,
+        response: HttpServletResponse,
         @RequestParam pageToken: String? = null,
         @RequestParam searchString: String? = null,
         @RequestParam labels: List<String>? = listOf()
     ): ResponseEntity<EmailsContainerDTO> {
-        val (username, client) = getUsernameAndClientFromRequest(request)
+        val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         return ResponseEntity.ok(
@@ -97,9 +102,10 @@ class GmailController(
     @PostMapping("/send")
     fun sendEmail(
         request: HttpServletRequest,
+        response: HttpServletResponse,
         @RequestBody sendRequest: SendRequest
     ): ResponseEntity<EmailThreadDto> {
-        val (username, client) = getUsernameAndClientFromRequest(request)
+        val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val email = gmailService.send(username, client, sendRequest)
@@ -111,9 +117,10 @@ class GmailController(
     @PostMapping("/reply")
     fun replyToEmail(
         request: HttpServletRequest,
+        response: HttpServletResponse,
         @RequestBody replyRequest: ReplyRequest
     ): ResponseEntity<EmailDto> {
-        val (username, client) = getUsernameAndClientFromRequest(request)
+        val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val email = gmailService.sendReply(username, client, replyRequest)

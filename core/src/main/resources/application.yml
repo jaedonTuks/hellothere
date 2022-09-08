@@ -52,3 +52,8 @@ stats:
         leniencyMinutes: 60
 
 max-emails: 5
+
+firebase:
+    config: 'firebaseconfig/config.json'
+    key: ${HELLOTHERE_FIREBASE_VK}
+    pass: ${HELLOTHERE_FIREBASE_PASS}

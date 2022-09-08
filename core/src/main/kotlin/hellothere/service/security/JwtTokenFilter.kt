@@ -19,7 +19,7 @@ class JwtTokenFilter(
                 if (jwtTokenService.isTokenValid(token)) {
                     filterChain?.doFilter(request, response)
                 } else if (response is HttpServletResponse) {
-                    response.setHeader("Set-Cookie", "${SecurityService.JWT_TOKEN_COOKIE_NAME}=''; Path=/; Max-Age=-1; HttpOnly;")
+                    response.setHeader("Set-Cookie", "${SecurityService.JWT_TOKEN_COOKIE_NAME}=''; Path=/; Max-Age=-1;")
                     response.sendRedirect("/login")
                 }
             } else {

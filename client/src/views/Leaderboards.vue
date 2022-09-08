@@ -33,7 +33,7 @@
           Leaderboards
         </h1>
       </v-col>
-      <v-col cols="8">
+      <v-col cols="12" lg="8">
         <v-data-table
           dark
           disable-filtering

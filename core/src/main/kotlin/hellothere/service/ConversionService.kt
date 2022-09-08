@@ -59,13 +59,18 @@ class ConversionService {
         val bodyOfHtmlDoc = StringUtils.substringBetween(fullBody, "<body", "</body>")
 
         return if (bodyOfHtmlDoc == null) {
-            fullBody
+            getDefaultStyledDiv(fullBody)
         } else {
             "<div $bodyOfHtmlDoc </div>"
         }
     }
 
+    fun getDefaultStyledDiv(content: String): String {
+        return "<div style='$defaultStyle'> $content </div>"
+    }
+
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(ConversionService::class.java)
+        const val defaultStyle = "color: white; font-size: 1.2em; font-family: Sans-serif"
     }
 }

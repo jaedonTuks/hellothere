@@ -1,9 +1,11 @@
 export function getDefaultState() {
   return {
     composingEmail: false,
+    displaySnackBar: false,
     isLoggedIn: true,
     loading: false,
     nextPageToken: null,
+    snackBarColor: 'error',
     challenges: [],
     userProfile: {
       leaderboardUsername: '',
@@ -13,6 +15,7 @@ export function getDefaultState() {
     labels: [],
     emailsById: {},
     threadsById: {},
+    viewingEmail: {},
     currentThreadIds: [],
   };
 }

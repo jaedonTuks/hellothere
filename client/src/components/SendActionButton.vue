@@ -1,6 +1,6 @@
 <template>
   <v-btn
-    class="button mr-10"
+    class="button mr-md-10"
     color="secondary"
     fixed
     bottom

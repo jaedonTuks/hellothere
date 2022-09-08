@@ -9,8 +9,11 @@ data class EmailDto(
     val id: String,
     val threadId: String,
     val from: String,
+    val to: List<String>,
+    val cc: List<String>,
+    val displayTo: Boolean,
     val date: LocalDateTime,
-    var body: String?
+    var body: String? = null
 ) {
     @JsonProperty("formattedDate")
     fun getFormattedDate(): String {
