@@ -4,6 +4,8 @@ export function getDefaultState() {
     displaySnackBar: false,
     isLoggedIn: true,
     loading: false,
+    areFeatureFlagsLoaded: false,
+    isGamificationEnabled: false,
     nextPageToken: null,
     snackBarColor: 'error',
     challenges: [],

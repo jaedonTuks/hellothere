@@ -34,6 +34,11 @@ class FeatureService(
         }
     }
 
+    fun clearCaches() {
+        ff4j.cacheProxy.cacheManager.clearFeatures()
+        ff4j.cacheProxy.cacheManager.clearProperties()
+    }
+
     final inline fun <reified T> getProperty(fF4jProperty: FF4jProperty): T {
         val property = ff4j.getProperty(fF4jProperty.toString()).value.toString()
 

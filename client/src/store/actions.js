@@ -177,6 +177,18 @@ const actions = {
       console.error(e);
       throw e;
     }),
+
+  getIsGamificationViewsEnabled: ({ commit }) => axios.get('/api/feature/gamification-view-enabled')
+    .then((response) => {
+      commit('setFeaturesLoaded', true);
+      commit('setIsGamificationEnabled', response.data);
+    })
+    .catch((e) => {
+      const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
+      commit('setIsLoggedIn', newLoggedIn);
+      console.error(e);
+    }),
+
 };
 
 export default actions;

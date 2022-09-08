@@ -7,4 +7,5 @@ object RestUrl {
     const val LABEL = "$ROOT_URL/label"
     const val USER = "$ROOT_URL/user"
     const val CHALLENGE = "$ROOT_URL/challenge"
+    const val FEATURE = "$ROOT_URL/feature"
 }

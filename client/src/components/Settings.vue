@@ -34,6 +34,8 @@
                     <v-color-picker
                       v-model="colors[index]"
                       hide-mode-switch
+                      hide-inputs
+                      hide-canvas
                       mode="hexa"
                     />
                     <v-btn

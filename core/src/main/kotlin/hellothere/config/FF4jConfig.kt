@@ -1,7 +1,6 @@
 package hellothere.config
 
 import org.ff4j.FF4j
-import org.ff4j.cache.FF4JCacheManager
 import org.ff4j.cache.InMemoryCacheManager
 import org.ff4j.springjdbc.store.EventRepositorySpringJdbc
 import org.ff4j.springjdbc.store.FeatureStoreSpringJdbc

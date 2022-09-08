@@ -3,11 +3,15 @@ package hellothere.service.challenge
 import hellothere.dto.UserChallengeDTO
 import hellothere.model.challange.UserChallenge
 import hellothere.model.challange.UserChallengeId
+import hellothere.model.feature.FF4jFeature
 import hellothere.model.stats.category.StatCategory
 import hellothere.model.user.User
 import hellothere.repository.challenge.ChallengeRepository
 import hellothere.repository.challenge.UserChallengeRepository
 import hellothere.requests.challenge.ClaimChallengeRewardRequest
+import hellothere.service.FeatureService
+import liquibase.pro.packaged.fe
+import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class ChallengeService(
     private val userChallengeRepository: UserChallengeRepository,
     private val challengeRepository: ChallengeRepository,
+    private val featureService: FeatureService,
 ) {
     @Transactional
     fun createUsersDefaultChallenges(user: User) {
@@ -38,7 +43,10 @@ class ChallengeService(
 
     @Transactional
     fun updateUserChallenges(username: String, statCategory: StatCategory) {
-        // todo deactivate this calculation for first week using ff4j feature switch
+        if (featureService.isDisabled(FF4jFeature.CHALLENGES)) {
+            return
+        }
+        LOGGER.info("Updating challenge for $username in $statCategory")
         val userChallenges = userChallengeRepository.findAllByIdAppUserAndChallengeStatCategoryOrderByChallengeId(username, statCategory)
             .filterNot { it.isComplete() }
 

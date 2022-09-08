@@ -10,6 +10,14 @@ const mutations = {
     state.loading = isLoading;
   },
 
+  setFeaturesLoaded: (state, featuresLoaded) => {
+    state.areFeatureFlagsLoaded = featuresLoaded;
+  },
+
+  setIsGamificationEnabled: (state, isGamificationViewsEnabled) => {
+    state.isGamificationEnabled = isGamificationViewsEnabled;
+  },
+
   setViewingEmail: (state, viewingEmail) => {
     state.viewingEmail = viewingEmail;
   },

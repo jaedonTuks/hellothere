@@ -6,6 +6,7 @@ import com.google.api.services.gmail.model.Label
 import hellothere.dto.label.LabelDto
 import hellothere.dto.label.LabelUpdateDto
 import hellothere.model.email.UserEmail
+import hellothere.model.feature.FF4jFeature
 import hellothere.model.label.UserLabel
 import hellothere.model.label.UserLabel.Companion.isManageableId
 import hellothere.model.label.UserLabelId
@@ -16,6 +17,7 @@ import hellothere.repository.user.UserRepository
 import hellothere.requests.label.UpdateEmailLabelsRequest
 import hellothere.requests.label.UpdateLabelColorRequest
 import hellothere.requests.label.UpdateLabelViewableRequest
+import hellothere.service.FeatureService
 import hellothere.service.google.BatchCallbacks.LabelBatchCallback
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
@@ -29,7 +31,8 @@ class LabelService(
     private val userRepository: UserRepository,
     private val userLabelRepository: UserLabelRepository,
     private val userEmailRepository: UserEmailRepository,
-    private val userStatsService: UserStatsService
+    private val userStatsService: UserStatsService,
+    private val featureService: FeatureService
 ) {
 
     @Transactional
@@ -189,6 +192,10 @@ class LabelService(
         username: String,
         updateLabelRequest: UpdateLabelViewableRequest
     ): LabelDto? {
+        if (featureService.isDisabled(FF4jFeature.CUSTOMISATION)) {
+            return null
+        }
+
         val label = userLabelRepository.findByIdOrNull(UserLabelId(updateLabelRequest.labelId, username))
 
         label?.isViewable = updateLabelRequest.isViewable
@@ -200,6 +207,10 @@ class LabelService(
         username: String,
         updateLabelRequest: UpdateLabelColorRequest
     ): LabelDto? {
+        if (featureService.isDisabled(FF4jFeature.CUSTOMISATION)) {
+            return null
+        }
+
         val label = userLabelRepository.findByIdOrNull(UserLabelId(updateLabelRequest.labelId, username))
 
         label?.color = updateLabelRequest.color
