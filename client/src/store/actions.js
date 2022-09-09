@@ -101,7 +101,7 @@ const actions = {
       console.error(e);
     }),
 
-  sendEmail: ({ commit }, payload) => axios.post('/api/gmail/send', payload)
+  sendEmail: ({ commit }, payload) => axios.post('/api/gmail/send', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
     .then((response) => {
       commit('updateEmailThreadsById', response.data);
       commit('prependToCurrentThreadIds', response.data.id);

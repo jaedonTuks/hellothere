@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -433,7 +434,8 @@ class GmailService(
             sendRequest.to,
             sendRequest.cc,
             sendRequest.subject,
-            sendRequest.body
+            sendRequest.body,
+            sendRequest.attachments ?: listOf()
         )
     }
 
@@ -457,12 +459,14 @@ class GmailService(
             .toSet()
             .toList()
 
+        // todo add attachments to reply
         return buildMessage(
             username,
             listOf(to),
             cc,
             subject,
             replyRequest.reply,
+            listOf(),
             replyHeaders
         )
     }
@@ -473,6 +477,7 @@ class GmailService(
         cc: List<String>,
         subject: String,
         body: String,
+        attachments: List<MultipartFile>,
         additionalHeaders: Map<String, String> = mapOf()
     ): MimeMessage? {
         if (hasInvalidEmailAddresses(to + from + cc)) {
@@ -483,13 +488,17 @@ class GmailService(
         val session = Session.getDefaultInstance(props, null)
 
         val mimeMessage = MimeMessage(session)
-        val mimeMessageHelper = MimeMessageHelper(mimeMessage)
+        val mimeMessageHelper = MimeMessageHelper(mimeMessage, true)
 
         mimeMessageHelper.setFrom(from)
         mimeMessageHelper.setTo(to.toTypedArray())
         mimeMessageHelper.setCc(cc.toTypedArray())
         mimeMessageHelper.setSubject(subject)
         mimeMessageHelper.setText(body)
+
+        attachments.forEach {
+            mimeMessageHelper.addAttachment(it.originalFilename ?: "${it.name}", it)
+        }
 
         additionalHeaders.entries.forEach {
             mimeMessage.addHeader(it.key, it.value)
@@ -514,9 +523,10 @@ class GmailService(
         cc: List<String>,
         subject: String,
         body: String,
+        attachments: List<MultipartFile>,
         additionalHeaders: Map<String, String> = mapOf()
     ): Message? {
-        val mimeMessage = buildMimeMessage(from, to, cc, subject, body, additionalHeaders)
+        val mimeMessage = buildMimeMessage(from, to, cc, subject, body, attachments, additionalHeaders)
             ?: return null
         val base64String = conversionService.convertMimeMessageToBase64String(mimeMessage)
             ?: return null

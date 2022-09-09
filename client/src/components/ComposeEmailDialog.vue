@@ -81,6 +81,7 @@
           <v-row  class="pa-5 pt-0 mt-4">
             <v-col cols="8">
               <v-file-input
+                v-model="attachments"
                 counter
                 multiple
                 show-size
@@ -88,7 +89,8 @@
                 prepend-icon=""
                 prepend-inner-icon="mdi-paperclip"
                 truncate-length="18"
-              ></v-file-input>
+                :rules="getFileValidationRules()"
+              />
             </v-col>
           </v-row>
           <v-row>
@@ -123,6 +125,7 @@ export default {
   name: 'ComposeEmailDialog',
   data() {
     return {
+      attachments: [],
       loading: false,
       labels: [],
       to: [],
@@ -152,15 +155,21 @@ export default {
 
     sendComposedEmail() {
       this.loading = true;
-      const payload = {
-        to: this.to,
-        cc: this.cc,
-        labels: this.selectedLabels,
-        subject: this.subject,
-        body: this.message,
-      };
 
-      this.sendEmail(payload)
+      const formDataPayload = new FormData();
+
+      formDataPayload.append('to', this.to);
+      formDataPayload.append('cc', this.cc);
+      formDataPayload.append('labels', this.selectedLabels);
+      formDataPayload.append('subject', this.subject);
+      formDataPayload.append('body', this.message);
+
+      this.attachments.forEach((attachment) => {
+        console.log(attachment.name);
+        formDataPayload.append('attachments', attachment, attachment.name);
+      });
+
+      this.sendEmail(formDataPayload)
         .then(() => {
           this.resetFields();
           EventBus.$emit('newEmail');
@@ -169,10 +178,13 @@ export default {
           this.loading = false;
         });
     },
+
+    getFileValidationRules() {
+      return [(attachments) => attachments.reduce((accumulator, attachment) => accumulator + attachment.size, 0) < 4000000 || 'Attachments size should be less than 4 MB'];
+    },
   },
 
   created() {
-    // todo verify if this works
     this.labels = this.getLabelNames();
     if (this.labels.length === 0) {
       this.fetchLabels().then(() => {

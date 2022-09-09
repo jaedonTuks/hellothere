@@ -118,11 +118,11 @@ class GmailController(
         )
     }
 
-    @PostMapping("/send")
+    @PostMapping("/send", consumes = ["multipart/form-data"])
     fun sendEmail(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        @RequestBody sendRequest: SendRequest
+        @ModelAttribute sendRequest: SendRequest
     ): ResponseEntity<EmailThreadDto> {
         val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
