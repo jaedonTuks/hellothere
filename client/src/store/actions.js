@@ -114,10 +114,7 @@ const actions = {
 
   replyToEmail: ({ commit }, payload) => axios.post('/api/gmail/reply', payload)
     .then((response) => {
-      commit('updateEmailThreadsByIdAddEmail', {
-        threadId: payload.threadId,
-        newEmail: response.data,
-      });
+      commit('updateEmailThreadsByIdAddEmail', response.data);
     })
     .catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);

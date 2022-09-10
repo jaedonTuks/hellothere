@@ -14,7 +14,10 @@ spring:
         username: HelloThereAdmin
         password: "EzJ3DkQ6iyd5kH0"
         driver-class-name: org.postgresql.Driver
-
+    servlet:
+        multipart:
+            max-file-size: 4MB
+            max-request-size: 4MB
 security:
     jwt:
         token:

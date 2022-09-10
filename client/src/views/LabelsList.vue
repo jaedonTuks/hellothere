@@ -6,7 +6,7 @@
             :class="{
             'label': true,
             'largerLabels': largerLabels,
-            'float-end': !isMobile
+            'float-end': !floatLeft && !isMobile
           }"
         >
            <v-icon
@@ -16,7 +16,7 @@
            >
              mdi-label
            </v-icon>
-          {{label}}
+          {{ idMode ? getLabelNameById(label) : label}}
         </span>
   </v-col>
 </template>
@@ -32,16 +32,31 @@ export default {
     largerLabels: Boolean,
     cols: String,
     md: String,
+    floatLeft: {
+      type: Boolean,
+      default: false,
+    },
+    idMode: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   computed: {
-    ...mapGetters(['getLabelByName']),
+    ...mapGetters(['getLabelByName', 'getLabelById']),
   },
 
   methods: {
+    getLabelNameById(id) {
+      const label = this.getLabelById(id);
+      if (label && label.name) {
+        return label.name;
+      }
+      return id;
+    },
 
-    getLabelColor(label) {
-      const storedLabel = this.getLabelByName(label);
+    getLabelColor(value) {
+      const storedLabel = this.idMode ? this.getLabelById(value) : this.getLabelByName(value);
       if (storedLabel) {
         return storedLabel.color;
       }

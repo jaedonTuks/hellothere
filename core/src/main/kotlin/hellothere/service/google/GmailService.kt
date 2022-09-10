@@ -209,8 +209,14 @@ class GmailService(
         return getThreadsBaseData(client, listOf(gmailId), username).firstOrNull()
     }
 
-    fun getEmailBaseData(client: Gmail, gmailId: String, username: String, isReply: Boolean = false): UserEmail? {
-        return getEmailBaseData(client, listOf(gmailId), username, isReply).firstOrNull()
+    fun getEmailFullData(client: Gmail, gmailId: String, username: String, isReply: Boolean = false): Message? {
+        val message = getMutableEmailsList(
+            listOf(gmailId),
+            EmailFormat.FULL,
+            client
+        )
+        saveNewEmailsFromGmail(message, username, isReply)
+        return message.firstOrNull()
     }
 
     private fun getMutableEmailsList(
@@ -412,10 +418,8 @@ class GmailService(
         // todo update correct message with the reply. Last non user message sent
         lastEmailInThread?.let { userStatsService.updateUserStats(username, StatCategory.REPLY, listOf(it)) }
 
-        val emailDto = buildEmailDtoFromMessage(username, client, sentMessage, isReply = true) ?: return null
-        emailDto.body = replyRequest.reply
 
-        return emailDto
+        return buildEmailDtoFromMessage(username, client, sentMessage, isReply = true) ?: null
     }
 
     private fun buildEmailDtoFromMessage(
@@ -424,7 +428,7 @@ class GmailService(
         sentMessage: Message,
         isReply: Boolean = false
     ): EmailDto? {
-        val sentEmailSummary = getEmailBaseData(client, sentMessage.id, username, isReply) ?: return null
+        val sentEmailSummary = getEmailFullData(client, sentMessage.id, username, isReply) ?: return null
         return buildEmailDto(sentEmailSummary)
     }
 
@@ -459,14 +463,13 @@ class GmailService(
             .toSet()
             .toList()
 
-        // todo add attachments to reply
         return buildMessage(
             username,
             listOf(to),
             cc,
             subject,
             replyRequest.reply,
-            listOf(),
+            replyRequest.attachments ?: listOf(),
             replyHeaders
         )
     }

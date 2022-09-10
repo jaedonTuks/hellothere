@@ -133,11 +133,11 @@ class GmailController(
         return ResponseEntity.ok(email)
     }
 
-    @PostMapping("/reply")
+    @PostMapping("/reply", consumes = ["multipart/form-data"])
     fun replyToEmail(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        @RequestBody replyRequest: ReplyRequest
+        @ModelAttribute replyRequest: ReplyRequest
     ): ResponseEntity<EmailDto> {
         val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()

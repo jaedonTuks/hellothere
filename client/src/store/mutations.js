@@ -81,9 +81,10 @@ const mutations = {
     state.threadsById[emailThread.id] = emailThread;
   },
 
-  updateEmailThreadsByIdAddEmail: (state, payload) => {
-    const emailThread = state.threadsById[payload.threadId];
-    emailThread.emails.push(payload.newEmail);
+  updateEmailThreadsByIdAddEmail: (state, newEmail) => {
+    console.log(newEmail);
+    const emailThread = state.threadsById[newEmail.threadId];
+    emailThread.emails.push(newEmail);
   },
 
   resetAndSetCurrentThreadIds: (state, emailContainer) => {
