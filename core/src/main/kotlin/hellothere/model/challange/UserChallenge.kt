@@ -8,7 +8,7 @@ import javax.persistence.*
 @Table(name = "user_challenge")
 class UserChallenge(
     @EmbeddedId
-    val id: UserChallengeId,
+    val id: UserChallengeId
 ) {
 
     @ManyToOne

@@ -7,3 +7,16 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.normalWeight {
+  font-weight: normal;
+}
+
+.greyer {
+  opacity: 0.85;
+}
+
+.xp {
+  color: var(--v-purpleAccent-lighten2);
+  opacity: 1;
+}

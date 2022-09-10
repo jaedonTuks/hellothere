@@ -89,3 +89,10 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: db/changelog/migrations/28_add_feature_flags.sql
+
+  - changeSet:
+      id: 30_improve_customisation.sql
+      author: Jaedon Heger
+      changes:
+        - sqlFile:
+            path: db/changelog/migrations/30_improve_customisation.sql

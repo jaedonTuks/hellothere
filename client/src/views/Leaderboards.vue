@@ -52,6 +52,9 @@
           <template v-slot:item.username="{ item }">
             {{ item.username }}
           </template>
+          <template v-slot:item.title="{ item }">
+            {{ item.title }}
+          </template>
           <template v-slot:item.xp="{ item }">
             {{ item.totalXp }}
           </template>
@@ -96,6 +99,11 @@ export default {
           value: 'username',
           filterable: false,
           sortable: false,
+          align: 'start',
+        },
+        {
+          text: 'Title',
+          value: 'title',
           align: 'start',
         },
         {

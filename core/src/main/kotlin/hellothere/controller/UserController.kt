@@ -5,8 +5,10 @@ import hellothere.config.RestUrl.USER
 import hellothere.dto.UserChallengeDTO
 import hellothere.dto.user.NotificationTokenDTO
 import hellothere.dto.user.UserDto
+import hellothere.model.feature.FF4jFeature
 import hellothere.requests.user.UpdateNotificationToken
-import hellothere.requests.user.UpdateUsernameRequest
+import hellothere.requests.user.UpdateTitleRequest
+import hellothere.service.FeatureService
 import hellothere.service.NotificationService
 import hellothere.service.challenge.ChallengeService
 import hellothere.service.security.SecurityService
@@ -24,7 +26,8 @@ class UserController(
     private val userService: UserService,
     private val challengeService: ChallengeService,
     private val securityService: SecurityService,
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val featureService: FeatureService
 ) {
     @GetMapping
     fun getUser(
@@ -52,14 +55,19 @@ class UserController(
         return ResponseEntity.ok(challengeService.getUserChallengesDTO(username))
     }
 
-    @PostMapping("/edit-username")
+    @PostMapping("/update-title")
     fun sendEmail(
         request: HttpServletRequest,
-        @RequestBody updateUsernameRequest: UpdateUsernameRequest
+        @RequestBody updateTitleRequest: UpdateTitleRequest
     ): ResponseEntity<String> {
+        if (featureService.isDisabled(FF4jFeature.CUSTOMISATION)) {
+            return ResponseEntity.noContent().build()
+        }
+
         val username = securityService.getUsernameFromRequest(request)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        return userService.updateLeaderboardUsername(username, updateUsernameRequest)?.let {
+
+        return userService.updateUserTitle(username, updateTitleRequest)?.let {
             ResponseEntity.ok(it.leaderboardUsername)
         } ?: ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
     }

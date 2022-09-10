@@ -13,6 +13,12 @@ class Challenge(
     @Column(name = "name")
     val name: String,
 
+    @Column(name = "title")
+    val title: String,
+
+    @Column(name = "level")
+    val level: String,
+
     @Enumerated(EnumType.STRING)
     @Column(name = "stat_category")
     val statCategory: StatCategory,

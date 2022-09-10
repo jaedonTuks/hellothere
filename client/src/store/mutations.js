@@ -98,8 +98,8 @@ const mutations = {
     state.currentThreadIds.unshift(newId);
   },
 
-  setProfileLeaderboardUsername: (state, newName) => {
-    state.profile.leaderboardUsername = newName;
+  setProfileTitle: (state, newTitle) => {
+    state.profile.title = newTitle;
   },
 
   resetToDefault: (state) => {

@@ -1,19 +1,19 @@
 <template>
   <v-card
     color="accent"
-    min-height="290"
+    min-height="350"
     :class="{
       'pa-5': true,
       'claimed': challenge.isRewardClaimed
     }"
   >
-    <v-card-title class="borderBottom pb-4">
+    <v-card-title class="pb-4">
       <v-row>
         <h2>{{ challenge.name }}</h2>
       </v-row>
       <v-progress-circular
         class="float-end progress"
-        color="purpleAccent"
+        color="primary"
         :value="percentageComplete"
       >
         <v-expand-x-transition>
@@ -21,6 +21,7 @@
         </v-expand-x-transition>
       </v-progress-circular>
     </v-card-title>
+    <div class="gradiantBorderBottom gradiantBorderBottomFullWidth"></div>
     <v-card-text class="mt-2 pa-2">
       <v-row v-if="challenge.isRewardClaimed" class="pa-4">
         <h3 class="mb-3 mr-4 pr-4">Completed</h3>
@@ -30,7 +31,9 @@
         <h3 class="mb-5">Goal: {{ challenge.goal }}</h3>
       </v-row>
       <div class="mb-5 pl-4">{{ challenge.description }}</div>
-      <h3 class="mb-3"> Rewards: {{ challenge.reward }} xp</h3>
+      <h3 class="mb-3"> Rewards: </h3>
+      <h4 class="titleReward normalWeight pl-4 mb-2">Title: {{ challenge.title }}</h4>
+      <h4 class="normalWeight pl-4">{{ challenge.reward }} <span class="xp"> XP</span></h4>
     </v-card-text>
     <v-card-actions>
       <v-btn

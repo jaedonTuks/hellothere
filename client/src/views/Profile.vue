@@ -4,6 +4,22 @@
       <v-col cols="12">
         <h1 class="mt-4 mt-lg-1"> {{ profileInfo.leaderboardUsername }}</h1>
       </v-col>
+      <v-col v-if="isGamificationEnabled" cols="12">
+        <v-row align="center">
+          <v-col cols="auto">
+            <h2 class="mt-4 mt-lg-1">Title:</h2>
+          </v-col>
+          <v-col cols="2">
+            <v-select
+              v-model="title"
+              label=""
+              :disabled="profileInfo.availableTitles.length < 2"
+              :items="profileInfo.availableTitles"
+              @change="updateTitle"
+            />
+          </v-col>
+        </v-row>
+      </v-col>
       <v-col cols="12">
         <h3 class="mt-4 mt-lg-1 normalWeight">Email: {{ profileInfo.email }}</h3>
       </v-col>
@@ -13,7 +29,7 @@
       <v-col v-if="isGamificationEnabled" cols="12">
         <h2 class="level">Level: {{ Math.floor(profileInfo.totalExperience / 50) }}</h2>
         <h3 class="level normalWeight">
-          XP Until next level: {{50 - (profileInfo.totalExperience % 50) }}
+          <span class="xp">XP</span> until next level: {{ 50 - (profileInfo.totalExperience % 50) }}
         </h3>
       </v-col>
     </v-row>
@@ -55,7 +71,7 @@
             type="bar"
             :series="experienceSeries"
           >
-            Total XP: {{ profileInfo.totalExperience }}
+            <span class="xp">Total XP</span>: {{ profileInfo.totalExperience }}
           </StatsCard>
           <StatsCard
             title="Emails Overview"
@@ -106,6 +122,7 @@ export default {
 
   data() {
     return {
+      title: null,
       profileInfo: null,
       editingUsername: false,
       newUserName: '',
@@ -163,17 +180,10 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchUserInfo', 'sendLogoutRequest', 'sendUpdateUsernameRequest']),
+    ...mapActions(['fetchUserInfo', 'sendLogoutRequest', 'sendUpdateTitleRequest']),
 
     getTotalsPercentage(value) {
       return this.getPercentage(value, this.profileInfo.messageTotalsSummary.totalEmails);
-    },
-
-    getBadges() {
-      if (this.profileInfo.badges) {
-        return this.profileInfo.badges;
-      }
-      return 'Complete challenges to earn badges';
     },
 
     getTotalsRadialSeries() {
@@ -195,18 +205,6 @@ export default {
       ];
     },
 
-    toggleEditUsername() {
-      this.editingUsername = !this.editingUsername;
-      if (this.editingUsername) {
-        this.$refs.usernameField.focus();
-      } else {
-        this.sendUpdateUsernameRequest({ newUsername: this.newUserName })
-          .then(() => {
-            this.newUserName = this.profileInfo.leaderboardUsername;
-          });
-      }
-    },
-
     logout() {
       this.sendLogoutRequest()
         .then(() => {
@@ -214,11 +212,18 @@ export default {
         });
     },
 
+    updateTitle() {
+      if (this.profileInfo.title !== this.title) {
+        this.sendUpdateTitleRequest({ newTitle: this.title });
+      }
+    },
+
   },
 
   created() {
     this.fetchUserInfo().then(() => {
       this.profileInfo = this.getProfile();
+      this.title = this.profileInfo.title;
       this.newUserName = this.profileInfo.leaderboardUsername;
     });
   },
@@ -228,11 +233,6 @@ export default {
 <style scoped>
 .borderTop {
   border-top: solid 2px white;
-}
-
-.normalWeight {
-  font-weight: normal;
-  opacity: 0.85;
 }
 
 h2 {

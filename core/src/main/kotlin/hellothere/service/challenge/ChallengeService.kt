@@ -10,8 +10,6 @@ import hellothere.repository.challenge.ChallengeRepository
 import hellothere.repository.challenge.UserChallengeRepository
 import hellothere.requests.challenge.ClaimChallengeRewardRequest
 import hellothere.service.FeatureService
-import liquibase.pro.packaged.fe
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -78,6 +76,28 @@ class ChallengeService(
     }
 
     @Transactional
+    fun getCompletedChallengesTitleNames(user: User): List<String> {
+        val completedChallenges = userChallengeRepository.findAllByIdAppUserAndIsRewardClaimedTrue(user.id)
+
+        val titles = completedChallenges.mapNotNull { it.challenge?.title }.toMutableSet()
+
+        val groupedChallenges = completedChallenges
+            .groupBy { it.challenge?.level }
+
+        val highestCompletedLevel = groupedChallenges
+            .entries.lastOrNull { it.value.size == 3 }
+
+        if (highestCompletedLevel != null) {
+            val keys = groupedChallenges.keys.toList()
+            val allStarTitles = keys.subList(0, keys.indexOf(highestCompletedLevel.key) +1)
+                .map { "$it All Star" }
+            titles.addAll(allStarTitles)
+        }
+        titles.add("Noob")
+        return titles.toList().sorted()
+    }
+
+    @Transactional
     fun getUserChallengesDTO(username: String): List<UserChallengeDTO> {
         val userChallenges = userChallengeRepository.findAllByIdAppUserOrderByChallengeId(username)
         return userChallenges.mapNotNull {
@@ -90,6 +110,7 @@ class ChallengeService(
             UserChallengeDTO(
                 challenge.id,
                 challenge.name,
+                challenge.title,
                 challenge.goal,
                 userChallenge.currentProgress,
                 challenge.reward,
