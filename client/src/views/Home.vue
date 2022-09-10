@@ -26,75 +26,15 @@
             <v-row style="min-height: 52px;">
               <v-slide-x-transition>
                 <v-col v-show="selectedEmailIds.length > 0" cols="4" md="2">
-                  <v-menu
-                    v-model="isLabelMenuOpen"
-                    bottom
-                    style="overflow-y: hidden"
-                    transition="slide-y-transition"
+                  <LabelMenu
                     ref="labelMenu"
-                    :close-on-content-click="false"
-                    @click="isLabelMenuOpen=true"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn
-                        dark
-                        small
-                        class="mt-0"
-                        color="background"
-                        elevation="0"
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        <v-icon>mdi-label</v-icon>
-                      </v-btn>
-                    </template>
-                    <v-list
-                      style="max-height: 500px; padding: 10px"
-                      class="overflow-y-auto backgroundDark"
-                    >
-                      <v-list-item-title class="borderBottom">
-                        <v-icon medium class="mr-2">mdi-label</v-icon>
-                        Manage label
-                      </v-list-item-title>
-                      <v-list-item
-                        v-for="(label, index) in manageableLabels"
-                        :key="index"
-                      >
-                        <v-list-item-action>
-                          <v-checkbox
-                            v-model="labelCheckboxSelected[index]"
-                            @change="newLabelSelected($event, label)"
-                          />
-                        </v-list-item-action>
-                        <v-list-item-title :style="{ 'color': label.color }">
-                          {{ label.name }}
-                        </v-list-item-title>
-                      </v-list-item>
-                    </v-list>
-                    <v-row justify="end" class="backgroundDark pa-3">
-                      <v-col class="borderTop" cols="6">
-                        <v-btn
-                          color="secondary"
-                          :disabled="selectedLabels.length === 0"
-                          :loading="labelRemoveLoading"
-                          @click="sendUpdateLabelsRequest(true)"
-                        >
-                          Remove labels
-                        </v-btn>
-                      </v-col>
-                      <v-col class="borderTop" cols="6">
-                        <v-btn
-                          color="secondary"
-                          class="float-end"
-                          :disabled="selectedLabels.length === 0"
-                          :loading="labelAddLoading"
-                          @click="sendUpdateLabelsRequest(false)"
-                        >
-                          Add labels
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                  </v-menu>
+                    :manageable-labels="manageableLabels"
+                    :selected-labels="selectedLabels"
+                    :label-add-loading="labelAddLoading"
+                    :label-remove-loading="labelRemoveLoading"
+                    @change="newLabelSelected"
+                    @send-update-request="sendUpdateLabelsRequest"
+                  />
                 </v-col>
               </v-slide-x-transition>
               <v-slide-x-transition>
@@ -246,10 +186,12 @@ import ComposeEmailDialog from '@/components/ComposeEmailDialog.vue';
 import NoEmailsCard from '@/components/NoEmailsCard.vue';
 // eslint-disable-next-line import/no-cycle
 import { EventBus } from '@/main';
+import LabelMenu from '@/views/LabelMenu.vue';
 
 export default {
   name: 'Home',
   components: {
+    LabelMenu,
     NoEmailsCard,
     EmailHeader,
     SendActionButton,
@@ -425,9 +367,9 @@ export default {
     },
 
     resetLabelSelections() {
+      this.$refs.labelMenu.closeMenu();
       this.selectedEmailIds = [];
       this.selectedLabels = [];
-      this.isLabelMenuOpen = false;
       this.labelCheckboxSelected = [];
     },
 
@@ -519,16 +461,8 @@ export default {
 </script>
 
 <style scoped>
-.selectedIndicator {
-
-}
-
 .leftBorder {
   border-left: 2px solid var(--v-secondary-base) !important;
-}
-
-.borderTop {
-  border-top: 2px solid var(--v-info-darken4) !important;
 }
 
 .expansionPanel {
@@ -538,14 +472,6 @@ export default {
 .expansionPanel .v-expansion-panel-header {
   padding-top: 2px !important;
   padding-bottom: 2px !important;
-}
-
-.backgroundDark {
-  background-color: var(--v-accent-darken2) !important;
-}
-
-.v-menu__content {
-  overflow-y: hidden !important;
 }
 
 .toolbarBottomBorder {

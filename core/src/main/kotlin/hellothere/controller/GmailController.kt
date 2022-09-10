@@ -14,6 +14,7 @@ import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.view.RedirectView
@@ -77,6 +78,24 @@ class GmailController(
         return ResponseEntity.ok(emailThread)
     }
 
+    @GetMapping("/attachment")
+    fun getAndDownloadAttachment(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        @RequestParam attachmentId: String,
+        @RequestParam emailId: String
+    ): ResponseEntity<ByteArray> {
+        val (username, client) = getUsernameAndClientFromRequest(request, response)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+
+        val attachment = gmailService.getAttachment(client, username, attachmentId, emailId)
+
+        return ResponseEntity
+            .ok()
+            .contentType(MediaType.IMAGE_JPEG)
+            .body(attachment)
+    }
+
     @GetMapping("/emails")
     fun getEmails(
         request: HttpServletRequest,
@@ -99,11 +118,11 @@ class GmailController(
         )
     }
 
-    @PostMapping("/send")
+    @PostMapping("/send", consumes = ["multipart/form-data"])
     fun sendEmail(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        @RequestBody sendRequest: SendRequest
+        @ModelAttribute sendRequest: SendRequest
     ): ResponseEntity<EmailThreadDto> {
         val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
@@ -114,11 +133,11 @@ class GmailController(
         return ResponseEntity.ok(email)
     }
 
-    @PostMapping("/reply")
+    @PostMapping("/reply", consumes = ["multipart/form-data"])
     fun replyToEmail(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        @RequestBody replyRequest: ReplyRequest
+        @ModelAttribute replyRequest: ReplyRequest
     ): ResponseEntity<EmailDto> {
         val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()

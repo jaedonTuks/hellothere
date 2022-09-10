@@ -4,6 +4,7 @@ import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.Message
+import hellothere.dto.email.AttachmentDTO
 import hellothere.dto.email.EmailDto
 import hellothere.dto.email.EmailThreadDto
 import hellothere.dto.email.EmailsContainerDTO
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -207,8 +209,14 @@ class GmailService(
         return getThreadsBaseData(client, listOf(gmailId), username).firstOrNull()
     }
 
-    fun getEmailBaseData(client: Gmail, gmailId: String, username: String, isReply: Boolean = false): UserEmail? {
-        return getEmailBaseData(client, listOf(gmailId), username, isReply).firstOrNull()
+    fun getEmailFullData(client: Gmail, gmailId: String, username: String, isReply: Boolean = false): Message? {
+        val message = getMutableEmailsList(
+            listOf(gmailId),
+            EmailFormat.FULL,
+            client
+        )
+        saveNewEmailsFromGmail(message, username, isReply)
+        return message.firstOrNull()
     }
 
     private fun getMutableEmailsList(
@@ -410,10 +418,8 @@ class GmailService(
         // todo update correct message with the reply. Last non user message sent
         lastEmailInThread?.let { userStatsService.updateUserStats(username, StatCategory.REPLY, listOf(it)) }
 
-        val emailDto = buildEmailDtoFromMessage(username, client, sentMessage, isReply = true) ?: return null
-        emailDto.body = replyRequest.reply
 
-        return emailDto
+        return buildEmailDtoFromMessage(username, client, sentMessage, isReply = true) ?: null
     }
 
     private fun buildEmailDtoFromMessage(
@@ -422,7 +428,7 @@ class GmailService(
         sentMessage: Message,
         isReply: Boolean = false
     ): EmailDto? {
-        val sentEmailSummary = getEmailBaseData(client, sentMessage.id, username, isReply) ?: return null
+        val sentEmailSummary = getEmailFullData(client, sentMessage.id, username, isReply) ?: return null
         return buildEmailDto(sentEmailSummary)
     }
 
@@ -432,7 +438,8 @@ class GmailService(
             sendRequest.to,
             sendRequest.cc,
             sendRequest.subject,
-            sendRequest.body
+            sendRequest.body,
+            sendRequest.attachments ?: listOf()
         )
     }
 
@@ -462,6 +469,7 @@ class GmailService(
             cc,
             subject,
             replyRequest.reply,
+            replyRequest.attachments ?: listOf(),
             replyHeaders
         )
     }
@@ -472,6 +480,7 @@ class GmailService(
         cc: List<String>,
         subject: String,
         body: String,
+        attachments: List<MultipartFile>,
         additionalHeaders: Map<String, String> = mapOf()
     ): MimeMessage? {
         if (hasInvalidEmailAddresses(to + from + cc)) {
@@ -482,13 +491,17 @@ class GmailService(
         val session = Session.getDefaultInstance(props, null)
 
         val mimeMessage = MimeMessage(session)
-        val mimeMessageHelper = MimeMessageHelper(mimeMessage)
+        val mimeMessageHelper = MimeMessageHelper(mimeMessage, true)
 
         mimeMessageHelper.setFrom(from)
         mimeMessageHelper.setTo(to.toTypedArray())
         mimeMessageHelper.setCc(cc.toTypedArray())
         mimeMessageHelper.setSubject(subject)
         mimeMessageHelper.setText(body)
+
+        attachments.forEach {
+            mimeMessageHelper.addAttachment(it.originalFilename ?: "${it.name}", it)
+        }
 
         additionalHeaders.entries.forEach {
             mimeMessage.addHeader(it.key, it.value)
@@ -513,9 +526,10 @@ class GmailService(
         cc: List<String>,
         subject: String,
         body: String,
+        attachments: List<MultipartFile>,
         additionalHeaders: Map<String, String> = mapOf()
     ): Message? {
-        val mimeMessage = buildMimeMessage(from, to, cc, subject, body, additionalHeaders)
+        val mimeMessage = buildMimeMessage(from, to, cc, subject, body, attachments, additionalHeaders)
             ?: return null
         val base64String = conversionService.convertMimeMessageToBase64String(mimeMessage)
             ?: return null
@@ -589,7 +603,8 @@ class GmailService(
             )?.split(",") ?: listOf(),
             message.labelIds.contains("SENT"),
             LocalDateTime.ofEpochSecond(message.internalDate, 0, ZoneOffset.UTC),
-            getFullBodyFromMessage(message)
+            getFullBodyFromMessage(message),
+            getAttachmentNames(message)
         )
     }
 
@@ -620,6 +635,26 @@ class GmailService(
         } else {
             conversionService.getHtmlBody(fullBody)
         }
+    }
+
+    fun getAttachmentNames(message: Message): List<AttachmentDTO> {
+        return message.payload.parts
+            .filter { !it.filename.isNullOrBlank() }
+            .map { AttachmentDTO(it.body.attachmentId, it.filename) }
+    }
+
+    fun getAttachment(
+        client: Gmail,
+        username: String,
+        attachmentId: String,
+        emailId: String
+    ): ByteArray? {
+        val attachmentBody = client.users()
+            .messages()
+            .attachments()
+            .get(USER_SELF_ACCESS, emailId, attachmentId)
+            .execute()
+        return conversionService.convertBase64ToByteArray(attachmentBody.data)
     }
 
     companion object {

@@ -62,34 +62,68 @@
             </v-row>
           </v-col>
           <EmailHtml :email="email"/>
+          <v-col v-if="email.attachments.length > 0" cols="12">
+            <h3 style="font-weight: normal">Attachments</h3>
+            <v-chip-group>
+              <v-chip
+                v-for="attachment in email.attachments"
+                :key="attachment.fileName"
+                color="secondary"
+                @click="downloadAttachment(attachment, email.id)"
+              >
+                <v-icon class="mr-2" small>mdi-download</v-icon>
+                <h3 style="font-weight: normal">{{ attachment.fileName }}</h3>
+              </v-chip>
+            </v-chip-group>
+          </v-col>
         </v-row>
       </div>
     </v-container>
-    <v-textarea
-      v-if="!isNoReplyEmail(emailThread.emails[0])"
-      outlined
-      v-model="reply"
-      class="mt-5"
-      name="input-7-4"
-      label="Reply"
-      append-icon="mdi-send"
-      :loading="sendingReply"
-      :disabled="sendingReply || isNoReplyEmail(emailThread.emails[0])"
-      @click:append="sendReply"
-      @keyup.ctrl.enter="sendReply"
-    />
+    <v-col cols="9">
+      <v-file-input
+        v-model="attachments"
+        class="mb-0"
+        counter
+        multiple
+        show-size
+        small-chips
+        full-width
+        :hide-input="attachments.length < 1"
+        :rules="getFileValidationRules()"
+      />
+    </v-col>
+    <v-form v-model="valid" ref="form" lazy-validation>
+      <v-textarea
+        v-if="!isNoReplyEmail(emailThread.emails[0])"
+        outlined
+        persistent-placeholder
+        v-model="reply"
+        class="mt-5"
+        name="input-7-4"
+        label="Reply"
+        append-icon="mdi-send"
+        :loading="sendingReply"
+        :disabled="sendingReply || isNoReplyEmail(emailThread.emails[0])"
+        :rules="getEmailBodyRules()"
+        @click:append="sendReply"
+        @keyup.ctrl.enter="sendReply"
+      />
+    </v-form>
   </v-container>
 </template>
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {
+  mapActions, mapGetters, mapMutations, mapState,
+} from 'vuex';
 import LabelsList from '@/views/LabelsList.vue';
 import screenSizeMixin from '@/mixins/screenSizeMixin';
 import EmailHtml from '@/views/EmailHtml.vue';
+import validationMixin from '@/mixins/validationMixin';
 
 export default {
   name: 'employeeBodyContent',
   components: { EmailHtml, LabelsList },
-  mixins: [screenSizeMixin],
+  mixins: [screenSizeMixin, validationMixin],
 
   data() {
     return {
@@ -97,6 +131,8 @@ export default {
       sendingReply: false,
       ownUserName: '',
       reply: '',
+      valid: true,
+      attachments: [],
       fullEmail: {
         emails: [],
       },
@@ -120,20 +156,36 @@ export default {
   },
 
   methods: {
-    ...mapActions(['replyToEmail', 'fetchFullEmail']),
+    ...mapMutations(['setViewingEmail']),
+    ...mapActions(['replyToEmail', 'fetchFullEmail', 'fetchAndDownloadAttachment']),
+
+    downloadAttachment(attachment, emailId) {
+      this.fetchAndDownloadAttachment({ id: attachment.id, name: attachment.fileName, emailId });
+    },
 
     sendReply() {
-      this.sendingReply = true;
-      const payload = {
-        threadId: this.emailThread.id,
-        reply: this.reply,
-      };
+      if (this.$refs.form.validate()) {
+        this.sendingReply = true;
 
-      this.replyToEmail(payload)
-        .finally(() => {
-          this.sendingReply = false;
-          this.reply = '';
+        const formDataPayload = new FormData();
+        formDataPayload.append('threadId', this.emailThread.id);
+        formDataPayload.append('reply', this.reply);
+
+        this.attachments.forEach((attachment) => {
+          formDataPayload.append('attachments', attachment, attachment.name);
         });
+
+        this.replyToEmail(formDataPayload)
+          .then(() => {
+            this.fullEmail = this.getEmailThread(this.emailThread.id);
+            this.reply = '';
+            this.attachments = [];
+            this.$refs.form.resetValidation();
+          })
+          .finally(() => {
+            this.sendingReply = false;
+          });
+      }
     },
 
     isOwnEmail(email) {
@@ -171,6 +223,10 @@ export default {
       this.getFullEmailThread();
     }
   },
+
+  beforeDestroy() {
+    this.setViewingEmail({});
+  },
 };
 </script>
 
@@ -204,6 +260,6 @@ html {
 }
 
 .testIframeClass {
-  color: green!important;
+  color: green !important;
 }
 </style>

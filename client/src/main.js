@@ -6,6 +6,7 @@ import router from './router';
 import store from './store';
 import vuetify from './plugins/vuetify';
 import './assets/styles/border.css';
+import './assets/styles/text.scss';
 import Messaging from './firebase';
 
 Vue.use(VueApexCharts);

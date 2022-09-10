@@ -13,7 +13,8 @@ data class EmailDto(
     val cc: List<String>,
     val displayTo: Boolean,
     val date: LocalDateTime,
-    var body: String? = null
+    var body: String? = null,
+    var attachments: List<AttachmentDTO> = listOf()
 ) {
     @JsonProperty("formattedDate")
     fun getFormattedDate(): String {

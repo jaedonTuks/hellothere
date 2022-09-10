@@ -6,7 +6,7 @@ const getters = {
 
   getLabels: (state) => () => state.labels,
 
-  getLabelById: (state) => (labelId) => state.labels.find((label)=>label.name === labelId),
+  getLabelById: (state) => (labelId) => state.labels.find((label)=>label.id === labelId),
 
   getLabelByName: (state) => (labelName) => state.labels.find((label) => label.name.toLowerCase() === labelName),
 

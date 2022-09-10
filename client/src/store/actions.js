@@ -1,5 +1,6 @@
 import axios from 'axios';
 import ErrorResponseUtil from '@/utils/ErrorResponseUtil';
+import fileDownload from 'js-file-download';
 
 const actions = {
   isLoggedIn: ({ commit }) => axios.get('/api/user/isLoggedIn').then(
@@ -100,7 +101,7 @@ const actions = {
       console.error(e);
     }),
 
-  sendEmail: ({ commit }, payload) => axios.post('/api/gmail/send', payload)
+  sendEmail: ({ commit }, payload) => axios.post('/api/gmail/send', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
     .then((response) => {
       commit('updateEmailThreadsById', response.data);
       commit('prependToCurrentThreadIds', response.data.id);
@@ -113,7 +114,7 @@ const actions = {
 
   replyToEmail: ({ commit }, payload) => axios.post('/api/gmail/reply', payload)
     .then((response) => {
-      commit('updateEmailThreadsByIdAddEmail', { threadId: payload.threadId, newEmail: response.data });
+      commit('updateEmailThreadsByIdAddEmail', response.data);
     })
     .catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
@@ -189,6 +190,15 @@ const actions = {
       console.error(e);
     }),
 
+  // eslint-disable-next-line no-empty-pattern
+  fetchAndDownloadAttachment: ({}, params) => axios.request({
+    url: `/api/gmail/attachment?attachmentId=${params.id}&emailId=${params.emailId}`,
+    method: 'GET',
+    responseType: 'blob',
+  })
+    .then((response) => {
+      fileDownload(response.data, params.name);
+    }),
 };
 
 export default actions;
