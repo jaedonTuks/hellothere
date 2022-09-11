@@ -31,9 +31,28 @@
         <h3 class="mb-5">Goal: {{ challenge.goal }}</h3>
       </v-row>
       <div class="mb-5 pl-4">{{ challenge.description }}</div>
-      <h3 class="mb-3"> Rewards: </h3>
-      <h4 class="titleReward normalWeight pl-4 mb-2">Title: {{ challenge.title }}</h4>
-      <h4 class="normalWeight pl-4">{{ challenge.reward }} <span class="xp"> XP</span></h4>
+      <v-row class="pa-4 pb-1"><h3 class="mb-3"> Rewards: </h3></v-row>
+
+      <v-row>
+        <v-col cols="6">
+          <h4 class="titleReward normalWeight pl-4 mb-2">Title: {{ challenge.title }}</h4>
+          <h4 class="normalWeight pl-4"><span class="xp"> XP: </span>{{ challenge.reward }} </h4>
+        </v-col>
+        <v-col cols="6">
+          <div v-if="challenge.color">
+            <h4 class="titleReward normalWeight mb-3">
+              Label Color:
+            </h4>
+            <div
+              class="pl-4 rounded colorReward"
+              :style="{
+              backgroundColor: challenge.color
+            }"
+            />
+          </div>
+        </v-col>
+      </v-row>
+
     </v-card-text>
     <v-card-actions>
       <v-btn
@@ -53,6 +72,7 @@
 import calculationsMixin from '@/mixins/calculationsMixin';
 import { mapActions, mapGetters } from 'vuex';
 import party from 'party-js';
+import EventBus from '@/EventBus';
 
 export default {
   name: 'ChallengeCard',
@@ -88,6 +108,7 @@ export default {
           party.confetti(event, {
             count: party.variation.range(20, 40),
           });
+          EventBus.$emit('updated-profile-titles');
         }).finally(() => {
           this.claimingReward = false;
         });
@@ -110,10 +131,15 @@ export default {
 }
 
 .claimed .progress {
-  opacity: 1!important;
+  opacity: 1 !important;
 }
 
 div {
   font-size: 1.05em;
+}
+
+.colorReward {
+  width: 40px;
+  height: 40px;
 }
 </style>

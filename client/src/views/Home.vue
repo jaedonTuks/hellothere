@@ -184,8 +184,7 @@ import SendActionButton from '@/components/SendActionButton.vue';
 import EmailHeader from '@/views/EmailHeader.vue';
 import ComposeEmailDialog from '@/components/ComposeEmailDialog.vue';
 import NoEmailsCard from '@/components/NoEmailsCard.vue';
-// eslint-disable-next-line import/no-cycle
-import { EventBus } from '@/main';
+import EventBus from '@/EventBus';
 import LabelMenu from '@/views/LabelMenu.vue';
 
 export default {
@@ -240,6 +239,9 @@ export default {
     },
 
     manageableLabels() {
+      if (!this.labels) {
+        return [];
+      }
       return this.labels.filter((label) => label.isManageable);
     },
 

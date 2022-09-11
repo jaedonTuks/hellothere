@@ -7,25 +7,8 @@ alter table challenge
 alter table challenge
     add column level VARCHAR(127);
 
-UPDATE challenge
-SET name          = 'Rookie Labeler',
-    description   = 'Label 10 emails and climb the leaderboards!',
-    stat_category = 'LABEL',
-    goal          = 10,
-    reward        = 20,
-    title         = 'Rookie Labeler',
-    level         = 'Rookie'
-WHERE id = 2;
-
-UPDATE challenge
-SET name          = 'Rookie Reply',
-    description   = 'Reply to your emails and gain more XP!',
-    stat_category = 'REPLY',
-    goal          = 10,
-    reward        = 20,
-    title         = 'Beginner Reply',
-    level         = 'Rookie'
-WHERE id = 3;
+alter table challenge
+    add column color VARCHAR(7);
 
 UPDATE challenge
 SET name          = 'Rookie Reader',
@@ -34,5 +17,27 @@ SET name          = 'Rookie Reader',
     goal          = 10,
     reward        = 20,
     title         = 'Rookie Reader',
-    level         = 'Rookie'
+    level         = 'Rookie',
+    color         = '#0ACD8F'
 WHERE id = 1;
+UPDATE challenge
+SET name          = 'Rookie Reply',
+    description   = 'Reply to your emails and gain more XP!',
+    stat_category = 'REPLY',
+    goal          = 10,
+    reward        = 20,
+    title         = 'Beginner Reply',
+    level         = 'Rookie',
+    color         = '#E2A224'
+WHERE id = 3;
+UPDATE challenge
+SET name          = 'Rookie Labeler',
+    description   = 'Label 10 emails and climb the leaderboards!',
+    stat_category = 'LABEL',
+    goal          = 10,
+    reward        = 20,
+    title         = 'Rookie Labeler',
+    level         = 'Rookie',
+    color         = '#0A86E5'
+WHERE id = 2;
+

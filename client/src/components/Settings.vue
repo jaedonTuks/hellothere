@@ -8,7 +8,8 @@
         <v-col
           v-for="(label, index) in labels"
           class="ma-2 pa-3"
-          cols="2"
+          cols="12"
+          lg="2"
           :key="`label-${index}`"
         >
           <v-card
@@ -27,29 +28,23 @@
                 color="secondary"
                 @change="updateViewable(label)"
               />
-              <v-expansion-panels>
-                <v-expansion-panel>
-                  <v-expansion-panel-header>Manage Color</v-expansion-panel-header>
-                  <v-expansion-panel-content>
-                    <v-color-picker
-                      v-model="colors[index]"
-                      hide-mode-switch
-                      hide-inputs
-                      hide-canvas
-                      mode="hexa"
-                    />
-                    <v-btn
-                      width="100%"
-                      class="mt-2"
-                      color="secondary"
-                      :loading="loading[index]"
-                      @click="updateColor(index)"
-                    >
-                      Save Label Color
-                    </v-btn>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
+
+              <v-swatches
+                v-model="colors[index]"
+                ou
+                :disabled="labelAvailableColors.length < 2"
+                :swatches="labelAvailableColors"
+              />
+              <v-btn
+                width="100%"
+                class="mt-2"
+                color="secondary"
+                :disabled="colors[index] == label.color"
+                :loading="loading[index]"
+                @click="updateColor(index)"
+              >
+                Save Label Color
+              </v-btn>
             </v-card-text>
           </v-card>
         </v-col>
@@ -61,21 +56,24 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import VSwatches from 'vue-swatches';
 
 export default {
   name: 'ChallengesOverview',
-
+  components: { VSwatches },
   data() {
     return {
       loadingLabels: true,
       labels: [],
       colors: [],
       loading: [],
+      availableColors: [],
     };
   },
 
   computed: {
+    ...mapState(['labelAvailableColors']),
     ...mapGetters(['getLabels']),
   },
 
@@ -98,7 +96,7 @@ export default {
         label.color = color;
         const payload = {
           labelId: label.id,
-          color: label.color.slice(0, -2),
+          color: label.color,
         };
         this.updateLabelColor(payload);
       }

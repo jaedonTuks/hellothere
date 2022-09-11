@@ -98,6 +98,16 @@ class ChallengeService(
     }
 
     @Transactional
+    fun getUnlockedColors(username: String): List<String> {
+        val completedChallenges = userChallengeRepository.findAllByIdAppUserAndIsRewardClaimedTrue(username)
+        val colors = completedChallenges.mapNotNull { it.challenge?.color }.toMutableSet()
+
+        colors.add("#FFF")
+
+        return colors.toList()
+    }
+
+    @Transactional
     fun getUserChallengesDTO(username: String): List<UserChallengeDTO> {
         val userChallenges = userChallengeRepository.findAllByIdAppUserOrderByChallengeId(username)
         return userChallenges.mapNotNull {
@@ -111,6 +121,7 @@ class ChallengeService(
                 challenge.id,
                 challenge.name,
                 challenge.title,
+                challenge.color,
                 challenge.goal,
                 userChallenge.currentProgress,
                 challenge.reward,

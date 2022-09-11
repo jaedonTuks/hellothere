@@ -9,12 +9,12 @@
           <v-col cols="auto">
             <h2 class="mt-4 mt-lg-1">Title:</h2>
           </v-col>
-          <v-col cols="2">
+          <v-col cols="8" lg="2">
             <v-select
               v-model="title"
               label=""
-              :disabled="profileInfo.availableTitles.length < 2"
-              :items="profileInfo.availableTitles"
+              :disabled="availableTitles.length < 2"
+              :items="availableTitles"
               @change="updateTitle"
             />
           </v-col>
@@ -114,6 +114,7 @@ import ScreenSizeMixin from '@/mixins/screenSizeMixin';
 import calculationsMixin from '@/mixins/calculationsMixin';
 import Settings from '@/components/Settings.vue';
 import featureFlags from '@/mixins/featureFlags';
+import EventBus from '@/EventBus';
 
 export default {
   name: 'Profile',
@@ -124,6 +125,7 @@ export default {
     return {
       title: null,
       profileInfo: null,
+      availableTitles: [],
       editingUsername: false,
       newUserName: '',
       selectedProfileViewIndex: 0,
@@ -223,9 +225,20 @@ export default {
   created() {
     this.fetchUserInfo().then(() => {
       this.profileInfo = this.getProfile();
+      this.availableTitles = this.profileInfo.availableTitles;
       this.title = this.profileInfo.title;
       this.newUserName = this.profileInfo.leaderboardUsername;
     });
+
+    EventBus.$on('updated-profile-titles', () => {
+      console.log('updating profile');
+      this.profileInfo = this.getProfile();
+      this.availableTitles = this.profileInfo.availableTitles;
+    });
+  },
+
+  beforeDestroy() {
+    EventBus.$off('updated-profile-titles');
   },
 };
 </script>
