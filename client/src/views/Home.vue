@@ -265,11 +265,6 @@ export default {
     ...mapActions(['fetchUserInfo', 'fetchEmails', 'fetchLabels', 'searchEmails', 'updateLabels']),
     ...mapMutations(['setViewingEmail']),
 
-    // general methods
-    updateEmails() {
-      this.emailThreads = this.getEmailThreads().sort((a, b) => b.instantSent - a.instantSent);
-    },
-
     navigateToEmail(emailThread) {
       this.setViewingEmail(emailThread);
       this.$router.push({ name: 'Email' });
@@ -425,8 +420,10 @@ export default {
         this.searchWithPayload(payload);
       } else {
         this.fetchEmails(this.nextPageToken)
-          .finally(() => {
+          .then(() => {
             this.emailThreads = this.getEmailThreads();
+          })
+          .finally(() => {
             this.isFetchingMoreEmails = false;
           });
       }
@@ -452,7 +449,12 @@ export default {
     }
 
     EventBus.$on('newEmail', () => {
-      this.updateEmails();
+      this.fetchEmails(null)
+        .finally(() => {
+          this.emailThreads = this.getEmailThreads()
+            .sort((a, b) => b.instantSent - a.instantSent);
+          this.isFetchingMoreEmails = false;
+        });
     });
   },
 
@@ -483,7 +485,8 @@ export default {
   color: red !important;
   display: block !important;
 }
+
 .v-slide-group__prev v-slide-group__prev--disabled {
-  display: none!important;
+  display: none !important;
 }
 </style>
