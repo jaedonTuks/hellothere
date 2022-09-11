@@ -28,9 +28,9 @@ import SnackBar from '@/SnackBar.vue';
 import { mapActions, mapMutations, mapState } from 'vuex';
 import screenSizeMixin from '@/mixins/screenSizeMixin';
 
-// eslint-disable-next-line no-unused-vars
-import { getAuth, signInAnonymously, signInWithEmailAndPassword } from 'firebase/auth';
-import { getToken } from 'firebase/messaging';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getToken, onMessage } from 'firebase/messaging';
+import EventBus from '@/EventBus';
 
 export default {
   name: 'App',
@@ -122,8 +122,18 @@ export default {
     document.title = 'Hello There!';
 
     if (this.isLoggedIn) {
-      this.signIntoFirebase();
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          this.signIntoFirebase();
+        }
+      });
     }
+  },
+
+  mounted() {
+    onMessage(this.$messaging, () => {
+      EventBus.$emit('newEmail');
+    });
   },
 };
 </script>

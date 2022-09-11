@@ -184,8 +184,7 @@ import SendActionButton from '@/components/SendActionButton.vue';
 import EmailHeader from '@/views/EmailHeader.vue';
 import ComposeEmailDialog from '@/components/ComposeEmailDialog.vue';
 import NoEmailsCard from '@/components/NoEmailsCard.vue';
-// eslint-disable-next-line import/no-cycle
-import { EventBus } from '@/main';
+import EventBus from '@/EventBus';
 import LabelMenu from '@/views/LabelMenu.vue';
 
 export default {
@@ -240,6 +239,9 @@ export default {
     },
 
     manageableLabels() {
+      if (!this.labels) {
+        return [];
+      }
       return this.labels.filter((label) => label.isManageable);
     },
 
@@ -262,11 +264,6 @@ export default {
   methods: {
     ...mapActions(['fetchUserInfo', 'fetchEmails', 'fetchLabels', 'searchEmails', 'updateLabels']),
     ...mapMutations(['setViewingEmail']),
-
-    // general methods
-    updateEmails() {
-      this.emailThreads = this.getEmailThreads().sort((a, b) => b.instantSent - a.instantSent);
-    },
 
     navigateToEmail(emailThread) {
       this.setViewingEmail(emailThread);
@@ -423,8 +420,10 @@ export default {
         this.searchWithPayload(payload);
       } else {
         this.fetchEmails(this.nextPageToken)
-          .finally(() => {
+          .then(() => {
             this.emailThreads = this.getEmailThreads();
+          })
+          .finally(() => {
             this.isFetchingMoreEmails = false;
           });
       }
@@ -450,7 +449,12 @@ export default {
     }
 
     EventBus.$on('newEmail', () => {
-      this.updateEmails();
+      this.fetchEmails(null)
+        .finally(() => {
+          this.emailThreads = this.getEmailThreads()
+            .sort((a, b) => b.instantSent - a.instantSent);
+          this.isFetchingMoreEmails = false;
+        });
     });
   },
 
@@ -481,7 +485,8 @@ export default {
   color: red !important;
   display: block !important;
 }
+
 .v-slide-group__prev v-slide-group__prev--disabled {
-  display: none!important;
+  display: none !important;
 }
 </style>

@@ -1,6 +1,7 @@
 package hellothere.controller
 
 import hellothere.config.RestUrl.LABEL
+import hellothere.dto.label.LabelContainerDTO
 import hellothere.dto.label.LabelDto
 import hellothere.dto.label.LabelUpdateDto
 import hellothere.requests.label.UpdateEmailLabelsRequest
@@ -30,7 +31,7 @@ class LabelController(
     fun getLabels(
         request: HttpServletRequest,
         response: HttpServletResponse
-    ): ResponseEntity<List<LabelDto>> {
+    ): ResponseEntity<LabelContainerDTO> {
         val (username, client) = getUsernameAndClientFromRequest(request, response)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 

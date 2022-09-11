@@ -15,6 +15,7 @@ export function getDefaultState() {
       currentWeekStats: null,
     },
     labels: [],
+    labelAvailableColors: [],
     emailsById: {},
     threadsById: {},
     viewingEmail: {},

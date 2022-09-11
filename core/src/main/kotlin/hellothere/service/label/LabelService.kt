@@ -3,6 +3,7 @@ package hellothere.service.label
 import com.google.api.services.gmail.Gmail
 import com.google.api.services.gmail.model.BatchModifyMessagesRequest
 import com.google.api.services.gmail.model.Label
+import hellothere.dto.label.LabelContainerDTO
 import hellothere.dto.label.LabelDto
 import hellothere.dto.label.LabelUpdateDto
 import hellothere.model.email.UserEmail
@@ -18,6 +19,7 @@ import hellothere.requests.label.UpdateEmailLabelsRequest
 import hellothere.requests.label.UpdateLabelColorRequest
 import hellothere.requests.label.UpdateLabelViewableRequest
 import hellothere.service.FeatureService
+import hellothere.service.challenge.ChallengeService
 import hellothere.service.google.BatchCallbacks.LabelBatchCallback
 import hellothere.service.google.GmailService.Companion.USER_SELF_ACCESS
 import hellothere.service.user.UserStatsService
@@ -32,7 +34,8 @@ class LabelService(
     private val userLabelRepository: UserLabelRepository,
     private val userEmailRepository: UserEmailRepository,
     private val userStatsService: UserStatsService,
-    private val featureService: FeatureService
+    private val featureService: FeatureService,
+    private val challengeService: ChallengeService
 ) {
 
     @Transactional
@@ -41,7 +44,7 @@ class LabelService(
     }
 
     @Transactional
-    fun getLabels(client: Gmail, username: String): List<LabelDto> {
+    fun getLabels(client: Gmail, username: String): LabelContainerDTO {
         val labelIds = getLabelIds(client, username)
 
         val cachedLabels = getCachedLabels(labelIds, username)
@@ -51,9 +54,15 @@ class LabelService(
         }
 
         val newLabels = fetchAndCacheLabels(labelIdsToFetch, client, username)
-        return (newLabels + cachedLabels).sortedBy { it.name }.filter { !it.name.contains("CATEGORY_") }.map {
+
+        val labels = (newLabels + cachedLabels).sortedBy { it.name }.filter { !it.name.contains("CATEGORY_") }.map {
             buildLabelDto(it)
         }
+        val colors = challengeService.getUnlockedColors(username)
+        return LabelContainerDTO(
+            labels,
+            colors
+        )
     }
 
     private fun fetchAndCacheLabels(labelIds: List<String>, client: Gmail, username: String): List<UserLabel> {
@@ -84,7 +93,7 @@ class LabelService(
             UserLabel(
                 UserLabelId(it.id, user.id),
                 it.name.replace("CATEGORY_", ""),
-                it.color?.backgroundColor ?: "#FFF",
+                "#FFF",
                 it.threadsUnread,
                 isManageableId(it.id),
                 true,
@@ -208,6 +217,13 @@ class LabelService(
         updateLabelRequest: UpdateLabelColorRequest
     ): LabelDto? {
         if (featureService.isDisabled(FF4jFeature.CUSTOMISATION)) {
+            return null
+        }
+
+        val availableColors = challengeService.getUnlockedColors(username)
+
+        if (!availableColors.contains(updateLabelRequest.color)) {
+            LOGGER.warn("Unable to update label ${updateLabelRequest.labelId} with color: ${updateLabelRequest.color} for user $username, color not yet unlocked.")
             return null
         }
 

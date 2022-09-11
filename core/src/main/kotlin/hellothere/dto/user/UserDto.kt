@@ -1,8 +1,6 @@
 package hellothere.dto.user
 
 import hellothere.dto.stats.MessageTotalsSummaryDTO
-import hellothere.model.stats.WeekStats
-import hellothere.model.user.Rank
 
 // todo add badge names
 // rank should change to a number placement string. With special consideration
@@ -11,6 +9,8 @@ import hellothere.model.user.Rank
 data class UserDto(
     val email: String,
     val leaderboardUsername: String,
+    val title: String,
+    val availableTitles: List<String>,
     val rank: Long,
     val currentWeekStats: WeekStatsDto?,
     val orderedWeekStats: List<WeekStatsDto> = listOf(),

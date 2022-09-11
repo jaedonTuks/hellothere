@@ -51,7 +51,8 @@ const actions = {
 
   fetchLabels: ({ commit }) => axios.get('/api/label')
     .then((response) => {
-      commit('setLabels', response.data);
+      commit('setLabels', response.data.labels);
+      commit('setLabelAvailableColors', response.data.colors);
     })
     .catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
@@ -147,6 +148,8 @@ const actions = {
     .then((response) => {
       commit('setUserChallengesById', response.data);
       commit('updateUserProfileXP', response.data);
+      commit('addColorToAvailableColors', response.data.color);
+      commit('addTitleToAvailableTitles', response.data.title);
     })
     .catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
@@ -161,9 +164,9 @@ const actions = {
       console.error(e);
     }),
 
-  sendUpdateUsernameRequest: ({ commit }, payload) => axios.post('/api/user/edit-username', payload)
+  sendUpdateTitleRequest: ({ commit }, payload) => axios.post('/api/user/update-title', payload)
     .then((response) => {
-      commit('setProfileLeaderboardUsername', response.data);
+      commit('setProfileTitle', response.data);
     }).catch((e) => {
       const newLoggedIn = ErrorResponseUtil.loggedInNewState(e);
       commit('setIsLoggedIn', newLoggedIn);

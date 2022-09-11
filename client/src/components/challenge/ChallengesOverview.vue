@@ -5,7 +5,8 @@
         <v-col
           v-for="(challenge, index) in challenges"
           :key="index"
-          cols="4"
+          cols="12"
+          lg="4"
         >
           <ChallengeCard
             :challenge-id="challenge.challengeId"

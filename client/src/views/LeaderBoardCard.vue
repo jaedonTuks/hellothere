@@ -8,7 +8,7 @@
     cols="12"
     lg="4"
   >
-    <v-card color="accent" :height="isFirstPlace? 300 : 250">
+    <v-card color="accent" :height="isFirstPlace? 320 : 270">
       <v-card-title
         :class="{
           'firstPlaceTitle': isFirstPlace,

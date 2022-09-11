@@ -9,11 +9,9 @@ class BackgroundTasks(
     private val notificationService: NotificationService
 ) {
 
-    @Scheduled(cron = "0 0/15 9-17 * * *")
+    @Scheduled(cron = "0 */15 7-18 * * *")
     fun checkForNewEmails() {
-        // todo implement to send notification
         notificationService.checkForNewEmails()
-
     }
 
     companion object {

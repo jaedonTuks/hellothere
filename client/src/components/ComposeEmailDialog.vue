@@ -164,7 +164,7 @@
 import {
   mapActions, mapGetters, mapMutations, mapState,
 } from 'vuex';
-import { EventBus } from '@/main';
+import EventBus from '@/EventBus';
 
 import LabelMenu from '@/views/LabelMenu.vue';
 import LabelsList from '@/views/LabelsList.vue';

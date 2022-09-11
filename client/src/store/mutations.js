@@ -39,6 +39,16 @@ const mutations = {
     state.labels = labels;
   },
 
+  setLabelAvailableColors: (state, colors) => {
+    state.labelAvailableColors = colors;
+  },
+
+  addColorToAvailableColors: (state, color) => {
+    if (color) {
+      state.labelAvailableColors.push(color);
+    }
+  },
+
   updateLabel: (state, label) => {
     const labelIndex = state.labels.findIndex((stateLabel) => stateLabel.id === label.id);
     if (labelIndex !== -1) {
@@ -98,8 +108,14 @@ const mutations = {
     state.currentThreadIds.unshift(newId);
   },
 
-  setProfileLeaderboardUsername: (state, newName) => {
-    state.profile.leaderboardUsername = newName;
+  setProfileTitle: (state, newTitle) => {
+    state.userProfile.title = newTitle;
+  },
+
+  addTitleToAvailableTitles: (state, newTitle) => {
+    if (newTitle && state.userProfile && state.userProfile.availableTitles) {
+      state.userProfile.availableTitles.push(newTitle);
+    }
   },
 
   resetToDefault: (state) => {
@@ -114,8 +130,6 @@ const mutations = {
     const index = state.challenges.findIndex(
       (storedChallenge) => storedChallenge.challengeId === challenge.challengeId,
     );
-    console.log(index);
-    console.log(state.challenges[index]);
     state.challenges.splice(index, 1, challenge);
   },
 };

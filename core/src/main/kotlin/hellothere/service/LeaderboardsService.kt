@@ -55,6 +55,7 @@ class LeaderboardsService(
         return weekStats.user?.leaderboardUsername?.let {
             UserLeaderBoardGeneralDTO(
                 rank,
+                weekStats.user!!.title,
                 it,
                 weekStats.getTotalExperience()
             )
@@ -70,12 +71,14 @@ class LeaderboardsService(
 
             return UserLeaderBoardDTO(
                 "Unclaimed",
+                "",
                 0
             )
         }
 
         return UserLeaderBoardDTO(
             user.leaderboardUsername,
+            user.title,
             user.getCurrentWeeksStats()!!.getTotalExperience()
         )
     }

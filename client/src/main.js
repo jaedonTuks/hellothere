@@ -7,6 +7,7 @@ import store from './store';
 import vuetify from './plugins/vuetify';
 import './assets/styles/border.css';
 import './assets/styles/text.scss';
+import 'vue-swatches/dist/vue-swatches.css';
 import Messaging from './firebase';
 
 Vue.use(VueApexCharts);
@@ -15,9 +16,6 @@ Vue.component('apexchart', VueApexCharts);
 
 Vue.config.productionTip = false;
 Vue.prototype.$messaging = Messaging;
-
-// eslint-disable-next-line import/prefer-default-export
-export const EventBus = new Vue();
 
 new Vue({
   router,

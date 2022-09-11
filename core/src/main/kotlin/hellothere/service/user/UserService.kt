@@ -8,7 +8,7 @@ import hellothere.model.user.User
 import hellothere.model.user.UserAccessToken
 import hellothere.repository.user.UserAccessTokenRepository
 import hellothere.repository.user.UserRepository
-import hellothere.requests.user.UpdateUsernameRequest
+import hellothere.requests.user.UpdateTitleRequest
 import hellothere.service.FeatureService
 import hellothere.service.LeaderboardsService
 import hellothere.service.challenge.ChallengeService
@@ -48,6 +48,8 @@ class UserService(
             UserDto(
                 it.id,
                 it.leaderboardUsername,
+                it.title,
+                challengeService.getCompletedChallengesTitleNames(it),
                 leaderboardsService.getCurrentPlaceOnLeaderboards(currentWeekStats?.getTotalExperience() ?: 0),
                 if (isStatsEnabled) {
                     userStatsService.buildWeekStatsDto(currentWeekStats)
@@ -77,6 +79,7 @@ class UserService(
         val newUser = User(
             newUserId,
             newUserId,
+            "Noob",
             null
         )
         userRepository.save(newUser)
@@ -106,17 +109,24 @@ class UserService(
             .execute()
     }
 
-    fun updateLeaderboardUsername(username: String, updateUsernameRequest: UpdateUsernameRequest): User? {
+    @Transactional
+    fun updateUserTitle(username: String, updateTitleRequest: UpdateTitleRequest): User? {
         val user = getUserById(username)
-        val usersWithLeaderboardUsernameCount =
-            userRepository.countByLeaderboardUsername(updateUsernameRequest.newUsername)
 
-        if (user == null || usersWithLeaderboardUsernameCount != 0) {
-            LOGGER.info("Can't update leaderboard name for user: $username, user = $user and count = $usersWithLeaderboardUsernameCount")
+        if (user == null) {
+            LOGGER.info("Can't update user title for $username, newTitle = ${updateTitleRequest.newTitle}. No user found")
             return null
         }
 
-        user.leaderboardUsername = updateUsernameRequest.newUsername
+        val availableTitles = challengeService.getCompletedChallengesTitleNames(user)
+        val validTitle = availableTitles.contains(updateTitleRequest.newTitle)
+
+        if (!validTitle) {
+            LOGGER.info("Can't update user title for $username, newTitle = ${updateTitleRequest.newTitle}. Title not unlocked")
+            return null
+        }
+
+        user.title = updateTitleRequest.newTitle
         return userRepository.save(user)
     }
 

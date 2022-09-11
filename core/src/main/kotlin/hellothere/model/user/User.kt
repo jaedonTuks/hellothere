@@ -17,6 +17,9 @@ class User(
     @Column(name = "leaderboard_username")
     var leaderboardUsername: String,
 
+    @Column(name = "title")
+    var title: String,
+
     @Column(name = "firebase_token")
     var firebaseToken: String?,
 

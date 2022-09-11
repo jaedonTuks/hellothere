@@ -13,6 +13,15 @@ class Challenge(
     @Column(name = "name")
     val name: String,
 
+    @Column(name = "title")
+    val title: String,
+
+    @Column(name = "level")
+    val level: String,
+
+    @Column(name = "color")
+    val color: String?,
+
     @Enumerated(EnumType.STRING)
     @Column(name = "stat_category")
     val statCategory: StatCategory,
@@ -23,7 +32,6 @@ class Challenge(
     @Column(name = "goal")
     val goal: Int,
 
-    // todo expand to badges as well
     @Column(name = "reward")
-    val reward: Int,
+    val reward: Int
 )
