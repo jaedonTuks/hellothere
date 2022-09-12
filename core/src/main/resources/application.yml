@@ -60,3 +60,5 @@ firebase:
     config: 'firebaseconfig/config.json'
     key: ${HELLOTHERE_FIREBASE_VK}
     pass: ${HELLOTHERE_FIREBASE_PASS}
+
+url: "http://localhost:8080"

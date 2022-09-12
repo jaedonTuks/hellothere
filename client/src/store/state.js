@@ -2,7 +2,7 @@ export function getDefaultState() {
   return {
     composingEmail: false,
     displaySnackBar: false,
-    isLoggedIn: true,
+    isLoggedIn: false,
     loading: false,
     areFeatureFlagsLoaded: false,
     isGamificationEnabled: false,

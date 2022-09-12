@@ -1,14 +1,12 @@
 package hellothere.config.security
 
-import hellothere.config.RestUrl.USER
-import hellothere.service.security.JwtTokenFilter
 import hellothere.service.security.JwtTokenService
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.config.http.SessionCreationPolicy
 
 @Configuration
 @EnableWebSecurity
@@ -21,11 +19,14 @@ class SecurityConfig(
         http
             .authorizeRequests()
             .antMatchers("/api/**").permitAll()
-            .antMatchers("$USER/**")
-            .authenticated()
+            .antMatchers("/**").permitAll()
 
         http
             .csrf()
             .disable()
+
+        http
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
 }

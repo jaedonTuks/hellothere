@@ -9,7 +9,7 @@ class BackgroundTasks(
     private val notificationService: NotificationService
 ) {
 
-    @Scheduled(cron = "0 */15 7-18 * * *")
+    @Scheduled(cron = "0 */15 7-18 * * *", zone = "UTC")
     fun checkForNewEmails() {
         notificationService.checkForNewEmails()
     }

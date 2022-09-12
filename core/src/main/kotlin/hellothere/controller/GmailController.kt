@@ -10,9 +10,9 @@ import hellothere.service.google.GmailService
 import hellothere.service.google.GoogleAuthenticationService
 import hellothere.service.security.SecurityService
 import hellothere.service.user.UserService
-import liquibase.pro.packaged.it
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -29,11 +29,15 @@ class GmailController(
     private val userService: UserService,
     private val securityService: SecurityService
 ) : BaseController(gmailService, securityService) {
+
+    @Value("\${url}")
+    lateinit var currentUrl: String
+
     @GetMapping("/logout")
     fun logout(httpServletResponse: HttpServletResponse) {
         securityService.logout(httpServletResponse)
         httpServletResponse.status = HttpServletResponse.SC_FOUND
-        httpServletResponse.setHeader("Location", "http://localhost:8080/login")
+        httpServletResponse.setHeader("Location", "$currentUrl/#/login")
     }
 
     @GetMapping("/login")
@@ -54,13 +58,13 @@ class GmailController(
                 userService.saveUserAccessToken(userAccessToken, user)
             }
 
-            httpServletResponse.setHeader("Location", "http://localhost:8080/profile")
+            httpServletResponse.setHeader("Location", "$currentUrl")
             httpServletResponse.status = HttpServletResponse.SC_FOUND
         } catch (e: Exception) {
             LOGGER.error("An Error occurred with message: ${e.message}")
             LOGGER.debug(e.stackTraceToString())
             httpServletResponse.status = HttpServletResponse.SC_FOUND
-            httpServletResponse.setHeader("Location", "http://localhost:8080/login?error=true")
+            httpServletResponse.setHeader("Location", "$currentUrl/#/login?error=true")
         }
     }
 

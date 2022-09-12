@@ -20,7 +20,7 @@ class GoogleAuthenticationService(
     @Value("\${gmail.client.clientId}") private val clientId: String,
     @Value("\${gmail.client.clientSecret}") private val clientSecret: String,
     @Value("\${gmail.client.redirectUrl}") private val redirectUrl: String,
-    private val userAccessTokenRepository: UserAccessTokenRepository,
+    private val userAccessTokenRepository: UserAccessTokenRepository
 ) {
     final val httpTransport: NetHttpTransport = GoogleNetHttpTransport.newTrustedTransport()
     final val jsonFactory = GsonFactory()
@@ -33,13 +33,13 @@ class GoogleAuthenticationService(
 
         val clientSecret = GoogleClientSecrets().setWeb(web)
 
-        // todo use a credential store?
         googleAuthCodeFlow = GoogleAuthorizationCodeFlow.Builder(
             httpTransport,
             jsonFactory,
             clientSecret,
             listOf(GmailScopes.GMAIL_READONLY, GmailScopes.GMAIL_SEND, GmailScopes.GMAIL_MODIFY)
         ).setAccessType("offline")
+            .setApprovalPrompt("force")
             .build()
     }
 
@@ -72,7 +72,6 @@ class GoogleAuthenticationService(
             credential.accessToken == null ||
             credential.expiresInSeconds != null &&
             credential.expiresInSeconds < 60L
-
         ) {
             if (!refreshCredential(credential, username)) {
                 return null

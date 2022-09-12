@@ -3,7 +3,7 @@ import ErrorResponseUtil from '@/utils/ErrorResponseUtil';
 import fileDownload from 'js-file-download';
 
 const actions = {
-  isLoggedIn: ({ commit }) => axios.get('/api/user/isLoggedIn').then(
+  verifyLoggedIn: ({ commit }) => axios.get('/api/user/isLoggedIn').then(
     (response) => {
       commit('setIsLoggedIn', response.data);
     },

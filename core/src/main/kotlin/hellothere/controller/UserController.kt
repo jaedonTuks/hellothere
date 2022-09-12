@@ -77,7 +77,6 @@ class UserController(
         request: HttpServletRequest
     ): ResponseEntity<Boolean> {
         val username = securityService.getUsernameFromRequest(request)
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         return ResponseEntity.ok(username != null)
     }

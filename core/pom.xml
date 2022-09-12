@@ -15,7 +15,7 @@
     <name>hellothere</name>
     <description>Demo project for Spring Boot</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
         <kotlin.version>1.6.10</kotlin.version>
         <ff4j.version>1.8.11</ff4j.version>
     </properties>
