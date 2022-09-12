@@ -335,9 +335,8 @@ class GmailService(
             val savedThread = cachedThreads.firstOrNull { it.id.threadId == message.threadId }
             val lastSavedMessage = savedThread?.emails?.lastOrNull()
             val email = UserEmail(
-                null,
-                message.id,
                 getEmailHeader(message, EmailHeaderName.MESSAGE_ID),
+                message.id,
                 getEmailHeader(message, EmailHeaderName.FROM),
                 getEmailHeader(message, EmailHeaderName.EMAIL_TO),
                 extractEmailFromHeaderString(getEmailHeader(message, EmailHeaderName.CC)),

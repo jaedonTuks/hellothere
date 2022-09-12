@@ -82,7 +82,6 @@ const actions = {
 
   updateLabels: ({ commit }, payload) => axios.post('/api/label/update', payload)
     .then((response) => {
-      console.log(response);
       commit('setLabels', response.data.allLabels);
       commit('updateEmailThreadLabels', response.data.threadLabelMap);
     })
