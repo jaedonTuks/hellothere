@@ -449,6 +449,7 @@ export default {
     }
 
     EventBus.$on('newEmail', () => {
+      this.isFetchingMoreEmails = true;
       this.fetchEmails(null)
         .finally(() => {
           this.emailThreads = this.getEmailThreads()

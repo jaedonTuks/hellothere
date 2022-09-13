@@ -13,8 +13,6 @@ alter table user_email_summary
 drop table email_labels;
 
 alter table user_email_summary
-    add column id bigserial;
-alter table user_email_summary
     add column email_to VARCHAR(1023);
 alter table user_email_summary
     add column cc VARCHAR(1023);
@@ -22,16 +20,16 @@ alter table user_email_summary
 alter table user_email_summary
     drop constraint user_email_summary_pkey;
 alter table user_email_summary
-    add PRIMARY KEY (id);
+    add PRIMARY KEY (mime_message_id);
 
 create table email_labels
 (
-    email_id bigint not null,
+    email_id VARCHAR(511) not null,
     label_id varchar(255) not null,
     app_user varchar(127) not null,
     primary key (email_id, label_id),
     constraint email_label_label_fk
         foreign key (label_id, app_user) references user_labels (gmail_id, app_user),
     constraint email_label_email_fk
-        foreign key (email_id) references user_email_summary (id)
+        foreign key (email_id) references user_email_summary (mime_message_id)
 );

@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest
 
 @Service
 class JwtTokenService(
-    @Value("\${security.jwt.token.secret-key}") private val jwtKey: String,
+    @Value("\${security.jwt.token.secret-key}") private val jwtKey: String
 ) {
     fun createUserToken(user: UserDto?): String {
         if (user == null) {

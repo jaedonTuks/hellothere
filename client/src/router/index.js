@@ -38,7 +38,7 @@ const routes = [
 ];
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes,
 });
@@ -55,7 +55,7 @@ function handleRouting(to, from, next) {
 
 router.beforeEach((to, from, next) => {
   if (!store.state.isLoggedIn) {
-    store.dispatch('isLoggedIn').then(() => {
+    store.dispatch('verifyLoggedIn').then(() => {
       handleRouting(to, from, next);
     });
   } else {

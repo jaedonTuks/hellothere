@@ -1,0 +1,21 @@
+server:
+    port: ${PORT:8080}
+logging:
+    level:
+        hellothere: INFO
+
+
+spring:
+    datasource:
+        url: jdbc:postgresql://ec2-54-76-43-89.eu-west-1.compute.amazonaws.com:5432/d3e75i272jlv51
+        username: gsqtkusmztxsme
+        password: ${HELLO_THERE_DB_PASS}
+        driver-class-name: org.postgresql.Driver
+
+gmail:
+    client:
+        redirectUrl: "https://hello-there.jaedon.info/api/gmail/callback"
+
+max-emails: 20
+
+url: "https://hello-there.jaedon.info/"

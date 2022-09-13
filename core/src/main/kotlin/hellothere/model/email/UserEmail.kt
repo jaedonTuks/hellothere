@@ -9,14 +9,11 @@ import javax.persistence.*
 @Table(name = "user_email_summary")
 class UserEmail(
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Long? = null,
+    @Column(name = "mime_message_id")
+    val mimeMessageId: String,
 
     @Column(name = "gmail_id")
     val gmailId: String,
-
-    @Column(name = "mime_message_id")
-    val mimeMessageId: String,
 
     @Column(name = "from_email")
     val fromEmail: String,

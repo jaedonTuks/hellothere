@@ -3,7 +3,7 @@ import ErrorResponseUtil from '@/utils/ErrorResponseUtil';
 import fileDownload from 'js-file-download';
 
 const actions = {
-  isLoggedIn: ({ commit }) => axios.get('/api/user/isLoggedIn').then(
+  verifyLoggedIn: ({ commit }) => axios.get('/api/user/isLoggedIn').then(
     (response) => {
       commit('setIsLoggedIn', response.data);
     },
@@ -82,7 +82,6 @@ const actions = {
 
   updateLabels: ({ commit }, payload) => axios.post('/api/label/update', payload)
     .then((response) => {
-      console.log(response);
       commit('setLabels', response.data.allLabels);
       commit('updateEmailThreadLabels', response.data.threadLabelMap);
     })

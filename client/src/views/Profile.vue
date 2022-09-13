@@ -34,7 +34,33 @@
       </v-col>
     </v-row>
 
+    <v-btn class="mt-4  mr-4" outlined @click="viewingCredits=true">Credits</v-btn>
     <v-btn class="mt-4  mr-2" @click="logout">Logout</v-btn>
+
+    <v-alert
+      v-model="viewingCredits"
+      colored-border
+      dismissible
+      border="left"
+      type="info"
+      elevation="2"
+      class="mt-4"
+      transition="scale-transition"
+    >
+      <h1>References</h1>
+      <div>
+        <h3>Loader</h3>
+        Rotary from whirl.netlify.app @author jh3y
+      </div>
+      <div>
+        <h3>Icons</h3>
+        App header icons and favicon made by <a href="https://www.freepik.com" title="Freepik">
+        Freepik </a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com'</a>
+      </div>
+      <h3>Software packages</h3>
+      See <a href="https://github.com/Jaedon-Heger/hellothere">github</a> pom.xml and package.json for idea of what packages were used
+    </v-alert>
+
     <div class="mb-4 mt-4 gradiantBorderBottom gradiantBorderBottomFullWidth"/>
     <v-tabs
       v-if="isGamificationEnabled"
@@ -127,6 +153,7 @@ export default {
       profileInfo: null,
       availableTitles: [],
       editingUsername: false,
+      viewingCredits: false,
       newUserName: '',
       selectedProfileViewIndex: 0,
     };

@@ -53,7 +53,14 @@ export default {
 
   watch: {
     isLoggedIn() {
-      // todo fix up this flow
+      if (this.isLoggedIn) {
+        Notification.requestPermission().then((permission) => {
+          if (permission === 'granted') {
+            this.signIntoFirebase();
+          }
+        });
+      }
+
       if (!this.isLoggedIn && !this.isLoggedInFromPreviousSession()) {
         this.$router.push({ name: 'Login' });
       }

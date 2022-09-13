@@ -3,6 +3,8 @@ package hellothere.controller
 import com.google.api.services.gmail.Gmail
 import hellothere.service.google.GmailService
 import hellothere.service.security.SecurityService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -15,6 +17,7 @@ abstract class BaseController(
 
         val client = gmailService.getGmailClientFromUsername(username)
         if (client == null) {
+            LOGGER.warn("No client for username $username")
             securityService.logout(response)
             return null
         }
@@ -30,5 +33,9 @@ abstract class BaseController(
         }
 
         return username
+    }
+
+    companion object {
+        val LOGGER: Logger = LoggerFactory.getLogger(GmailController::class.java)
     }
 }
