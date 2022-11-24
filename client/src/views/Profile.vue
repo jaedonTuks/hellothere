@@ -209,7 +209,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchUserInfo', 'sendLogoutRequest', 'sendUpdateTitleRequest']),
+    ...mapActions(['fetchUserInfo', 'sendLogoutRequest', 'sendUpdateTitleRequest', 'fetchUserChallenges']),
 
     getTotalsPercentage(value) {
       return this.getPercentage(value, this.profileInfo.messageTotalsSummary.totalEmails);
@@ -255,6 +255,7 @@ export default {
       this.availableTitles = this.profileInfo.availableTitles;
       this.title = this.profileInfo.title;
       this.newUserName = this.profileInfo.leaderboardUsername;
+      this.fetchUserChallenges();
     });
 
     EventBus.$on('updated-profile-titles', () => {

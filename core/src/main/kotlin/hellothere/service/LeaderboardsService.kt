@@ -7,6 +7,7 @@ import hellothere.model.feature.FF4jFeature
 import hellothere.model.stats.WeekStats
 import hellothere.model.user.User
 import hellothere.repository.user.WeekStatsRepository
+import hellothere.service.challenge.ChallengeService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -16,7 +17,8 @@ import java.time.LocalDate
 @Service
 class LeaderboardsService(
     private val weekStatsRepository: WeekStatsRepository,
-    private val featureService: FeatureService
+    private val featureService: FeatureService,
+    val challengeService: ChallengeService
 ) {
 
     @Transactional
@@ -79,7 +81,8 @@ class LeaderboardsService(
         return UserLeaderBoardDTO(
             user.leaderboardUsername,
             user.title,
-            user.getCurrentWeeksStats()!!.getTotalExperience()
+            user.getCurrentWeeksStats()!!.getTotalExperience(),
+            challengeService.getUserChallengesCompleted(user.id)
         )
     }
 

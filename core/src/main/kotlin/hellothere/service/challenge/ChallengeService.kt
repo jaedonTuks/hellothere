@@ -115,6 +115,11 @@ class ChallengeService(
         }
     }
 
+    @Transactional
+    fun getUserChallengesCompleted(username: String): Int {
+        return userChallengeRepository.countAllByIdAppUserAndIsRewardClaimedTrue(username)
+    }
+
     fun buildUserChallengeDTO(userChallenge: UserChallenge): UserChallengeDTO? {
         return userChallenge.challenge?.let { challenge ->
             UserChallengeDTO(

@@ -45,8 +45,8 @@ export default {
   methods: {
     redirectToGoogleOAuth() {
       // todo switch between prod and local here
-      // window.location.href = 'http://localhost:9000/api/gmail/login';
-      window.location.href = 'https://hello-there.jaedon.info/api/gmail/login';
+      window.location.href = 'http://localhost:9000/api/gmail/login';
+      // window.location.href = 'https://hello-there.jaedon.info/api/gmail/login';
     },
   },
 

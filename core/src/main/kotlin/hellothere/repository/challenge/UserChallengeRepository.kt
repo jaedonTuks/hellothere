@@ -16,4 +16,6 @@ interface UserChallengeRepository : JpaRepository<UserChallenge, UserChallengeId
     fun findFirstById(userChallengeId: UserChallengeId): UserChallenge?
 
     fun findAllByIdAppUserAndIsRewardClaimedTrue(userId: String): List<UserChallenge>
+
+    fun countAllByIdAppUserAndIsRewardClaimedTrue(userId: String): Int
 }

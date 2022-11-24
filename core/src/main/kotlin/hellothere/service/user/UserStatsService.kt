@@ -159,7 +159,7 @@ class UserStatsService(
             }
         }
 
-        return totalXp
+        return totalXp.coerceAtMost(actionConfig.xp)
     }
 
     fun getMaxActionTime(category: StatCategory, dateSent: LocalDateTime): LocalDateTime {

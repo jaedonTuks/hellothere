@@ -637,6 +637,10 @@ class GmailService(
     }
 
     fun getAttachmentNames(message: Message): List<AttachmentDTO> {
+        if (message.payload == null || message.payload.parts == null) {
+            return listOf()
+        }
+
         return message.payload.parts
             .filter { !it.filename.isNullOrBlank() }
             .map { AttachmentDTO(it.body.attachmentId, it.filename) }
